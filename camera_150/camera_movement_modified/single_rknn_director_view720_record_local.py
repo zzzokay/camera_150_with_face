@@ -20,9 +20,9 @@
     # 1. 最常用：USB3 单目矫正 + RKNN 检测 + 样本同款运镜 + 720p 预览
     python3 camera_movement_modified/single_rknn_director_view720_record_local.py \
       --device /dev/video41 \
-      --calib-file /home/elf/work/basketball/camera_usb3_calib.npz \
-      --model /home/elf/work/basketball/model/basketball_player_fp_2.1.0.rknn \
-      --labels /home/elf/work/basketball/model/labels.txt \
+      --calib-file /home/elf/work/camera_150/camera_usb3_calib.npz \
+      --model /home/elf/work/camera_150/model/basketball_player_fp_2.1.0.rknn \
+      --labels /home/elf/work/camera_150/model/labels.txt \
       --width 1920 --height 1080 --fps 30 \
       --detect-interval 3 \
       --view-width 1280 --view-height 720 \
@@ -32,7 +32,7 @@
     #    输出目录由 --record-dir 控制，默认来自 single_rknn_base.DEFAULT_RECORD_DIR。
     python3 camera_movement_modified/single_rknn_director_view720_record_local.py \
       --device /dev/video41 \
-      --record-dir /home/elf/work/basketball/camera_movement_modified/director_videos
+      --record-dir /home/elf/work/camera_150/camera_movement_modified/director_videos
 
     # 3. 录制带检测框、FPS、crop 信息的调试视频
     python3 camera_movement_modified/single_rknn_director_view720_record_local.py \
@@ -72,7 +72,16 @@ import threading
 import time
 import types
 from datetime import datetime
-from typing import List, Tuple
+from typing import List, Optional, Tuple
+
+from audio_chain import (
+    AudioConfig,
+    add_audio_cli_args,
+    audio_config_from_args,
+    audio_summary,
+    build_alsa_input_args,
+    build_audio_output_args,
+)
 
 # RK3588 / Mali 平台上 OpenCV 有时会尝试启用 OpenCL。
 # 对这个实时脚本来说，OpenCL 不一定加速，反而可能带来额外初始化开销，所以先禁用。
@@ -177,6 +186,7 @@ class AsyncFFmpegH264Recorder:
         encoder: str = "h264_rkmpp",
         queue_size: int = 60,
         prefix: str = "single_director_view720",
+        audio_config: Optional[AudioConfig] = None,
     ):
         self.out_dir = out_dir
         self.fps = float(fps)
@@ -184,6 +194,7 @@ class AsyncFFmpegH264Recorder:
         self.encoder = str(encoder)
         self.queue_size = int(queue_size)
         self.prefix = str(prefix)
+        self.audio = audio_config or AudioConfig(enabled=False)
 
         self.proc = None
         self.thread = None
@@ -203,26 +214,42 @@ class AsyncFFmpegH264Recorder:
         self.submitted = 0
 
     def _build_cmd(self):
-        """构造 ffmpeg 命令。输入是 BGR24 原始帧，输出是 mp4。"""
-        return [
+        """构造 FFmpeg 命令：BGR24 视频 + ALSA 音频 -> H.264/AAC MP4。"""
+        cmd = [
             "ffmpeg",
             "-y",
             "-hide_banner",
             "-loglevel", "warning",
+            "-nostdin",
             "-f", "rawvideo",
             "-pix_fmt", "bgr24",
             "-s", f"{self.frame_w}x{self.frame_h}",
             "-r", str(self.fps),
             "-i", "-",
+        ]
+
+        cmd += build_alsa_input_args(self.audio)
+
+        cmd += [
+            "-map", "0:v:0",
             "-vf", "format=nv12",
             "-c:v", self.encoder,
             "-b:v", self.bitrate,
             "-maxrate", self.bitrate,
             "-bufsize", bitrate_to_bufsize(self.bitrate),
-            "-an",
+        ]
+
+        cmd += build_audio_output_args(self.audio, audio_input_index=1)
+
+        cmd += [
+            "-max_muxing_queue_size", "1024",
+            # 关闭 Python 的视频 stdin 后，以视频流结束作为 MP4 收尾条件。
+            "-shortest",
             "-movflags", "+faststart",
             self.path,
         ]
+
+        return cmd
 
     def start(self, frame: np.ndarray) -> None:
         """根据第一帧确定录制分辨率，并启动 ffmpeg 与后台写入线程。"""
@@ -255,6 +282,7 @@ class AsyncFFmpegH264Recorder:
         print(f"  fps     : {self.fps}")
         print(f"  encoder : {self.encoder}")
         print(f"  bitrate : {self.bitrate}")
+        print(f"  audio   : {audio_summary(self.audio)}")
         print(f"  log     : {self.log_path}")
 
         try:
@@ -369,7 +397,8 @@ class AsyncFFmpegH264Recorder:
         """返回适合绘制到预览画面上的录制状态。"""
         if not self.is_recording:
             return "STANDBY"
-        return f"REC w={self.written} q={self.q.qsize() if self.q is not None else 0} d={self.dropped}"
+        audio_state = "AON" if self.audio.enabled else "AOFF"
+        return f"REC/{audio_state} w={self.written} q={self.q.qsize() if self.q is not None else 0} d={self.dropped}"
 
 
 def single_detections_to_boxes_info(detections) -> List[dict]:
@@ -700,6 +729,7 @@ def run(args: argparse.Namespace) -> None:
         encoder=args.record_encoder,
         queue_size=args.record_queue_size,
         prefix="single_director_view720",
+        audio_config=audio_config_from_args(args, "record"),
     )
     next_record_submit_t = 0.0
 
@@ -951,6 +981,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--record-queue-size", type=int, default=60, help="录制后台队列大小，满了会丢旧帧")
     parser.add_argument("--record-overlay", action="store_true", help="打开后录制带检测框/状态文字的画面；默认录制干净 view")
 
+    # NAU8822 / ALSA 正式音频链路。
+    add_audio_cli_args(parser, "record")
+
     # 性能日志。
     parser.add_argument("--print-every", type=int, default=30)
 
@@ -972,6 +1005,7 @@ def main() -> None:
     print(f"smooth             : {args.smooth}")
     print(f"record_dir         : {args.record_dir}")
     print(f"record_fps/encoder : {args.record_fps} / {args.record_encoder}")
+    print(f"record_audio       : {audio_summary(audio_config_from_args(args, 'record'))}")
     print("====================================================================\n")
 
     run(args)

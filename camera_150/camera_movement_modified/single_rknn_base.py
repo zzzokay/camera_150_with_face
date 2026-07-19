@@ -37,11 +37,11 @@ except Exception:
 
 
 DEFAULT_DEVICE = "/dev/video41"
-DEFAULT_MODEL = "/home/elf/work/basketball/model/basketball_player_fp_2.1.0.rknn"
-DEFAULT_LABELS = "/home/elf/work/basketball/model/labels.txt"
-DEFAULT_CALIB_FILE = "/home/elf/work/basketball/camera_usb3_calib.npz"
-DEFAULT_SAVE_DIR = "/home/elf/work/basketball/camera_movement_modified/debug_view1920"
-DEFAULT_RECORD_DIR = "/home/elf/work/basketball/camera_movement_modified/director_videos"
+DEFAULT_MODEL = "/home/elf/work/camera_150/model/basketball_player_fp_2.1.0.rknn"
+DEFAULT_LABELS = "/home/elf/work/camera_150/model/labels.txt"
+DEFAULT_CALIB_FILE = "/home/elf/work/camera_150/camera_usb3_calib.npz"
+DEFAULT_SAVE_DIR = "/home/elf/work/camera_150/camera_movement_modified/debug_view1920"
+DEFAULT_RECORD_DIR = "/home/elf/work/camera_150/camera_movement_modified/director_videos"
 
 MODEL_INPUT_SIZE_DEFAULT = 640
 PERSON_CLASS_ID = 0

@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-07-19T17:40:31",
+  "created_at": "2026-07-19T20:01:14",
   "face_size": [
     160,
     160
@@ -9,6 +9,12 @@
       "person_id": "001",
       "name": "player_001",
       "folder": "001__player_001",
+      "sample_count": "30"
+    },
+    "1": {
+      "person_id": "001",
+      "name": "player_001",
+      "folder": "001__player_001_bad_backup_20260719_190524",
       "sample_count": "40"
     }
   }

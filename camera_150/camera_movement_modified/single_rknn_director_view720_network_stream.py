@@ -102,6 +102,15 @@ from pathlib import Path
 from typing import Optional, Tuple
 from urllib.parse import urlparse
 
+from audio_chain import (
+    AudioConfig,
+    add_audio_cli_args,
+    audio_config_from_args,
+    audio_summary,
+    build_alsa_input_args,
+    build_audio_output_args,
+)
+
 # RK3588 / Mali 平台上 OpenCV 有时会尝试启用 OpenCL，可能带来额外开销。
 # 这个环境变量必须尽量在 import cv2 前设置。
 os.environ["OPENCV_OPENCL_RUNTIME"] = "disabled"
@@ -298,6 +307,7 @@ class FFmpegNetworkStreamer:
         restart_backoff: float = 2.0,
         check_rtsp_server: bool = True,
         resize_input: bool = True,
+        audio_config: Optional[AudioConfig] = None,
     ):
         self.width = int(width)
         self.height = int(height)
@@ -314,6 +324,7 @@ class FFmpegNetworkStreamer:
         self.restart_backoff = float(restart_backoff)
         self.check_rtsp_server = bool(check_rtsp_server)
         self.resize_input = bool(resize_input)
+        self.audio = audio_config or AudioConfig(enabled=False)
 
         self.slot = LatestFrameSlot()
         self.stats = StreamStats()
@@ -345,6 +356,7 @@ class FFmpegNetworkStreamer:
         print(f"  fps         : {self.fps}")
         print(f"  encoder     : {self.encoder}")
         print(f"  bitrate     : {self.bitrate}")
+        print(f"  audio       : {audio_summary(self.audio)}")
         print(f"  ffmpeg log  : {self.log_path}")
 
         self.stop_event.clear()
@@ -430,8 +442,9 @@ class FFmpegNetworkStreamer:
         """返回一行简短状态文字，用于叠加到预览画面。"""
         alive = self.proc is not None and self.proc.poll() is None
         state = "STREAM_ON" if alive else "STREAM_OFF"
+        audio_state = "AON" if self.audio.enabled else "AOFF"
         return (
-            f"{state} w={self.stats.written} "
+            f"{state}/{audio_state} w={self.stats.written} "
             f"drop={self.stats.dropped} rst={self.stats.restart_count}"
         )
 
@@ -506,18 +519,26 @@ class FFmpegNetworkStreamer:
             "-s", f"{self.width}x{self.height}",
             "-r", str(self.fps),
             "-i", "-",
-
-            # 不推音频。
-            "-an",
-
-            # 像素格式转换。
-            "-vf", video_filter,
         ]
 
+        # 第二路输入由 FFmpeg 直接从 NAU8822/ALSA 采集，Python 不搬运 PCM。
+        cmd += build_alsa_input_args(self.audio)
+
+        # 显式映射视频，避免增加音频输入后 FFmpeg 自动选流产生歧义。
+        cmd += [
+            "-map", "0:v:0",
+            "-vf", video_filter,
+        ]
         cmd += encoder_args
 
+        # 音频启用时映射 1:a:0 并编码 AAC；禁用时保持 -an。
+        cmd += build_audio_output_args(self.audio, audio_input_index=1)
+
         # flush_packets 可以降低封装端缓存，减少延迟。
-        cmd += ["-flush_packets", "1"]
+        cmd += [
+            "-max_muxing_queue_size", "1024",
+            "-flush_packets", "1",
+        ]
 
         if self.mode == "rtsp":
             cmd += [
@@ -987,6 +1008,7 @@ def run(args: argparse.Namespace) -> None:
         restart_backoff=args.stream_restart_backoff,
         check_rtsp_server=not args.no_rtsp_check,
         resize_input=True,
+        audio_config=audio_config_from_args(args, "stream"),
     )
     streamer.start()
 
@@ -1278,6 +1300,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--stream-heartbeat-timeout", type=float, default=8.0, help="推流心跳超时，单位秒")
     parser.add_argument("--stream-restart-backoff", type=float, default=2.0, help="FFmpeg 最小重启间隔，单位秒")
 
+    # NAU8822 / ALSA 正式音频链路。
+    add_audio_cli_args(parser, "stream")
+
     return parser.parse_args()
 
 
@@ -1300,6 +1325,7 @@ def main() -> None:
     print(f"stream_fps          : {args.stream_fps}")
     print(f"stream_encoder      : {args.stream_encoder}")
     print(f"stream_bitrate      : {args.stream_bitrate}")
+    print(f"stream_audio        : {audio_summary(audio_config_from_args(args, 'stream'))}")
     print(f"stream_overlay      : {args.stream_overlay}")
     print("=============================================================\n")
 

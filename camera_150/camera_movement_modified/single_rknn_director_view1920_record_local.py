@@ -5,7 +5,7 @@
 
 流程：
     1. 单路摄像头后台采集 raw frame。
-    2. 使用 /home/elf/work/basketball/camera_usb3_calib.npz 做单目 undistort。
+    2. 使用 /home/elf/work/camera_150/camera_usb3_calib.npz 做单目 undistort。
     3. 在 undistorted frame 上做 RKNN person 检测。
     4. 检测框直接作为单图坐标送入 predict1_weighted / predict1_director。
     5. 根据导播状态在单图中做数字裁切，并 resize 到 1280x720 输出。

@@ -22,3 +22,6 @@
 {"type": "clock", "running": false, "period": 1, "clock": "09:57", "created_at_ms": 1783579361270}
 {"type": "reset_game", "period": 1, "clock": "10:00", "created_at_ms": 1783579368582}
 {"type": "reset_game", "period": 1, "clock": "10:00", "created_at_ms": 1784450711879}
+{"type": "score", "team": "home", "value": 1, "selected_player": null, "period": 1, "clock": "10:00", "created_at_ms": 1784466054966}
+{"type": "score", "team": "home", "value": 1, "selected_player": null, "period": 1, "clock": "08:41", "created_at_ms": 1784466166754}
+{"type": "clock", "running": false, "period": 1, "clock": "08:34", "created_at_ms": 1784466172937}

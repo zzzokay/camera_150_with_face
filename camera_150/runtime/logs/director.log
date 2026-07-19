@@ -904,3 +904,565 @@ I RKNN: [23:37:46.956] RKNN Runtime Information, librknnrt version: 2.1.0 (967d0
 I RKNN: [23:37:46.956] RKNN Driver Information, version: 0.9.8
 I RKNN: [23:37:46.957] RKNN Model Information, version: 6, toolkit version: 2.1.0+708089d1(compiler version: 2.1.0 (967d001cc8@2024-08-07T11:32:45)), target: RKNPU v2, target platform: rk3588, framework name: ONNX, framework layout: NCHW, model inference type: static_shape
 W RKNN: [23:37:46.985] query RKNN_QUERY_INPUT_DYNAMIC_RANGE error, rknn model is static shape type, please export rknn with dynamic_shapes
+W rknn-toolkit-lite2 version: 2.3.2
+W Query dynamic range failed. Ret code: RKNN_ERR_MODEL_INVALID. (If it is a static shape RKNN model, please ignore the above warning message.)
+
+================ 单路 USB3 RKNN 运镜网络推流 ================
+device              : /dev/video41
+camera size         : 1920 x 1080 @ 30
+calib_file          : /home/elf/work/camera_150/camera_usb3_calib.npz
+undistort           : True
+model               : /home/elf/work/camera_150/model/basketball_player_fp_2.1.0.rknn
+view size           : 1280 x 720
+render_mode         : sample
+detect_interval     : 3
+stream_mode         : rtsp
+stream_url          : rtsp://127.0.0.1:8554/director
+stream_fps          : 25.0
+stream_encoder      : h264_rkmpp
+stream_bitrate      : 4M
+stream_audio        : hw:1,0, 48000 Hz, 2 ch, aac 128k
+game_state_file     : /home/elf/work/camera_150/techtable_v2/game_state.json
+game_policy         : True
+basket_x_ratio      : 0.180 / 0.820
+home_first_attack   : right
+stream_overlay      : False
+=============================================================
+
+[信息] 已加载单目校准文件:
+  calib_file        : /home/elf/work/camera_150/camera_usb3_calib.npz
+  image_size        : 1920 x 1080
+  roi               : (0, 0, 1919, 1079)
+  rectify mode      : single-camera undistort only (R=None, no epipolar/stereo rectification)
+[single-rknn] 加载 RKNN 模型: /home/elf/work/camera_150/model/basketball_player_fp_2.1.0.rknn
+[single-rknn] 初始化 RKNN runtime: core_id=-1
+[single-rknn] 模型加载成功，输入尺寸: 640x640
+[single-rknn] 标签数量: 1
+[视频源] 已打开: /dev/video41
+[视频源] 实际分辨率: 1920x1080, FPS: 30.0, FOURCC: MJPG
+[信息] 等待摄像头第一帧...
+[信息] 后台采集线程已启动
+
+[推流] 启动网络推流器:
+  mode        : rtsp
+  url         : rtsp://127.0.0.1:8554/director
+  size        : 1280 x 720
+  fps         : 25.0
+  encoder     : h264_rkmpp
+  bitrate     : 4M
+  audio       : hw:1,0, 48000 Hz, 2 ch, aac 128k
+  ffmpeg log  : ./stream_logs/network_stream_20260720_003753.ffmpeg.log
+[推流] 启动 FFmpeg:
+  ffmpeg -hide_banner -loglevel warning -nostdin -f rawvideo -pix_fmt bgr24 -s 1280x720 -r 25.0 -i - -thread_queue_size 1024 -f alsa -ac 2 -ar 48000 -i hw:1,0 -map 0:v:0 -vf format=nv12 -c:v h264_rkmpp -b:v 4M -maxrate 4M -bufsize 4M -g 25 -bf 0 -map 1:a:0 -af aresample=async=1000:first_pts=0 -c:a aac -b:a 128k -ar 48000 -ac 2 -max_muxing_queue_size 1024 -flush_packets 1 -f rtsp -rtsp_transport tcp rtsp://127.0.0.1:8554/director
+
+[信息] 开始运行：单路 USB3 undistort + RKNN 运镜 + 网络推流。
+按键：s 保存当前调试截图，q/Esc 退出。
+[信息] VLC 拉流地址：rtsp://RK3588的IP:8554/director
+
+[single-rknn] RKNN 输出 shape: (1, 84, 8400), dtype: float32
+[PROFILE] frame=0 fps=0.0 infer=115.4ms age=0 undistort=15.9ms director=5.5ms view=2.5ms total=139.3ms detections=1 persons=1 scale=1.32 anchor=955.4 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1 drop=0 rst=0
+[PROFILE] frame=30 fps=24.0 infer=60.8ms age=0 undistort=13.3ms director=0.4ms view=6.7ms total=81.3ms detections=1 persons=1 scale=1.32 anchor=910.6 mode=sample crop=(240, 324, 1583, 1079) stream=STREAM_ON/AON w=40 drop=0 rst=0
+[PROFILE] frame=60 fps=24.5 infer=61.3ms age=0 undistort=16.8ms director=0.4ms view=2.7ms total=82.3ms detections=1 persons=1 scale=1.32 anchor=849.6 mode=sample crop=(70, 324, 1412, 1079) stream=STREAM_ON/AON w=78 drop=0 rst=0
+[PROFILE] frame=90 fps=21.1 infer=66.7ms age=0 undistort=21.5ms director=0.4ms view=2.7ms total=91.4ms detections=1 persons=1 scale=1.32 anchor=822.9 mode=sample crop=(0, 324, 1342, 1079) stream=STREAM_ON/AON w=177 drop=0 rst=0
+[PROFILE] frame=120 fps=18.6 infer=67.3ms age=0 undistort=21.5ms director=0.4ms view=2.8ms total=92.1ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 326, 1339, 1079) stream=STREAM_ON/AON w=225 drop=0 rst=0
+[PROFILE] frame=150 fps=15.9 infer=76.9ms age=0 undistort=20.5ms director=1.1ms view=7.6ms total=106.8ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 343, 1308, 1079) stream=STREAM_ON/AON w=279 drop=0 rst=0
+[PROFILE] frame=180 fps=15.1 infer=80.6ms age=0 undistort=24.5ms director=0.4ms view=4.2ms total=109.8ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 366, 1268, 1079) stream=STREAM_ON/AON w=337 drop=0 rst=0
+[PROFILE] frame=210 fps=17.3 infer=64.4ms age=0 undistort=21.8ms director=0.4ms view=4.3ms total=91.0ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=393 drop=0 rst=0
+[PROFILE] frame=240 fps=20.2 infer=58.8ms age=0 undistort=19.6ms director=0.4ms view=3.3ms total=83.0ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=438 drop=0 rst=0
+[PROFILE] frame=270 fps=22.4 infer=66.0ms age=0 undistort=21.9ms director=0.4ms view=2.6ms total=90.9ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=480 drop=0 rst=0
+[PROFILE] frame=300 fps=20.6 infer=62.7ms age=0 undistort=24.0ms director=0.4ms view=2.1ms total=89.3ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=526 drop=0 rst=0
+[PROFILE] frame=330 fps=26.7 infer=61.7ms age=0 undistort=16.1ms director=0.4ms view=2.2ms total=80.4ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=561 drop=0 rst=0
+[PROFILE] frame=360 fps=26.4 infer=63.1ms age=0 undistort=15.9ms director=0.3ms view=2.1ms total=82.3ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=598 drop=0 rst=0
+[PROFILE] frame=390 fps=26.6 infer=57.8ms age=0 undistort=14.1ms director=0.3ms view=3.3ms total=75.6ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=635 drop=0 rst=0
+[PROFILE] frame=420 fps=26.8 infer=60.7ms age=0 undistort=14.0ms director=0.4ms view=2.2ms total=77.3ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=671 drop=0 rst=0
+[PROFILE] frame=450 fps=28.1 infer=57.8ms age=0 undistort=15.0ms director=0.3ms view=2.1ms total=75.3ms detections=1 persons=1 scale=1.32 anchor=831.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=707 drop=0 rst=0
+[PROFILE] frame=480 fps=27.8 infer=60.6ms age=0 undistort=16.6ms director=0.4ms view=2.5ms total=80.1ms detections=1 persons=1 scale=1.32 anchor=837.2 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=743 drop=0 rst=0
+[PROFILE] frame=510 fps=27.1 infer=62.9ms age=0 undistort=15.5ms director=0.4ms view=2.2ms total=81.1ms detections=1 persons=1 scale=1.32 anchor=892.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=779 drop=0 rst=0
+[PROFILE] frame=540 fps=26.8 infer=61.1ms age=0 undistort=17.1ms director=0.4ms view=3.7ms total=82.4ms detections=1 persons=1 scale=1.32 anchor=759.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=814 drop=0 rst=0
+[PROFILE] frame=570 fps=27.1 infer=62.3ms age=0 undistort=17.3ms director=0.3ms view=2.1ms total=82.2ms detections=1 persons=1 scale=1.32 anchor=765.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=851 drop=0 rst=0
+[PROFILE] frame=600 fps=27.2 infer=61.7ms age=0 undistort=12.9ms director=0.3ms view=2.1ms total=77.1ms detections=1 persons=1 scale=1.32 anchor=788.9 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=886 drop=0 rst=0
+[PROFILE] frame=630 fps=27.6 infer=63.3ms age=0 undistort=16.9ms director=0.4ms view=2.3ms total=83.0ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=922 drop=0 rst=0
+[PROFILE] frame=660 fps=27.2 infer=63.7ms age=0 undistort=17.2ms director=0.4ms view=2.2ms total=83.6ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=958 drop=0 rst=0
+[PROFILE] frame=690 fps=26.7 infer=57.4ms age=0 undistort=13.8ms director=0.3ms view=3.0ms total=74.7ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=993 drop=0 rst=0
+[PROFILE] frame=720 fps=28.0 infer=58.9ms age=0 undistort=16.1ms director=0.4ms view=2.4ms total=77.9ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1029 drop=0 rst=0
+[PROFILE] frame=750 fps=26.9 infer=61.4ms age=0 undistort=16.8ms director=0.3ms view=2.1ms total=80.7ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1065 drop=0 rst=0
+[PROFILE] frame=780 fps=25.4 infer=62.1ms age=0 undistort=16.1ms director=0.4ms view=2.6ms total=81.3ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1101 drop=0 rst=0
+[PROFILE] frame=810 fps=26.1 infer=61.0ms age=0 undistort=16.6ms director=0.4ms view=4.0ms total=82.1ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1138 drop=0 rst=0
+[PROFILE] frame=840 fps=27.3 infer=60.2ms age=0 undistort=14.8ms director=0.4ms view=2.7ms total=78.1ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1174 drop=0 rst=0
+[PROFILE] frame=870 fps=25.8 infer=64.2ms age=0 undistort=16.1ms director=0.4ms view=2.5ms total=83.3ms detections=1 persons=1 scale=1.32 anchor=798.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1211 drop=0 rst=0
+[PROFILE] frame=900 fps=26.7 infer=57.7ms age=0 undistort=16.3ms director=0.3ms view=2.2ms total=76.7ms detections=1 persons=1 scale=1.32 anchor=829.2 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1248 drop=0 rst=0
+[PROFILE] frame=930 fps=27.2 infer=58.9ms age=0 undistort=16.2ms director=0.3ms view=2.1ms total=77.6ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1284 drop=0 rst=0
+[PROFILE] frame=960 fps=27.2 infer=60.4ms age=0 undistort=18.2ms director=0.3ms view=2.2ms total=81.2ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1320 drop=0 rst=0
+[PROFILE] frame=990 fps=28.2 infer=59.9ms age=0 undistort=19.2ms director=0.4ms view=2.2ms total=81.7ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1355 drop=0 rst=0
+[PROFILE] frame=1020 fps=27.0 infer=58.9ms age=0 undistort=14.0ms director=0.3ms view=2.3ms total=75.6ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1391 drop=0 rst=0
+[PROFILE] frame=1050 fps=27.4 infer=60.8ms age=0 undistort=17.9ms director=0.3ms view=16.3ms total=95.4ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1427 drop=0 rst=0
+[PROFILE] frame=1080 fps=26.5 infer=61.6ms age=0 undistort=16.5ms director=0.3ms view=2.2ms total=80.7ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1465 drop=0 rst=0
+[PROFILE] frame=1110 fps=27.3 infer=61.9ms age=0 undistort=17.5ms director=0.3ms view=2.1ms total=81.9ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1505 drop=0 rst=0
+[PROFILE] frame=1140 fps=27.6 infer=61.2ms age=0 undistort=15.9ms director=0.3ms view=2.2ms total=79.6ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1540 drop=0 rst=0
+[PROFILE] frame=1170 fps=26.6 infer=60.9ms age=0 undistort=13.4ms director=0.3ms view=2.1ms total=76.8ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1576 drop=0 rst=0
+[PROFILE] frame=1200 fps=26.6 infer=63.3ms age=0 undistort=13.0ms director=0.3ms view=2.1ms total=78.9ms detections=1 persons=1 scale=1.32 anchor=831.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1612 drop=0 rst=0
+[PROFILE] frame=1230 fps=27.6 infer=62.4ms age=0 undistort=21.2ms director=0.4ms view=2.2ms total=86.3ms detections=1 persons=1 scale=1.32 anchor=820.9 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1648 drop=0 rst=0
+[PROFILE] frame=1260 fps=26.4 infer=62.3ms age=0 undistort=16.2ms director=0.3ms view=2.9ms total=81.9ms detections=1 persons=1 scale=1.32 anchor=810.0 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1684 drop=0 rst=0
+[PROFILE] frame=1290 fps=27.2 infer=60.7ms age=0 undistort=12.8ms director=0.3ms view=2.2ms total=76.0ms detections=1 persons=1 scale=1.32 anchor=805.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1719 drop=0 rst=0
+[PROFILE] frame=1320 fps=27.2 infer=61.9ms age=0 undistort=15.0ms director=0.4ms view=2.6ms total=79.9ms detections=1 persons=1 scale=1.32 anchor=805.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1755 drop=0 rst=0
+[PROFILE] frame=1350 fps=26.0 infer=58.9ms age=0 undistort=12.9ms director=0.3ms view=3.1ms total=75.3ms detections=1 persons=1 scale=1.32 anchor=805.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1791 drop=0 rst=0
+[PROFILE] frame=1380 fps=28.7 infer=60.8ms age=0 undistort=22.1ms director=0.3ms view=2.8ms total=86.1ms detections=1 persons=1 scale=1.32 anchor=805.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=1827 drop=0 rst=0
+[PROFILE] frame=1410 fps=27.3 infer=62.3ms age=0 undistort=13.5ms director=0.4ms view=3.3ms total=79.5ms detections=1 persons=1 scale=1.32 anchor=922.1 mode=sample crop=(0, 375, 1252, 1079) stream=STREAM_ON/AON w=1862 drop=0 rst=0
+[PROFILE] frame=1440 fps=26.5 infer=59.0ms age=0 undistort=17.5ms director=0.3ms view=2.7ms total=79.6ms detections=1 persons=1 scale=1.32 anchor=791.3 mode=sample crop=(0, 324, 1342, 1079) stream=STREAM_ON/AON w=1899 drop=0 rst=0
+[PROFILE] frame=1470 fps=26.3 infer=59.2ms age=0 undistort=17.7ms director=0.4ms view=2.6ms total=79.9ms detections=1 persons=1 scale=1.32 anchor=1049.7 mode=sample crop=(0, 324, 1342, 1079) stream=STREAM_ON/AON w=1935 drop=0 rst=0
+[PROFILE] frame=1500 fps=26.3 infer=61.8ms age=0 undistort=15.9ms director=0.3ms view=3.1ms total=81.3ms detections=1 persons=1 scale=1.32 anchor=810.5 mode=sample crop=(0, 324, 1342, 1079) stream=STREAM_ON/AON w=1971 drop=0 rst=0
+[PROFILE] frame=1530 fps=26.9 infer=60.8ms age=0 undistort=13.8ms director=0.3ms view=2.2ms total=77.3ms detections=1 persons=1 scale=1.32 anchor=805.0 mode=sample crop=(0, 333, 1326, 1079) stream=STREAM_ON/AON w=2007 drop=0 rst=0
+[PROFILE] frame=1560 fps=28.1 infer=58.8ms age=0 undistort=17.7ms director=0.3ms view=3.3ms total=80.1ms detections=1 persons=1 scale=1.32 anchor=805.0 mode=sample crop=(0, 356, 1285, 1079) stream=STREAM_ON/AON w=2042 drop=0 rst=0
+[PROFILE] frame=1590 fps=28.3 infer=60.0ms age=0 undistort=14.0ms director=0.4ms view=2.1ms total=76.5ms detections=1 persons=1 scale=1.32 anchor=805.0 mode=sample crop=(0, 375, 1252, 1079) stream=STREAM_ON/AON w=2078 drop=0 rst=0
+[PROFILE] frame=1620 fps=27.1 infer=62.3ms age=0 undistort=13.0ms director=0.4ms view=2.2ms total=78.0ms detections=1 persons=1 scale=1.32 anchor=1045.0 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2113 drop=0 rst=0
+[PROFILE] frame=1650 fps=27.6 infer=60.5ms age=0 undistort=16.6ms director=0.3ms view=2.2ms total=79.6ms detections=1 persons=1 scale=1.32 anchor=1123.9 mode=sample crop=(0, 371, 1259, 1079) stream=STREAM_ON/AON w=2150 drop=0 rst=0
+[PROFILE] frame=1680 fps=26.9 infer=61.2ms age=0 undistort=12.6ms director=0.3ms view=4.5ms total=78.7ms detections=1 persons=1 scale=1.32 anchor=1016.9 mode=sample crop=(111, 349, 1409, 1079) stream=STREAM_ON/AON w=2185 drop=0 rst=0
+[PROFILE] frame=1710 fps=28.2 infer=59.4ms age=0 undistort=13.7ms director=0.4ms view=2.7ms total=76.3ms detections=1 persons=1 scale=1.32 anchor=876.1 mode=sample crop=(257, 329, 1590, 1079) stream=STREAM_ON/AON w=2220 drop=0 rst=0
+[PROFILE] frame=1740 fps=27.1 infer=64.6ms age=0 undistort=13.6ms director=0.3ms view=2.7ms total=81.3ms detections=1 persons=1 scale=1.32 anchor=765.7 mode=sample crop=(202, 324, 1545, 1079) stream=STREAM_ON/AON w=2256 drop=0 rst=0
+[PROFILE] frame=1770 fps=27.1 infer=57.5ms age=0 undistort=14.8ms director=0.4ms view=2.2ms total=74.9ms detections=1 persons=1 scale=1.32 anchor=781.4 mode=sample crop=(19, 324, 1361, 1079) stream=STREAM_ON/AON w=2293 drop=0 rst=0
+[PROFILE] frame=1800 fps=27.7 infer=60.5ms age=0 undistort=14.3ms director=0.3ms view=4.0ms total=79.2ms detections=1 persons=1 scale=1.32 anchor=795.7 mode=sample crop=(0, 324, 1342, 1079) stream=STREAM_ON/AON w=2328 drop=0 rst=0
+[PROFILE] frame=1830 fps=27.0 infer=57.7ms age=0 undistort=16.2ms director=0.3ms view=2.6ms total=76.9ms detections=1 persons=1 scale=1.32 anchor=795.7 mode=sample crop=(0, 329, 1333, 1079) stream=STREAM_ON/AON w=2364 drop=0 rst=0
+[PROFILE] frame=1860 fps=27.8 infer=60.6ms age=0 undistort=13.4ms director=0.4ms view=2.7ms total=77.2ms detections=1 persons=1 scale=1.32 anchor=795.7 mode=sample crop=(0, 350, 1296, 1079) stream=STREAM_ON/AON w=2400 drop=0 rst=0
+[PROFILE] frame=1890 fps=27.7 infer=62.6ms age=0 undistort=16.9ms director=0.3ms view=3.1ms total=83.0ms detections=1 persons=1 scale=1.32 anchor=795.7 mode=sample crop=(0, 371, 1259, 1079) stream=STREAM_ON/AON w=2436 drop=0 rst=0
+[PROFILE] frame=1920 fps=27.7 infer=62.3ms age=0 undistort=16.2ms director=0.3ms view=2.3ms total=81.2ms detections=1 persons=1 scale=1.32 anchor=795.7 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2472 drop=0 rst=0
+[PROFILE] frame=1950 fps=26.7 infer=59.8ms age=0 undistort=17.6ms director=0.3ms view=2.2ms total=80.0ms detections=1 persons=1 scale=1.32 anchor=802.3 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2508 drop=0 rst=0
+[PROFILE] frame=1980 fps=27.0 infer=57.8ms age=0 undistort=30.0ms director=0.3ms view=2.2ms total=90.4ms detections=1 persons=1 scale=1.32 anchor=746.6 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2544 drop=0 rst=0
+[PROFILE] frame=2010 fps=26.7 infer=59.3ms age=0 undistort=13.0ms director=0.3ms view=2.2ms total=74.9ms detections=1 persons=1 scale=1.32 anchor=760.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2580 drop=0 rst=0
+[PROFILE] frame=2040 fps=26.4 infer=58.5ms age=0 undistort=14.4ms director=0.3ms view=2.6ms total=75.9ms detections=1 persons=1 scale=1.32 anchor=779.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2616 drop=0 rst=0
+[PROFILE] frame=2070 fps=27.3 infer=59.4ms age=0 undistort=13.1ms director=0.3ms view=2.3ms total=75.2ms detections=1 persons=1 scale=1.32 anchor=793.6 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2652 drop=0 rst=0
+[PROFILE] frame=2100 fps=27.3 infer=63.7ms age=0 undistort=16.4ms director=0.3ms view=2.1ms total=82.7ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2689 drop=0 rst=0
+[PROFILE] frame=2130 fps=27.5 infer=63.5ms age=0 undistort=16.1ms director=0.4ms view=2.2ms total=82.3ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2724 drop=0 rst=0
+[PROFILE] frame=2160 fps=25.9 infer=60.2ms age=0 undistort=13.3ms director=0.4ms view=3.8ms total=77.7ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2761 drop=0 rst=0
+[PROFILE] frame=2190 fps=27.2 infer=60.0ms age=0 undistort=15.2ms director=0.3ms view=2.2ms total=77.8ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2796 drop=0 rst=0
+[PROFILE] frame=2220 fps=27.3 infer=59.6ms age=0 undistort=17.2ms director=0.3ms view=2.2ms total=79.5ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2833 drop=0 rst=0
+[PROFILE] frame=2250 fps=26.5 infer=61.6ms age=0 undistort=16.3ms director=0.3ms view=2.8ms total=81.1ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2869 drop=0 rst=0
+[PROFILE] frame=2280 fps=27.1 infer=61.6ms age=0 undistort=14.7ms director=0.3ms view=4.4ms total=81.1ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2905 drop=0 rst=0
+[PROFILE] frame=2310 fps=26.6 infer=61.4ms age=0 undistort=16.5ms director=0.3ms view=2.6ms total=80.9ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2942 drop=0 rst=0
+[PROFILE] frame=2340 fps=27.3 infer=64.2ms age=0 undistort=16.7ms director=0.3ms view=2.9ms total=84.2ms detections=1 persons=1 scale=1.32 anchor=798.5 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2977 drop=0 rst=0
+[信息] 用户退出
+
+[推流] 正在停止网络推流器...
+[推流][watchdog] 重启 FFmpeg，原因: ffmpeg process is None
+[推流] 启动 FFmpeg:
+  ffmpeg -hide_banner -loglevel warning -nostdin -f rawvideo -pix_fmt bgr24 -s 1280x720 -r 25.0 -i - -thread_queue_size 1024 -f alsa -ac 2 -ar 48000 -i hw:1,0 -map 0:v:0 -vf format=nv12 -c:v h264_rkmpp -b:v 4M -maxrate 4M -bufsize 4M -g 25 -bf 0 -map 1:a:0 -af aresample=async=1000:first_pts=0 -c:a aac -b:a 128k -ar 48000 -ac 2 -max_muxing_queue_size 1024 -flush_packets 1 -f rtsp -rtsp_transport tcp rtsp://127.0.0.1:8554/director
+[推流] 已停止:
+  submitted : 2363
+  written   : 3004
+  resized   : 0
+  dropped   : 0
+  restarts  : 1
+[信息] 程序退出
+I RKNN: [00:37:51.896] RKNN Runtime Information, librknnrt version: 2.1.0 (967d001cc8@2024-08-07T19:28:19)
+I RKNN: [00:37:51.897] RKNN Driver Information, version: 0.9.8
+I RKNN: [00:37:51.898] RKNN Model Information, version: 6, toolkit version: 2.1.0+708089d1(compiler version: 2.1.0 (967d001cc8@2024-08-07T11:32:45)), target: RKNPU v2, target platform: rk3588, framework name: ONNX, framework layout: NCHW, model inference type: static_shape
+W RKNN: [00:37:51.944] query RKNN_QUERY_INPUT_DYNAMIC_RANGE error, rknn model is static shape type, please export rknn with dynamic_shapes
+W rknn-toolkit-lite2 version: 2.3.2
+W Query dynamic range failed. Ret code: RKNN_ERR_MODEL_INVALID. (If it is a static shape RKNN model, please ignore the above warning message.)
+
+================ 单路 USB3 RKNN 运镜网络推流 ================
+device              : /dev/video41
+camera size         : 1920 x 1080 @ 30
+calib_file          : /home/elf/work/camera_150/camera_usb3_calib.npz
+undistort           : True
+model               : /home/elf/work/camera_150/model/basketball_player_fp_2.1.0.rknn
+view size           : 1280 x 720
+render_mode         : sample
+detect_interval     : 3
+stream_mode         : rtsp
+stream_url          : rtsp://127.0.0.1:8554/director
+stream_fps          : 25.0
+stream_encoder      : h264_rkmpp
+stream_bitrate      : 4M
+stream_audio        : hw:1,0, 48000 Hz, 2 ch, aac 128k
+game_state_file     : /home/elf/work/camera_150/techtable_v2/game_state.json
+game_policy         : True
+basket_x_ratio      : 0.180 / 0.820
+home_first_attack   : right
+stream_overlay      : False
+=============================================================
+
+[信息] 已加载单目校准文件:
+  calib_file        : /home/elf/work/camera_150/camera_usb3_calib.npz
+  image_size        : 1920 x 1080
+  roi               : (0, 0, 1919, 1079)
+  rectify mode      : single-camera undistort only (R=None, no epipolar/stereo rectification)
+[single-rknn] 加载 RKNN 模型: /home/elf/work/camera_150/model/basketball_player_fp_2.1.0.rknn
+[single-rknn] 初始化 RKNN runtime: core_id=-1
+[single-rknn] 模型加载成功，输入尺寸: 640x640
+[single-rknn] 标签数量: 1
+[视频源] 已打开: /dev/video41
+[视频源] 实际分辨率: 1920x1080, FPS: 30.0, FOURCC: MJPG
+[信息] 等待摄像头第一帧...
+[信息] 后台采集线程已启动
+
+[推流] 启动网络推流器:
+  mode        : rtsp
+  url         : rtsp://127.0.0.1:8554/director
+  size        : 1280 x 720
+  fps         : 25.0
+  encoder     : h264_rkmpp
+  bitrate     : 4M
+  audio       : hw:1,0, 48000 Hz, 2 ch, aac 128k
+  ffmpeg log  : ./stream_logs/network_stream_20260720_005002.ffmpeg.log
+[推流] 启动 FFmpeg:
+  ffmpeg -hide_banner -loglevel warning -nostdin -f rawvideo -pix_fmt bgr24 -s 1280x720 -r 25.0 -i - -thread_queue_size 1024 -f alsa -ac 2 -ar 48000 -i hw:1,0 -map 0:v:0 -vf format=nv12 -c:v h264_rkmpp -b:v 4M -maxrate 4M -bufsize 4M -g 25 -bf 0 -map 1:a:0 -af aresample=async=1000:first_pts=0 -c:a aac -b:a 128k -ar 48000 -ac 2 -max_muxing_queue_size 1024 -flush_packets 1 -f rtsp -rtsp_transport tcp rtsp://127.0.0.1:8554/director
+
+[信息] 开始运行：单路 USB3 undistort + RKNN 运镜 + 网络推流。
+按键：s 保存当前调试截图，q/Esc 退出。
+[信息] VLC 拉流地址：rtsp://RK3588的IP:8554/director
+
+[single-rknn] RKNN 输出 shape: (1, 84, 8400), dtype: float32
+[PROFILE] frame=0 fps=0.0 infer=68.3ms age=0 undistort=17.8ms director=0.5ms view=3.9ms total=90.5ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1 drop=0 rst=0
+[PROFILE] frame=30 fps=25.5 infer=59.3ms age=0 undistort=16.6ms director=0.3ms view=5.0ms total=81.3ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=39 drop=0 rst=0
+[PROFILE] frame=60 fps=23.5 infer=65.2ms age=0 undistort=17.2ms director=0.3ms view=4.5ms total=87.3ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=78 drop=0 rst=0
+[PROFILE] frame=90 fps=25.0 infer=59.8ms age=0 undistort=16.7ms director=0.4ms view=2.5ms total=79.4ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=116 drop=0 rst=0
+[PROFILE] frame=120 fps=24.1 infer=64.4ms age=0 undistort=16.1ms director=0.3ms view=6.6ms total=87.6ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=155 drop=0 rst=0
+[PROFILE] frame=150 fps=24.7 infer=61.9ms age=0 undistort=18.6ms director=0.3ms view=2.9ms total=83.8ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=194 drop=0 rst=0
+[PROFILE] frame=180 fps=24.6 infer=63.7ms age=0 undistort=20.7ms director=0.3ms view=2.3ms total=87.2ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=233 drop=0 rst=0
+[PROFILE] frame=210 fps=24.7 infer=64.8ms age=0 undistort=21.8ms director=0.5ms view=6.1ms total=93.2ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=272 drop=0 rst=0
+[PROFILE] frame=240 fps=25.3 infer=59.2ms age=0 undistort=15.1ms director=0.3ms view=2.3ms total=77.0ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=311 drop=0 rst=0
+[PROFILE] frame=270 fps=24.5 infer=61.2ms age=0 undistort=17.1ms director=0.4ms view=4.2ms total=83.0ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=350 drop=0 rst=0
+[PROFILE] frame=300 fps=24.4 infer=62.9ms age=0 undistort=18.1ms director=0.3ms view=2.3ms total=83.7ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=389 drop=0 rst=0
+[PROFILE] frame=330 fps=25.2 infer=63.2ms age=0 undistort=19.9ms director=0.3ms view=6.3ms total=89.8ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=427 drop=0 rst=0
+[PROFILE] frame=360 fps=25.3 infer=58.4ms age=0 undistort=13.1ms director=0.4ms view=2.3ms total=74.3ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=465 drop=0 rst=0
+[PROFILE] frame=390 fps=25.3 infer=63.1ms age=0 undistort=17.5ms director=0.2ms view=5.6ms total=86.4ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=504 drop=0 rst=0
+[PROFILE] frame=420 fps=24.4 infer=61.8ms age=0 undistort=17.4ms director=0.2ms view=2.7ms total=82.2ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=542 drop=0 rst=0
+[PROFILE] frame=450 fps=25.6 infer=70.3ms age=0 undistort=14.2ms director=0.2ms view=2.8ms total=87.5ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=580 drop=0 rst=0
+[PROFILE] frame=480 fps=24.9 infer=62.1ms age=0 undistort=21.0ms director=0.2ms view=6.4ms total=89.7ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=618 drop=0 rst=0
+[PROFILE] frame=510 fps=24.6 infer=62.4ms age=0 undistort=18.7ms director=0.2ms view=2.3ms total=83.7ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=657 drop=0 rst=0
+[PROFILE] frame=540 fps=24.4 infer=59.6ms age=0 undistort=24.1ms director=0.3ms view=17.8ms total=101.9ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=696 drop=0 rst=0
+[PROFILE] frame=570 fps=24.1 infer=61.8ms age=0 undistort=20.3ms director=0.2ms view=6.7ms total=89.0ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=735 drop=0 rst=0
+[PROFILE] frame=600 fps=24.1 infer=63.0ms age=0 undistort=17.4ms director=0.2ms view=6.9ms total=87.6ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=773 drop=0 rst=0
+[PROFILE] frame=630 fps=25.1 infer=63.1ms age=0 undistort=18.1ms director=0.2ms view=3.3ms total=84.8ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=811 drop=0 rst=0
+[PROFILE] frame=660 fps=24.8 infer=66.2ms age=0 undistort=16.0ms director=0.2ms view=2.4ms total=84.8ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=849 drop=0 rst=0
+[PROFILE] frame=690 fps=25.7 infer=58.9ms age=0 undistort=15.8ms director=0.2ms view=3.3ms total=78.2ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=887 drop=0 rst=0
+[PROFILE] frame=720 fps=24.6 infer=60.3ms age=0 undistort=17.2ms director=0.2ms view=2.2ms total=80.0ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=925 drop=0 rst=0
+[PROFILE] frame=750 fps=25.8 infer=60.8ms age=0 undistort=19.3ms director=0.2ms view=3.8ms total=84.1ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=962 drop=0 rst=0
+[PROFILE] frame=780 fps=24.8 infer=60.9ms age=0 undistort=18.4ms director=0.2ms view=3.0ms total=82.6ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1001 drop=0 rst=0
+[PROFILE] frame=810 fps=24.4 infer=64.5ms age=0 undistort=15.4ms director=0.2ms view=6.9ms total=87.0ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1040 drop=0 rst=0
+[PROFILE] frame=840 fps=24.2 infer=62.2ms age=0 undistort=18.5ms director=0.2ms view=3.3ms total=84.3ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1078 drop=0 rst=0
+[PROFILE] frame=870 fps=24.7 infer=66.0ms age=0 undistort=19.5ms director=0.2ms view=3.4ms total=89.0ms detections=0 persons=0 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1118 drop=0 rst=0
+[PROFILE] frame=900 fps=24.0 infer=65.9ms age=0 undistort=17.6ms director=0.4ms view=2.4ms total=86.3ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1157 drop=0 rst=0
+[PROFILE] frame=930 fps=25.3 infer=66.2ms age=0 undistort=21.3ms director=0.3ms view=4.2ms total=92.1ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1196 drop=0 rst=0
+[PROFILE] frame=960 fps=24.4 infer=64.4ms age=0 undistort=17.0ms director=0.5ms view=4.6ms total=86.6ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1235 drop=0 rst=0
+[PROFILE] frame=990 fps=24.3 infer=60.9ms age=0 undistort=16.5ms director=0.4ms view=2.4ms total=80.3ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1274 drop=0 rst=0
+[PROFILE] frame=1020 fps=25.0 infer=63.7ms age=0 undistort=15.1ms director=0.3ms view=2.4ms total=81.6ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1313 drop=0 rst=0
+[PROFILE] frame=1050 fps=25.9 infer=63.2ms age=0 undistort=20.6ms director=0.3ms view=2.4ms total=86.6ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1351 drop=0 rst=0
+[PROFILE] frame=1080 fps=25.6 infer=61.0ms age=0 undistort=19.8ms director=0.3ms view=3.4ms total=84.5ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1391 drop=0 rst=0
+[PROFILE] frame=1110 fps=24.5 infer=69.3ms age=0 undistort=14.2ms director=0.3ms view=2.2ms total=86.1ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1430 drop=0 rst=0
+[PROFILE] frame=1140 fps=25.1 infer=62.4ms age=0 undistort=17.4ms director=0.3ms view=2.5ms total=82.7ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1468 drop=0 rst=0
+[PROFILE] frame=1170 fps=24.3 infer=64.1ms age=0 undistort=13.1ms director=0.3ms view=8.1ms total=85.7ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1507 drop=0 rst=0
+[PROFILE] frame=1200 fps=24.6 infer=64.7ms age=0 undistort=15.7ms director=0.3ms view=4.2ms total=85.8ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1546 drop=0 rst=0
+[PROFILE] frame=1230 fps=25.2 infer=66.6ms age=0 undistort=16.3ms director=0.3ms view=2.3ms total=85.7ms detections=2 persons=2 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1585 drop=0 rst=0
+[PROFILE] frame=1260 fps=24.0 infer=61.8ms age=0 undistort=16.9ms director=0.3ms view=2.4ms total=81.5ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1624 drop=0 rst=0
+[PROFILE] frame=1290 fps=23.6 infer=62.5ms age=0 undistort=17.2ms director=0.3ms view=3.1ms total=83.1ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1663 drop=0 rst=0
+[PROFILE] frame=1320 fps=24.2 infer=62.2ms age=0 undistort=17.4ms director=0.3ms view=4.4ms total=84.5ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1702 drop=0 rst=0
+[PROFILE] frame=1350 fps=25.0 infer=59.1ms age=0 undistort=18.6ms director=0.3ms view=2.5ms total=80.6ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1741 drop=0 rst=0
+[PROFILE] frame=1380 fps=24.3 infer=65.6ms age=0 undistort=13.8ms director=0.3ms view=3.6ms total=83.3ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1780 drop=0 rst=0
+[PROFILE] frame=1410 fps=24.1 infer=69.2ms age=0 undistort=16.5ms director=0.3ms view=5.8ms total=91.9ms detections=2 persons=2 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1820 drop=0 rst=0
+[PROFILE] frame=1440 fps=25.0 infer=63.0ms age=0 undistort=17.4ms director=0.3ms view=2.5ms total=83.2ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1859 drop=0 rst=0
+[PROFILE] frame=1470 fps=24.9 infer=64.5ms age=0 undistort=15.2ms director=0.3ms view=2.3ms total=82.4ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1897 drop=0 rst=0
+[PROFILE] frame=1500 fps=24.7 infer=67.3ms age=0 undistort=13.9ms director=0.3ms view=2.3ms total=83.9ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1936 drop=0 rst=0
+[PROFILE] frame=1530 fps=24.8 infer=63.4ms age=0 undistort=21.4ms director=0.3ms view=2.3ms total=87.5ms detections=1 persons=1 scale=1.32 anchor=960.0 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=1974 drop=0 rst=0
+[PROFILE] frame=1560 fps=24.2 infer=59.7ms age=0 undistort=16.1ms director=0.4ms view=2.2ms total=78.5ms detections=1 persons=1 scale=1.32 anchor=955.9 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2013 drop=0 rst=0
+[PROFILE] frame=1590 fps=24.5 infer=61.6ms age=0 undistort=21.3ms director=0.4ms view=4.3ms total=87.7ms detections=1 persons=1 scale=1.32 anchor=898.3 mode=sample crop=(275, 324, 1618, 1079) stream=STREAM_ON/AON w=2053 drop=0 rst=0
+[PROFILE] frame=1620 fps=25.1 infer=65.3ms age=0 undistort=20.5ms director=0.4ms view=2.6ms total=88.9ms detections=1 persons=1 scale=1.32 anchor=876.2 mode=sample crop=(269, 324, 1611, 1079) stream=STREAM_ON/AON w=2091 drop=0 rst=0
+[PROFILE] frame=1650 fps=24.7 infer=65.0ms age=0 undistort=19.3ms director=0.3ms view=2.5ms total=87.1ms detections=1 persons=1 scale=1.32 anchor=862.8 mode=sample crop=(121, 324, 1463, 1079) stream=STREAM_ON/AON w=2130 drop=0 rst=0
+[PROFILE] frame=1680 fps=25.0 infer=62.5ms age=0 undistort=16.5ms director=0.5ms view=5.7ms total=85.3ms detections=1 persons=1 scale=1.32 anchor=847.6 mode=sample crop=(0, 324, 1342, 1079) stream=STREAM_ON/AON w=2169 drop=0 rst=0
+[PROFILE] frame=1710 fps=24.5 infer=63.9ms age=0 undistort=18.8ms director=0.6ms view=2.7ms total=86.1ms detections=1 persons=1 scale=1.32 anchor=833.1 mode=sample crop=(0, 324, 1342, 1079) stream=STREAM_ON/AON w=2208 drop=0 rst=0
+[PROFILE] frame=1740 fps=23.9 infer=64.4ms age=0 undistort=13.2ms director=0.3ms view=2.3ms total=80.3ms detections=1 persons=1 scale=1.32 anchor=833.1 mode=sample crop=(0, 337, 1319, 1079) stream=STREAM_ON/AON w=2248 drop=0 rst=0
+[PROFILE] frame=1770 fps=25.4 infer=63.8ms age=0 undistort=16.8ms director=0.4ms view=4.1ms total=85.1ms detections=1 persons=1 scale=1.32 anchor=833.1 mode=sample crop=(0, 361, 1276, 1079) stream=STREAM_ON/AON w=2287 drop=0 rst=0
+[PROFILE] frame=1800 fps=23.5 infer=59.1ms age=0 undistort=21.8ms director=0.6ms view=2.6ms total=84.2ms detections=1 persons=1 scale=1.32 anchor=833.1 mode=sample crop=(0, 377, 1248, 1079) stream=STREAM_ON/AON w=2326 drop=0 rst=0
+[PROFILE] frame=1830 fps=25.0 infer=74.0ms age=0 undistort=19.6ms director=0.3ms view=3.0ms total=97.0ms detections=1 persons=1 scale=1.32 anchor=833.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2366 drop=0 rst=0
+[PROFILE] frame=1860 fps=24.7 infer=64.4ms age=0 undistort=13.9ms director=0.3ms view=2.4ms total=81.1ms detections=1 persons=1 scale=1.32 anchor=833.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2406 drop=0 rst=0
+[PROFILE] frame=1890 fps=25.2 infer=62.5ms age=0 undistort=21.3ms director=0.6ms view=3.2ms total=87.7ms detections=1 persons=1 scale=1.32 anchor=833.1 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2444 drop=0 rst=0
+[PROFILE] frame=1920 fps=25.9 infer=64.6ms age=0 undistort=15.8ms director=0.4ms view=2.5ms total=83.4ms detections=1 persons=1 scale=1.32 anchor=828.4 mode=sample crop=(0, 378, 1246, 1079) stream=STREAM_ON/AON w=2483 drop=0 rst=0
+[PROFILE] frame=1950 fps=25.0 infer=64.5ms age=0 undistort=21.9ms director=0.4ms view=7.9ms total=94.8ms detections=1 persons=1 scale=1.32 anchor=1066.5 mode=sample crop=(0, 372, 1257, 1079) stream=STREAM_ON/AON w=2522 drop=0 rst=0
+[PROFILE] frame=1980 fps=23.9 infer=61.5ms age=0 undistort=17.3ms director=0.4ms view=4.5ms total=83.7ms detections=1 persons=1 scale=1.32 anchor=988.4 mode=sample crop=(94, 351, 1388, 1079) stream=STREAM_ON/AON w=2562 drop=0 rst=0
+[PROFILE] frame=2010 fps=24.3 infer=64.0ms age=0 undistort=16.6ms director=0.3ms view=2.8ms total=83.8ms detections=1 persons=1 scale=1.32 anchor=969.5 mode=sample crop=(246, 330, 1577, 1079) stream=STREAM_ON/AON w=2601 drop=0 rst=0
+[PROFILE] frame=2040 fps=24.9 infer=63.9ms age=0 undistort=20.4ms director=0.3ms view=2.7ms total=87.4ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2640 drop=0 rst=0
+[PROFILE] frame=2070 fps=23.6 infer=66.6ms age=0 undistort=17.5ms director=0.4ms view=2.5ms total=87.0ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2679 drop=0 rst=0
+[PROFILE] frame=2100 fps=24.1 infer=61.4ms age=0 undistort=17.5ms director=0.3ms view=5.2ms total=84.5ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2718 drop=0 rst=0
+[PROFILE] frame=2130 fps=24.9 infer=65.3ms age=0 undistort=17.9ms director=0.3ms view=2.3ms total=85.9ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2756 drop=0 rst=0
+[PROFILE] frame=2160 fps=24.1 infer=63.4ms age=0 undistort=15.2ms director=0.3ms view=6.7ms total=85.7ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2795 drop=0 rst=0
+[PROFILE] frame=2190 fps=24.9 infer=63.1ms age=0 undistort=20.3ms director=0.3ms view=2.9ms total=86.7ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2834 drop=0 rst=0
+[PROFILE] frame=2220 fps=24.8 infer=62.0ms age=0 undistort=19.1ms director=0.3ms view=2.3ms total=83.9ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2873 drop=0 rst=0
+[PROFILE] frame=2250 fps=24.8 infer=63.3ms age=0 undistort=22.2ms director=0.4ms view=3.4ms total=89.3ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2912 drop=0 rst=0
+[PROFILE] frame=2280 fps=25.0 infer=62.5ms age=0 undistort=18.1ms director=0.3ms view=2.3ms total=83.3ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2950 drop=0 rst=0
+[PROFILE] frame=2310 fps=24.3 infer=69.7ms age=0 undistort=16.6ms director=0.3ms view=3.2ms total=89.9ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=2990 drop=0 rst=0
+[PROFILE] frame=2340 fps=24.4 infer=61.0ms age=0 undistort=18.0ms director=0.5ms view=3.7ms total=83.3ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3029 drop=0 rst=0
+[PROFILE] frame=2370 fps=24.2 infer=61.0ms age=0 undistort=17.8ms director=0.3ms view=7.7ms total=87.0ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3068 drop=0 rst=0
+[PROFILE] frame=2400 fps=24.1 infer=62.5ms age=0 undistort=16.6ms director=0.3ms view=3.5ms total=82.9ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3108 drop=0 rst=0
+[PROFILE] frame=2430 fps=24.3 infer=65.3ms age=0 undistort=17.2ms director=0.4ms view=2.7ms total=85.5ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3146 drop=0 rst=0
+[PROFILE] frame=2460 fps=24.6 infer=63.2ms age=0 undistort=21.4ms director=0.3ms view=2.8ms total=90.3ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3186 drop=0 rst=0
+[PROFILE] frame=2490 fps=24.9 infer=59.0ms age=0 undistort=19.3ms director=0.3ms view=2.3ms total=81.0ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3225 drop=0 rst=0
+[PROFILE] frame=2520 fps=25.1 infer=63.8ms age=0 undistort=21.1ms director=0.3ms view=3.1ms total=88.4ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3264 drop=0 rst=0
+[PROFILE] frame=2550 fps=24.3 infer=64.8ms age=0 undistort=13.5ms director=0.3ms view=2.2ms total=80.8ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3303 drop=0 rst=0
+[PROFILE] frame=2580 fps=23.0 infer=63.7ms age=0 undistort=18.6ms director=0.3ms view=6.6ms total=89.3ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3343 drop=0 rst=0
+[PROFILE] frame=2610 fps=23.6 infer=64.0ms age=0 undistort=17.0ms director=0.3ms view=3.0ms total=84.4ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3383 drop=0 rst=0
+[PROFILE] frame=2640 fps=25.4 infer=60.2ms age=0 undistort=18.7ms director=0.3ms view=6.1ms total=85.5ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3421 drop=0 rst=0
+[PROFILE] frame=2670 fps=24.6 infer=66.1ms age=0 undistort=16.1ms director=0.3ms view=3.0ms total=85.5ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3460 drop=0 rst=0
+[PROFILE] frame=2700 fps=25.0 infer=66.7ms age=0 undistort=14.2ms director=0.3ms view=4.6ms total=85.9ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3499 drop=0 rst=0
+[PROFILE] frame=2730 fps=23.6 infer=61.6ms age=0 undistort=14.1ms director=0.4ms view=4.2ms total=80.4ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3538 drop=0 rst=0
+[PROFILE] frame=2760 fps=24.3 infer=65.5ms age=0 undistort=16.4ms director=0.3ms view=2.3ms total=84.6ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3576 drop=0 rst=0
+[PROFILE] frame=2790 fps=25.8 infer=59.6ms age=0 undistort=21.6ms director=0.4ms view=3.0ms total=84.6ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3615 drop=0 rst=0
+[PROFILE] frame=2820 fps=24.7 infer=65.2ms age=0 undistort=17.2ms director=0.3ms view=2.7ms total=85.5ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3655 drop=0 rst=0
+[PROFILE] frame=2850 fps=24.0 infer=64.7ms age=0 undistort=18.3ms director=0.3ms view=2.3ms total=85.7ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3695 drop=0 rst=0
+[PROFILE] frame=2880 fps=25.5 infer=62.5ms age=0 undistort=20.1ms director=0.3ms view=5.5ms total=88.5ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3733 drop=0 rst=0
+[PROFILE] frame=2910 fps=24.9 infer=64.1ms age=0 undistort=17.8ms director=0.3ms view=2.8ms total=85.1ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3773 drop=0 rst=0
+[PROFILE] frame=2940 fps=25.1 infer=64.5ms age=0 undistort=17.0ms director=0.3ms view=2.9ms total=85.7ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3812 drop=0 rst=0
+[PROFILE] frame=2970 fps=24.4 infer=58.8ms age=0 undistort=16.3ms director=0.4ms view=3.6ms total=79.2ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3850 drop=0 rst=0
+[PROFILE] frame=3000 fps=24.7 infer=60.3ms age=0 undistort=19.7ms director=0.3ms view=2.8ms total=83.2ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3888 drop=0 rst=0
+[PROFILE] frame=3030 fps=25.0 infer=63.0ms age=0 undistort=14.8ms director=0.9ms view=5.1ms total=83.9ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3927 drop=0 rst=0
+[PROFILE] frame=3060 fps=24.3 infer=65.2ms age=0 undistort=17.9ms director=0.3ms view=3.2ms total=87.6ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=3966 drop=0 rst=0
+[PROFILE] frame=3090 fps=24.7 infer=59.4ms age=0 undistort=25.5ms director=0.3ms view=2.7ms total=88.0ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4005 drop=0 rst=0
+[PROFILE] frame=3120 fps=24.9 infer=63.5ms age=0 undistort=19.1ms director=0.3ms view=8.1ms total=91.1ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4043 drop=0 rst=0
+[PROFILE] frame=3150 fps=24.0 infer=59.3ms age=0 undistort=18.1ms director=0.3ms view=8.2ms total=85.9ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4082 drop=0 rst=0
+[PROFILE] frame=3180 fps=25.5 infer=61.7ms age=0 undistort=16.5ms director=0.3ms view=3.2ms total=81.8ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4120 drop=0 rst=0
+[PROFILE] frame=3210 fps=25.1 infer=59.5ms age=0 undistort=20.1ms director=0.3ms view=13.4ms total=93.4ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4159 drop=0 rst=0
+[PROFILE] frame=3240 fps=24.5 infer=65.6ms age=0 undistort=13.7ms director=0.3ms view=2.3ms total=82.0ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4198 drop=0 rst=0
+[PROFILE] frame=3270 fps=24.2 infer=57.4ms age=0 undistort=17.7ms director=0.3ms view=2.7ms total=78.1ms detections=1 persons=1 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4236 drop=0 rst=0
+[PROFILE] frame=3300 fps=24.9 infer=62.5ms age=0 undistort=15.9ms director=0.2ms view=3.7ms total=82.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4275 drop=0 rst=0
+[PROFILE] frame=3330 fps=24.5 infer=62.6ms age=0 undistort=22.1ms director=0.3ms view=4.8ms total=89.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4313 drop=0 rst=0
+[PROFILE] frame=3360 fps=24.8 infer=66.1ms age=0 undistort=17.4ms director=0.3ms view=5.5ms total=89.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4352 drop=0 rst=0
+[PROFILE] frame=3390 fps=23.3 infer=62.1ms age=0 undistort=17.8ms director=0.2ms view=4.0ms total=84.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4390 drop=0 rst=0
+[PROFILE] frame=3420 fps=24.2 infer=61.9ms age=0 undistort=13.8ms director=0.2ms view=3.6ms total=79.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4429 drop=0 rst=0
+[PROFILE] frame=3450 fps=23.9 infer=61.0ms age=0 undistort=19.3ms director=0.2ms view=3.8ms total=84.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4469 drop=0 rst=0
+[PROFILE] frame=3480 fps=25.1 infer=65.7ms age=0 undistort=13.7ms director=0.2ms view=2.7ms total=82.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4506 drop=0 rst=0
+[PROFILE] frame=3510 fps=25.6 infer=63.4ms age=0 undistort=20.5ms director=0.2ms view=6.1ms total=90.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4544 drop=0 rst=0
+[PROFILE] frame=3540 fps=25.9 infer=58.3ms age=0 undistort=18.9ms director=0.2ms view=7.0ms total=84.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4582 drop=0 rst=0
+[PROFILE] frame=3570 fps=25.0 infer=63.7ms age=0 undistort=22.2ms director=0.2ms view=5.4ms total=91.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4620 drop=0 rst=0
+[PROFILE] frame=3600 fps=24.9 infer=58.7ms age=0 undistort=13.3ms director=0.2ms view=2.3ms total=74.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4659 drop=0 rst=0
+[PROFILE] frame=3630 fps=24.9 infer=61.3ms age=0 undistort=15.9ms director=0.2ms view=2.4ms total=79.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4697 drop=0 rst=0
+[PROFILE] frame=3660 fps=25.4 infer=61.4ms age=0 undistort=16.8ms director=0.2ms view=5.5ms total=83.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4735 drop=0 rst=0
+[PROFILE] frame=3690 fps=25.3 infer=62.9ms age=0 undistort=21.1ms director=0.2ms view=2.8ms total=87.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4773 drop=0 rst=0
+[PROFILE] frame=3720 fps=25.5 infer=60.1ms age=0 undistort=22.7ms director=0.2ms view=2.3ms total=85.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4811 drop=0 rst=0
+[PROFILE] frame=3750 fps=25.4 infer=62.5ms age=0 undistort=19.7ms director=0.2ms view=2.5ms total=84.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4850 drop=0 rst=0
+[PROFILE] frame=3780 fps=24.9 infer=65.7ms age=0 undistort=18.3ms director=0.2ms view=4.3ms total=88.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4889 drop=0 rst=0
+[PROFILE] frame=3810 fps=25.9 infer=64.8ms age=0 undistort=18.9ms director=0.3ms view=2.7ms total=86.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4926 drop=0 rst=0
+[PROFILE] frame=3840 fps=26.1 infer=64.9ms age=0 undistort=17.1ms director=0.2ms view=3.4ms total=85.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=4964 drop=0 rst=0
+[PROFILE] frame=3870 fps=24.7 infer=63.6ms age=0 undistort=17.8ms director=0.2ms view=2.2ms total=83.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5002 drop=0 rst=0
+[PROFILE] frame=3900 fps=25.6 infer=61.8ms age=0 undistort=17.9ms director=0.2ms view=4.5ms total=84.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5040 drop=0 rst=0
+[PROFILE] frame=3930 fps=24.9 infer=64.9ms age=0 undistort=21.2ms director=0.2ms view=9.9ms total=96.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5078 drop=0 rst=0
+[PROFILE] frame=3960 fps=24.9 infer=63.1ms age=0 undistort=13.2ms director=0.2ms view=2.3ms total=78.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5117 drop=0 rst=0
+[PROFILE] frame=3990 fps=25.2 infer=59.0ms age=0 undistort=16.9ms director=0.2ms view=3.7ms total=79.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5155 drop=0 rst=0
+[PROFILE] frame=4020 fps=25.3 infer=62.6ms age=0 undistort=18.1ms director=0.2ms view=2.2ms total=83.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5193 drop=0 rst=0
+[PROFILE] frame=4050 fps=25.5 infer=63.0ms age=0 undistort=17.1ms director=0.2ms view=6.6ms total=86.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5230 drop=0 rst=0
+[PROFILE] frame=4080 fps=25.9 infer=60.5ms age=0 undistort=14.1ms director=0.2ms view=4.3ms total=79.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5268 drop=0 rst=0
+[PROFILE] frame=4110 fps=26.0 infer=61.7ms age=0 undistort=17.1ms director=0.2ms view=2.4ms total=81.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5305 drop=0 rst=0
+[PROFILE] frame=4140 fps=25.9 infer=63.4ms age=0 undistort=19.3ms director=0.2ms view=2.9ms total=85.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5343 drop=0 rst=0
+[PROFILE] frame=4170 fps=25.5 infer=59.0ms age=0 undistort=23.8ms director=0.2ms view=5.4ms total=88.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5382 drop=0 rst=0
+[PROFILE] frame=4200 fps=24.8 infer=63.7ms age=0 undistort=16.9ms director=0.2ms view=2.4ms total=83.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5419 drop=0 rst=0
+[PROFILE] frame=4230 fps=25.3 infer=61.4ms age=0 undistort=20.2ms director=0.3ms view=3.9ms total=85.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5457 drop=0 rst=0
+[PROFILE] frame=4260 fps=24.0 infer=60.0ms age=0 undistort=18.3ms director=0.2ms view=9.4ms total=87.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5496 drop=0 rst=0
+[PROFILE] frame=4290 fps=25.0 infer=61.8ms age=0 undistort=16.7ms director=0.3ms view=2.5ms total=81.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5534 drop=0 rst=0
+[PROFILE] frame=4320 fps=25.3 infer=61.5ms age=0 undistort=16.6ms director=0.2ms view=3.7ms total=82.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5572 drop=0 rst=0
+[PROFILE] frame=4350 fps=25.2 infer=61.5ms age=0 undistort=15.5ms director=0.2ms view=2.3ms total=79.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5610 drop=0 rst=0
+[PROFILE] frame=4380 fps=26.2 infer=63.8ms age=0 undistort=19.1ms director=0.2ms view=4.4ms total=87.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5647 drop=0 rst=0
+[PROFILE] frame=4410 fps=25.0 infer=63.4ms age=0 undistort=21.0ms director=0.2ms view=2.3ms total=86.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5685 drop=0 rst=0
+[PROFILE] frame=4440 fps=24.8 infer=59.5ms age=0 undistort=20.8ms director=0.2ms view=2.8ms total=83.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5723 drop=0 rst=0
+[PROFILE] frame=4470 fps=24.8 infer=63.8ms age=0 undistort=17.5ms director=0.2ms view=2.4ms total=83.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5762 drop=0 rst=0
+[PROFILE] frame=4500 fps=25.5 infer=69.0ms age=0 undistort=13.9ms director=0.2ms view=2.3ms total=85.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5800 drop=0 rst=0
+[PROFILE] frame=4530 fps=24.1 infer=68.0ms age=0 undistort=16.9ms director=0.2ms view=2.3ms total=87.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5838 drop=0 rst=0
+[PROFILE] frame=4560 fps=24.8 infer=63.8ms age=0 undistort=22.0ms director=0.2ms view=2.4ms total=88.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5877 drop=0 rst=0
+[PROFILE] frame=4590 fps=25.9 infer=59.7ms age=0 undistort=16.5ms director=0.2ms view=4.3ms total=80.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5914 drop=0 rst=0
+[PROFILE] frame=4620 fps=25.1 infer=61.2ms age=0 undistort=12.8ms director=0.2ms view=2.3ms total=76.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5952 drop=0 rst=0
+[PROFILE] frame=4650 fps=25.6 infer=58.7ms age=0 undistort=17.7ms director=0.2ms view=2.3ms total=79.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=5991 drop=0 rst=0
+[PROFILE] frame=4680 fps=25.7 infer=60.6ms age=0 undistort=20.3ms director=0.2ms view=2.4ms total=83.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6028 drop=0 rst=0
+[PROFILE] frame=4710 fps=25.2 infer=59.2ms age=0 undistort=16.2ms director=0.2ms view=2.3ms total=77.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6066 drop=0 rst=0
+[PROFILE] frame=4740 fps=24.7 infer=64.8ms age=0 undistort=17.0ms director=0.2ms view=3.2ms total=85.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6104 drop=0 rst=0
+[PROFILE] frame=4770 fps=25.2 infer=62.8ms age=0 undistort=22.1ms director=0.2ms view=2.8ms total=88.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6143 drop=0 rst=0
+[PROFILE] frame=4800 fps=24.7 infer=58.2ms age=0 undistort=12.9ms director=0.2ms view=2.7ms total=74.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6181 drop=0 rst=0
+[PROFILE] frame=4830 fps=25.0 infer=61.5ms age=0 undistort=13.3ms director=0.2ms view=3.1ms total=78.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6219 drop=0 rst=0
+[PROFILE] frame=4860 fps=24.8 infer=63.4ms age=0 undistort=19.6ms director=0.2ms view=4.7ms total=87.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6257 drop=0 rst=0
+[PROFILE] frame=4890 fps=25.9 infer=62.6ms age=0 undistort=21.8ms director=0.2ms view=6.0ms total=90.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6295 drop=0 rst=0
+[PROFILE] frame=4920 fps=25.7 infer=61.1ms age=0 undistort=18.6ms director=0.2ms view=2.9ms total=82.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6333 drop=0 rst=0
+[PROFILE] frame=4950 fps=25.6 infer=61.4ms age=0 undistort=15.1ms director=0.2ms view=4.5ms total=81.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6371 drop=0 rst=0
+[PROFILE] frame=4980 fps=25.6 infer=60.2ms age=0 undistort=18.0ms director=0.2ms view=2.9ms total=81.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6409 drop=0 rst=0
+[PROFILE] frame=5010 fps=25.7 infer=61.6ms age=0 undistort=14.0ms director=0.2ms view=4.2ms total=80.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6446 drop=0 rst=0
+[PROFILE] frame=5040 fps=25.5 infer=60.7ms age=0 undistort=18.5ms director=0.2ms view=13.2ms total=92.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6485 drop=0 rst=0
+[PROFILE] frame=5070 fps=26.0 infer=68.1ms age=0 undistort=18.0ms director=0.2ms view=4.3ms total=90.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6523 drop=0 rst=0
+[PROFILE] frame=5100 fps=25.9 infer=62.0ms age=0 undistort=17.3ms director=0.2ms view=12.0ms total=91.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6561 drop=0 rst=0
+[PROFILE] frame=5130 fps=25.0 infer=61.7ms age=0 undistort=16.2ms director=0.2ms view=4.9ms total=83.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6599 drop=0 rst=0
+[PROFILE] frame=5160 fps=25.3 infer=60.7ms age=0 undistort=13.2ms director=0.2ms view=3.4ms total=77.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6636 drop=0 rst=0
+[PROFILE] frame=5190 fps=25.5 infer=62.4ms age=0 undistort=18.0ms director=0.2ms view=2.3ms total=83.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6674 drop=0 rst=0
+[PROFILE] frame=5220 fps=25.7 infer=60.5ms age=0 undistort=13.7ms director=0.2ms view=6.5ms total=80.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6712 drop=0 rst=0
+[PROFILE] frame=5250 fps=23.9 infer=63.8ms age=0 undistort=16.1ms director=0.2ms view=2.7ms total=82.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6751 drop=0 rst=0
+[PROFILE] frame=5280 fps=24.2 infer=62.2ms age=0 undistort=13.2ms director=0.2ms view=2.6ms total=78.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6789 drop=0 rst=0
+[PROFILE] frame=5310 fps=25.0 infer=59.0ms age=0 undistort=14.8ms director=0.2ms view=4.6ms total=78.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6827 drop=0 rst=0
+[PROFILE] frame=5340 fps=25.8 infer=61.3ms age=0 undistort=16.4ms director=0.2ms view=2.5ms total=80.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6865 drop=0 rst=0
+[PROFILE] frame=5370 fps=25.5 infer=65.4ms age=0 undistort=17.1ms director=0.2ms view=2.3ms total=85.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6903 drop=0 rst=0
+[PROFILE] frame=5400 fps=24.4 infer=59.6ms age=0 undistort=19.4ms director=0.2ms view=2.7ms total=82.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6942 drop=0 rst=0
+[PROFILE] frame=5430 fps=24.4 infer=62.8ms age=0 undistort=16.7ms director=0.2ms view=4.3ms total=84.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=6980 drop=0 rst=0
+[PROFILE] frame=5460 fps=24.9 infer=69.5ms age=0 undistort=13.1ms director=0.2ms view=2.4ms total=85.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7019 drop=0 rst=0
+[PROFILE] frame=5490 fps=25.3 infer=59.4ms age=0 undistort=18.1ms director=0.2ms view=2.2ms total=80.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7057 drop=0 rst=0
+[PROFILE] frame=5520 fps=24.6 infer=64.6ms age=0 undistort=19.1ms director=0.2ms view=4.4ms total=88.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7095 drop=0 rst=0
+[PROFILE] frame=5550 fps=25.6 infer=63.7ms age=0 undistort=13.9ms director=0.2ms view=2.4ms total=80.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7133 drop=0 rst=0
+[PROFILE] frame=5580 fps=25.4 infer=63.5ms age=0 undistort=18.1ms director=0.2ms view=2.7ms total=84.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7171 drop=0 rst=0
+[PROFILE] frame=5610 fps=24.7 infer=66.4ms age=0 undistort=16.7ms director=0.2ms view=2.7ms total=86.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7209 drop=0 rst=0
+[PROFILE] frame=5640 fps=25.5 infer=62.7ms age=0 undistort=17.0ms director=0.2ms view=2.3ms total=82.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7246 drop=0 rst=0
+[PROFILE] frame=5670 fps=26.5 infer=61.8ms age=0 undistort=19.3ms director=0.2ms view=2.4ms total=83.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7283 drop=0 rst=0
+[PROFILE] frame=5700 fps=25.2 infer=64.4ms age=0 undistort=17.0ms director=0.5ms view=2.5ms total=84.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7322 drop=0 rst=0
+[PROFILE] frame=5730 fps=25.2 infer=62.1ms age=0 undistort=18.4ms director=0.2ms view=3.0ms total=83.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7360 drop=0 rst=0
+[PROFILE] frame=5760 fps=24.9 infer=58.7ms age=0 undistort=18.9ms director=0.2ms view=2.3ms total=80.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7398 drop=0 rst=0
+[PROFILE] frame=5790 fps=23.1 infer=60.9ms age=0 undistort=13.2ms director=0.2ms view=4.6ms total=79.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7437 drop=0 rst=0
+[PROFILE] frame=5820 fps=25.4 infer=59.3ms age=0 undistort=20.7ms director=0.2ms view=11.5ms total=92.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7476 drop=0 rst=0
+[PROFILE] frame=5850 fps=25.3 infer=64.8ms age=0 undistort=19.9ms director=0.2ms view=11.6ms total=96.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7514 drop=0 rst=0
+[PROFILE] frame=5880 fps=25.7 infer=62.4ms age=0 undistort=16.7ms director=0.2ms view=4.7ms total=84.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7552 drop=0 rst=0
+[PROFILE] frame=5910 fps=25.6 infer=67.8ms age=0 undistort=13.8ms director=0.2ms view=4.4ms total=86.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7590 drop=0 rst=0
+[PROFILE] frame=5940 fps=25.6 infer=62.3ms age=0 undistort=13.1ms director=0.2ms view=2.7ms total=79.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7628 drop=0 rst=0
+[PROFILE] frame=5970 fps=24.8 infer=63.5ms age=0 undistort=16.7ms director=0.2ms view=2.2ms total=82.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7666 drop=0 rst=0
+[PROFILE] frame=6000 fps=24.9 infer=60.8ms age=0 undistort=13.9ms director=0.2ms view=3.5ms total=78.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7705 drop=0 rst=0
+[PROFILE] frame=6030 fps=23.8 infer=64.7ms age=0 undistort=15.8ms director=0.2ms view=2.3ms total=83.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7743 drop=0 rst=0
+[PROFILE] frame=6060 fps=23.8 infer=62.6ms age=0 undistort=13.7ms director=0.2ms view=6.8ms total=83.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7781 drop=0 rst=0
+[PROFILE] frame=6090 fps=25.3 infer=61.3ms age=0 undistort=21.1ms director=0.2ms view=6.0ms total=88.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7819 drop=0 rst=0
+[PROFILE] frame=6120 fps=25.5 infer=61.1ms age=0 undistort=22.1ms director=0.2ms view=4.3ms total=88.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7857 drop=0 rst=0
+[PROFILE] frame=6150 fps=25.1 infer=58.5ms age=0 undistort=20.5ms director=0.2ms view=2.2ms total=81.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7896 drop=0 rst=0
+[PROFILE] frame=6180 fps=26.0 infer=61.0ms age=0 undistort=18.8ms director=0.2ms view=9.2ms total=89.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7934 drop=0 rst=0
+[PROFILE] frame=6210 fps=24.8 infer=61.9ms age=0 undistort=20.1ms director=0.2ms view=3.1ms total=85.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=7971 drop=0 rst=0
+[PROFILE] frame=6240 fps=24.5 infer=59.9ms age=0 undistort=14.4ms director=0.2ms view=4.0ms total=78.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8010 drop=0 rst=0
+[PROFILE] frame=6270 fps=25.1 infer=65.2ms age=0 undistort=14.3ms director=0.2ms view=3.7ms total=83.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8048 drop=0 rst=0
+[PROFILE] frame=6300 fps=25.8 infer=62.7ms age=0 undistort=18.5ms director=0.2ms view=4.7ms total=86.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8086 drop=0 rst=0
+[PROFILE] frame=6330 fps=24.4 infer=63.2ms age=0 undistort=17.5ms director=0.2ms view=7.2ms total=88.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8124 drop=0 rst=0
+[PROFILE] frame=6360 fps=24.4 infer=69.7ms age=0 undistort=15.8ms director=0.2ms view=4.4ms total=90.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8163 drop=0 rst=0
+[PROFILE] frame=6390 fps=25.2 infer=62.7ms age=0 undistort=16.6ms director=0.8ms view=4.4ms total=84.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8201 drop=0 rst=0
+[PROFILE] frame=6420 fps=25.2 infer=58.8ms age=0 undistort=22.1ms director=0.2ms view=3.2ms total=84.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8239 drop=0 rst=0
+[PROFILE] frame=6450 fps=24.0 infer=60.2ms age=0 undistort=16.1ms director=0.2ms view=2.3ms total=78.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8278 drop=0 rst=0
+[PROFILE] frame=6480 fps=25.2 infer=64.3ms age=0 undistort=21.1ms director=0.2ms view=3.4ms total=89.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8316 drop=0 rst=0
+[PROFILE] frame=6510 fps=24.3 infer=64.5ms age=0 undistort=19.0ms director=0.2ms view=3.0ms total=86.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8355 drop=0 rst=0
+[PROFILE] frame=6540 fps=25.3 infer=62.0ms age=0 undistort=15.1ms director=0.2ms view=2.5ms total=79.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8393 drop=0 rst=0
+[PROFILE] frame=6570 fps=25.3 infer=58.0ms age=0 undistort=15.9ms director=0.2ms view=2.4ms total=76.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8431 drop=0 rst=0
+[PROFILE] frame=6600 fps=24.2 infer=65.5ms age=0 undistort=15.6ms director=0.2ms view=2.3ms total=83.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8470 drop=0 rst=0
+[PROFILE] frame=6630 fps=25.3 infer=63.1ms age=0 undistort=12.9ms director=0.2ms view=2.5ms total=78.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8508 drop=0 rst=0
+[PROFILE] frame=6660 fps=24.6 infer=63.9ms age=0 undistort=20.5ms director=0.2ms view=4.0ms total=88.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8547 drop=0 rst=0
+[PROFILE] frame=6690 fps=24.9 infer=63.4ms age=0 undistort=20.4ms director=0.3ms view=2.3ms total=86.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8585 drop=0 rst=0
+[PROFILE] frame=6720 fps=25.3 infer=62.5ms age=0 undistort=18.4ms director=0.2ms view=2.7ms total=83.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8623 drop=0 rst=0
+[PROFILE] frame=6750 fps=23.9 infer=64.3ms age=0 undistort=16.3ms director=0.2ms view=2.3ms total=83.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8662 drop=0 rst=0
+[PROFILE] frame=6780 fps=26.1 infer=58.3ms age=0 undistort=21.3ms director=0.2ms view=2.6ms total=82.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8700 drop=0 rst=0
+[PROFILE] frame=6810 fps=24.7 infer=62.5ms age=0 undistort=16.9ms director=0.2ms view=3.6ms total=83.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8739 drop=0 rst=0
+[PROFILE] frame=6840 fps=25.8 infer=61.3ms age=0 undistort=13.2ms director=0.3ms view=3.0ms total=77.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8778 drop=0 rst=0
+[PROFILE] frame=6870 fps=25.2 infer=62.8ms age=0 undistort=13.1ms director=0.2ms view=3.0ms total=79.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8816 drop=0 rst=0
+[PROFILE] frame=6900 fps=25.2 infer=61.7ms age=0 undistort=16.1ms director=0.2ms view=2.4ms total=80.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8854 drop=0 rst=0
+[PROFILE] frame=6930 fps=25.3 infer=61.1ms age=0 undistort=21.4ms director=0.2ms view=2.3ms total=85.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8893 drop=0 rst=0
+[PROFILE] frame=6960 fps=24.9 infer=63.2ms age=0 undistort=15.0ms director=0.2ms view=2.5ms total=80.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8931 drop=0 rst=0
+[PROFILE] frame=6990 fps=24.6 infer=63.4ms age=0 undistort=19.9ms director=0.2ms view=2.3ms total=85.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=8970 drop=0 rst=0
+[PROFILE] frame=7020 fps=25.0 infer=58.0ms age=0 undistort=13.1ms director=0.2ms view=2.3ms total=73.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9008 drop=0 rst=0
+[PROFILE] frame=7050 fps=24.9 infer=64.2ms age=0 undistort=20.1ms director=0.2ms view=4.0ms total=88.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9046 drop=0 rst=0
+[PROFILE] frame=7080 fps=25.7 infer=62.8ms age=0 undistort=19.9ms director=0.2ms view=5.3ms total=88.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9084 drop=0 rst=0
+[PROFILE] frame=7110 fps=25.8 infer=61.0ms age=0 undistort=20.6ms director=0.2ms view=2.8ms total=84.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9122 drop=0 rst=0
+[PROFILE] frame=7140 fps=25.6 infer=68.3ms age=0 undistort=17.6ms director=0.2ms view=3.6ms total=89.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9160 drop=0 rst=0
+[PROFILE] frame=7170 fps=25.1 infer=58.8ms age=0 undistort=20.0ms director=0.2ms view=4.7ms total=83.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9198 drop=0 rst=0
+[PROFILE] frame=7200 fps=24.1 infer=61.3ms age=0 undistort=16.5ms director=0.2ms view=3.3ms total=81.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9237 drop=0 rst=0
+[PROFILE] frame=7230 fps=24.8 infer=63.3ms age=0 undistort=16.3ms director=0.2ms view=6.9ms total=86.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9275 drop=0 rst=0
+[PROFILE] frame=7260 fps=24.4 infer=63.7ms age=0 undistort=15.3ms director=0.2ms view=14.8ms total=94.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9314 drop=0 rst=0
+[PROFILE] frame=7290 fps=24.4 infer=59.5ms age=0 undistort=17.8ms director=0.2ms view=2.6ms total=80.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9353 drop=0 rst=0
+[PROFILE] frame=7320 fps=25.6 infer=64.3ms age=0 undistort=14.3ms director=0.2ms view=2.3ms total=81.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9391 drop=0 rst=0
+[PROFILE] frame=7350 fps=26.1 infer=63.7ms age=0 undistort=14.7ms director=0.2ms view=2.3ms total=81.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9428 drop=0 rst=0
+[PROFILE] frame=7380 fps=26.4 infer=61.5ms age=0 undistort=17.2ms director=0.2ms view=2.9ms total=81.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9466 drop=0 rst=0
+[PROFILE] frame=7410 fps=26.1 infer=65.1ms age=0 undistort=14.5ms director=0.3ms view=2.4ms total=82.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9504 drop=0 rst=0
+[PROFILE] frame=7440 fps=25.6 infer=63.3ms age=0 undistort=21.9ms director=0.2ms view=3.4ms total=88.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9542 drop=0 rst=0
+[PROFILE] frame=7470 fps=25.0 infer=66.3ms age=0 undistort=16.8ms director=0.2ms view=2.3ms total=85.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9579 drop=0 rst=0
+[PROFILE] frame=7500 fps=25.0 infer=63.0ms age=0 undistort=17.9ms director=0.2ms view=2.7ms total=83.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9618 drop=0 rst=0
+[PROFILE] frame=7530 fps=25.5 infer=58.6ms age=0 undistort=15.6ms director=0.2ms view=6.4ms total=80.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9656 drop=0 rst=0
+[PROFILE] frame=7560 fps=25.4 infer=59.4ms age=0 undistort=19.7ms director=0.2ms view=3.3ms total=82.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9694 drop=0 rst=0
+[PROFILE] frame=7590 fps=25.9 infer=63.6ms age=0 undistort=18.4ms director=0.2ms view=2.9ms total=85.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9732 drop=0 rst=0
+[PROFILE] frame=7620 fps=23.7 infer=65.1ms age=0 undistort=15.6ms director=0.2ms view=3.0ms total=83.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9771 drop=0 rst=0
+[PROFILE] frame=7650 fps=24.8 infer=63.0ms age=0 undistort=16.6ms director=0.2ms view=2.3ms total=82.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9809 drop=0 rst=0
+[PROFILE] frame=7680 fps=25.6 infer=61.4ms age=0 undistort=14.6ms director=0.2ms view=4.4ms total=80.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9846 drop=0 rst=0
+[PROFILE] frame=7710 fps=25.3 infer=58.0ms age=0 undistort=18.2ms director=0.2ms view=2.8ms total=79.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9884 drop=0 rst=0
+[PROFILE] frame=7740 fps=25.3 infer=65.4ms age=0 undistort=15.2ms director=0.2ms view=2.3ms total=83.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9922 drop=0 rst=0
+[PROFILE] frame=7770 fps=24.8 infer=61.8ms age=0 undistort=17.0ms director=0.2ms view=7.9ms total=87.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=9961 drop=0 rst=0
+[PROFILE] frame=7800 fps=23.9 infer=61.9ms age=0 undistort=13.9ms director=0.2ms view=2.3ms total=78.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10000 drop=0 rst=0
+[PROFILE] frame=7830 fps=24.8 infer=66.3ms age=0 undistort=14.0ms director=0.2ms view=2.4ms total=82.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10037 drop=0 rst=0
+[PROFILE] frame=7860 fps=26.2 infer=61.2ms age=0 undistort=16.2ms director=0.2ms view=2.2ms total=79.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10075 drop=0 rst=0
+[PROFILE] frame=7890 fps=25.6 infer=64.7ms age=0 undistort=12.9ms director=0.2ms view=2.5ms total=80.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10113 drop=0 rst=0
+[PROFILE] frame=7920 fps=26.0 infer=61.2ms age=0 undistort=17.7ms director=0.2ms view=2.3ms total=81.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10151 drop=0 rst=0
+[PROFILE] frame=7950 fps=24.9 infer=63.1ms age=0 undistort=19.5ms director=0.2ms view=2.2ms total=85.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10189 drop=0 rst=0
+[PROFILE] frame=7980 fps=26.0 infer=62.3ms age=0 undistort=16.6ms director=0.2ms view=8.7ms total=87.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10227 drop=0 rst=0
+[PROFILE] frame=8010 fps=26.2 infer=63.8ms age=0 undistort=17.8ms director=0.2ms view=2.8ms total=84.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10264 drop=0 rst=0
+[PROFILE] frame=8040 fps=25.2 infer=62.4ms age=0 undistort=18.8ms director=0.2ms view=2.2ms total=83.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10302 drop=0 rst=0
+[PROFILE] frame=8070 fps=25.4 infer=63.6ms age=0 undistort=19.1ms director=0.2ms view=2.5ms total=85.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10340 drop=0 rst=0
+[PROFILE] frame=8100 fps=24.4 infer=62.6ms age=0 undistort=16.9ms director=0.2ms view=2.3ms total=82.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10378 drop=0 rst=0
+[PROFILE] frame=8130 fps=25.3 infer=63.0ms age=0 undistort=20.7ms director=0.2ms view=2.7ms total=86.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10416 drop=0 rst=0
+[PROFILE] frame=8160 fps=25.2 infer=58.0ms age=0 undistort=16.1ms director=0.2ms view=2.8ms total=77.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10454 drop=0 rst=0
+[PROFILE] frame=8190 fps=24.9 infer=63.0ms age=0 undistort=17.0ms director=0.2ms view=5.5ms total=85.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10491 drop=0 rst=0
+[PROFILE] frame=8220 fps=25.8 infer=64.1ms age=0 undistort=20.3ms director=0.2ms view=7.9ms total=92.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10529 drop=0 rst=0
+[PROFILE] frame=8250 fps=25.7 infer=62.7ms age=0 undistort=16.7ms director=0.2ms view=4.7ms total=84.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10566 drop=0 rst=0
+[PROFILE] frame=8280 fps=25.1 infer=62.4ms age=0 undistort=18.8ms director=0.2ms view=2.9ms total=84.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10604 drop=0 rst=0
+[PROFILE] frame=8310 fps=25.2 infer=62.6ms age=0 undistort=13.2ms director=0.2ms view=2.5ms total=78.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10642 drop=0 rst=0
+[PROFILE] frame=8340 fps=25.1 infer=64.5ms age=0 undistort=13.1ms director=0.2ms view=2.2ms total=80.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10680 drop=0 rst=0
+[PROFILE] frame=8370 fps=25.4 infer=59.1ms age=0 undistort=21.7ms director=0.2ms view=7.5ms total=88.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10718 drop=0 rst=0
+[PROFILE] frame=8400 fps=25.0 infer=66.2ms age=0 undistort=13.3ms director=0.2ms view=2.5ms total=82.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10756 drop=0 rst=0
+[PROFILE] frame=8430 fps=25.7 infer=60.7ms age=0 undistort=16.2ms director=0.2ms view=10.1ms total=87.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10794 drop=0 rst=0
+[PROFILE] frame=8460 fps=25.7 infer=61.8ms age=0 undistort=20.1ms director=0.3ms view=4.6ms total=86.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10832 drop=0 rst=0
+[PROFILE] frame=8490 fps=24.6 infer=62.3ms age=0 undistort=20.3ms director=0.2ms view=5.0ms total=87.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10871 drop=0 rst=0
+[PROFILE] frame=8520 fps=25.7 infer=65.2ms age=0 undistort=22.3ms director=0.2ms view=3.2ms total=90.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10908 drop=0 rst=0
+[PROFILE] frame=8550 fps=25.9 infer=66.0ms age=0 undistort=17.0ms director=0.2ms view=2.3ms total=85.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10946 drop=0 rst=0
+[PROFILE] frame=8580 fps=25.3 infer=59.5ms age=0 undistort=19.0ms director=0.2ms view=4.4ms total=83.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=10984 drop=0 rst=0
+[PROFILE] frame=8610 fps=25.7 infer=62.8ms age=0 undistort=13.1ms director=0.2ms view=2.3ms total=78.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11021 drop=0 rst=0
+[PROFILE] frame=8640 fps=25.1 infer=63.1ms age=0 undistort=13.2ms director=0.2ms view=4.4ms total=81.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11059 drop=0 rst=0
+[PROFILE] frame=8670 fps=25.3 infer=59.6ms age=0 undistort=20.5ms director=0.2ms view=2.4ms total=82.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11097 drop=0 rst=0
+[PROFILE] frame=8700 fps=25.7 infer=61.3ms age=0 undistort=18.3ms director=0.2ms view=2.9ms total=82.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11135 drop=0 rst=0
+[PROFILE] frame=8730 fps=24.9 infer=65.0ms age=0 undistort=19.4ms director=0.2ms view=4.1ms total=88.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11172 drop=0 rst=0
+[PROFILE] frame=8760 fps=25.7 infer=59.6ms age=0 undistort=21.7ms director=0.2ms view=6.4ms total=87.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11210 drop=0 rst=0
+[PROFILE] frame=8790 fps=25.5 infer=63.1ms age=0 undistort=16.4ms director=0.2ms view=2.8ms total=82.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11248 drop=0 rst=0
+[PROFILE] frame=8820 fps=24.6 infer=60.6ms age=0 undistort=14.6ms director=0.2ms view=5.1ms total=80.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11286 drop=0 rst=0
+[PROFILE] frame=8850 fps=25.1 infer=58.5ms age=0 undistort=21.2ms director=0.2ms view=15.4ms total=95.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11324 drop=0 rst=0
+[PROFILE] frame=8880 fps=24.9 infer=63.6ms age=0 undistort=21.6ms director=0.2ms view=3.2ms total=88.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11362 drop=0 rst=0
+[PROFILE] frame=8910 fps=24.4 infer=57.8ms age=0 undistort=14.0ms director=0.2ms view=7.1ms total=79.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11400 drop=0 rst=0
+[PROFILE] frame=8940 fps=25.5 infer=58.3ms age=0 undistort=21.1ms director=0.2ms view=3.7ms total=83.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11438 drop=0 rst=0
+[PROFILE] frame=8970 fps=25.8 infer=62.2ms age=0 undistort=17.6ms director=0.2ms view=2.7ms total=82.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11476 drop=0 rst=0
+[PROFILE] frame=9000 fps=25.4 infer=63.3ms age=0 undistort=20.4ms director=0.2ms view=5.5ms total=89.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11514 drop=0 rst=0
+[PROFILE] frame=9030 fps=25.8 infer=60.1ms age=0 undistort=13.2ms director=0.2ms view=4.4ms total=78.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11552 drop=0 rst=0
+[PROFILE] frame=9060 fps=25.9 infer=61.4ms age=0 undistort=21.2ms director=0.2ms view=2.3ms total=85.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11590 drop=0 rst=0
+[PROFILE] frame=9090 fps=25.3 infer=61.1ms age=0 undistort=16.3ms director=0.2ms view=3.7ms total=81.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11628 drop=0 rst=0
+[PROFILE] frame=9120 fps=24.7 infer=60.1ms age=0 undistort=16.7ms director=0.2ms view=2.4ms total=79.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11667 drop=0 rst=0
+[PROFILE] frame=9150 fps=25.4 infer=62.8ms age=0 undistort=17.4ms director=0.2ms view=2.5ms total=82.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11705 drop=0 rst=0
+[PROFILE] frame=9180 fps=24.9 infer=63.1ms age=0 undistort=17.2ms director=0.3ms view=4.4ms total=84.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11743 drop=0 rst=0
+[PROFILE] frame=9210 fps=24.5 infer=64.7ms age=0 undistort=17.1ms director=0.2ms view=6.7ms total=88.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11781 drop=0 rst=0
+[PROFILE] frame=9240 fps=25.8 infer=61.7ms age=0 undistort=18.0ms director=0.2ms view=2.5ms total=82.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11819 drop=0 rst=0
+[PROFILE] frame=9270 fps=25.2 infer=60.0ms age=0 undistort=16.1ms director=0.2ms view=2.5ms total=78.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11857 drop=0 rst=0
+[PROFILE] frame=9300 fps=24.9 infer=62.0ms age=0 undistort=17.2ms director=0.2ms view=2.7ms total=82.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11894 drop=0 rst=0
+[PROFILE] frame=9330 fps=24.6 infer=59.3ms age=0 undistort=17.5ms director=0.2ms view=5.6ms total=82.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11932 drop=0 rst=0
+[PROFILE] frame=9360 fps=24.7 infer=61.7ms age=0 undistort=13.9ms director=0.2ms view=2.3ms total=78.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=11971 drop=0 rst=0
+[PROFILE] frame=9390 fps=25.6 infer=63.4ms age=0 undistort=14.8ms director=0.2ms view=2.3ms total=80.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12009 drop=0 rst=0
+[PROFILE] frame=9420 fps=26.0 infer=62.4ms age=0 undistort=13.2ms director=0.3ms view=2.9ms total=78.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12046 drop=0 rst=0
+[PROFILE] frame=9450 fps=24.6 infer=62.0ms age=0 undistort=17.0ms director=0.2ms view=5.9ms total=85.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12084 drop=0 rst=0
+[PROFILE] frame=9480 fps=25.2 infer=62.1ms age=0 undistort=16.0ms director=0.2ms view=3.2ms total=81.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12122 drop=0 rst=0
+[PROFILE] frame=9510 fps=25.2 infer=60.8ms age=0 undistort=13.8ms director=0.2ms view=3.9ms total=78.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12160 drop=0 rst=0
+[PROFILE] frame=9540 fps=26.2 infer=61.7ms age=0 undistort=20.7ms director=0.2ms view=2.3ms total=84.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12197 drop=0 rst=0
+[PROFILE] frame=9570 fps=24.9 infer=61.4ms age=0 undistort=17.4ms director=0.2ms view=2.3ms total=82.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12236 drop=0 rst=0
+[PROFILE] frame=9600 fps=25.3 infer=65.2ms age=0 undistort=15.7ms director=0.2ms view=2.9ms total=84.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12274 drop=0 rst=0
+[PROFILE] frame=9630 fps=25.6 infer=60.0ms age=0 undistort=17.0ms director=0.2ms view=2.9ms total=80.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12311 drop=0 rst=0
+[PROFILE] frame=9660 fps=24.7 infer=61.5ms age=0 undistort=17.5ms director=0.2ms view=7.1ms total=86.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12350 drop=0 rst=0
+[PROFILE] frame=9690 fps=24.8 infer=62.5ms age=0 undistort=18.0ms director=0.2ms view=13.5ms total=94.2ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12389 drop=0 rst=0
+[PROFILE] frame=9720 fps=26.2 infer=63.0ms age=0 undistort=20.1ms director=0.2ms view=2.7ms total=86.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12427 drop=0 rst=0
+[PROFILE] frame=9750 fps=25.1 infer=67.3ms age=0 undistort=18.5ms director=0.2ms view=10.6ms total=96.5ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12466 drop=0 rst=0
+[PROFILE] frame=9780 fps=24.8 infer=64.1ms age=0 undistort=16.8ms director=0.2ms view=2.3ms total=83.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12504 drop=0 rst=0
+[PROFILE] frame=9810 fps=25.7 infer=60.9ms age=0 undistort=14.8ms director=0.2ms view=2.4ms total=78.4ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12542 drop=0 rst=0
+[PROFILE] frame=9840 fps=25.5 infer=64.1ms age=0 undistort=17.0ms director=0.2ms view=2.6ms total=83.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12580 drop=0 rst=0
+[PROFILE] frame=9870 fps=24.9 infer=64.8ms age=0 undistort=16.8ms director=0.2ms view=2.4ms total=84.3ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12619 drop=0 rst=0
+[PROFILE] frame=9900 fps=24.9 infer=62.8ms age=0 undistort=20.6ms director=0.2ms view=3.1ms total=86.8ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12657 drop=0 rst=0
+[PROFILE] frame=9930 fps=25.7 infer=59.8ms age=0 undistort=18.5ms director=0.2ms view=2.3ms total=80.7ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12695 drop=0 rst=0
+[PROFILE] frame=9960 fps=26.1 infer=61.9ms age=0 undistort=21.4ms director=0.2ms view=2.3ms total=85.9ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12733 drop=0 rst=0
+[PROFILE] frame=9990 fps=24.9 infer=59.9ms age=0 undistort=20.7ms director=0.2ms view=4.2ms total=85.0ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12771 drop=0 rst=0
+[PROFILE] frame=10020 fps=27.9 infer=62.4ms age=0 undistort=21.7ms director=0.2ms view=2.3ms total=86.6ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12807 drop=0 rst=0
+[PROFILE] frame=10050 fps=27.5 infer=59.7ms age=0 undistort=13.9ms director=0.2ms view=2.3ms total=76.1ms detections=0 persons=0 scale=1.32 anchor=989.2 mode=sample crop=(289, 324, 1631, 1079) stream=STREAM_ON/AON w=12842 drop=0 rst=0
+
+[信息] 收到退出信号，当前帧结束后退出。
+
+[推流] 正在停止网络推流器...
+[推流][watchdog] 重启 FFmpeg，原因: ffmpeg process is None
+[推流] 启动 FFmpeg:
+  ffmpeg -hide_banner -loglevel warning -nostdin -f rawvideo -pix_fmt bgr24 -s 1280x720 -r 25.0 -i - -thread_queue_size 1024 -f alsa -ac 2 -ar 48000 -i hw:1,0 -map 0:v:0 -vf format=nv12 -c:v h264_rkmpp -b:v 4M -maxrate 4M -bufsize 4M -g 25 -bf 0 -map 1:a:0 -af aresample=async=1000:first_pts=0 -c:a aac -b:a 128k -ar 48000 -ac 2 -max_muxing_queue_size 1024 -flush_packets 1 -f rtsp -rtsp_transport tcp rtsp://127.0.0.1:8554/director
+[推流] 已停止:
+  submitted : 10060
+  written   : 12852
+  resized   : 0
+  dropped   : 0
+  restarts  : 1
+[信息] 程序退出
+I RKNN: [00:50:01.282] RKNN Runtime Information, librknnrt version: 2.1.0 (967d001cc8@2024-08-07T19:28:19)
+I RKNN: [00:50:01.283] RKNN Driver Information, version: 0.9.8
+I RKNN: [00:50:01.283] RKNN Model Information, version: 6, toolkit version: 2.1.0+708089d1(compiler version: 2.1.0 (967d001cc8@2024-08-07T11:32:45)), target: RKNPU v2, target platform: rk3588, framework name: ONNX, framework layout: NCHW, model inference type: static_shape
+W RKNN: [00:50:01.313] query RKNN_QUERY_INPUT_DYNAMIC_RANGE error, rknn model is static shape type, please export rknn with dynamic_shapes

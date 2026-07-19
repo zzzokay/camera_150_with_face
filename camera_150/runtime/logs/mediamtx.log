@@ -1285,3 +1285,866 @@
 2026/07/19 23:49:06 INF [RTSP] [conn 127.0.0.1:51194] closed: terminated
 2026/07/19 23:49:06 INF [RTSP] [session baa2fc85] destroyed: terminated
 2026/07/19 23:49:06 INF waiting for running hooks
+2026/07/20 00:37:49 INF MediaMTX v1.19.2, linux, arm64
+2026/07/20 00:37:49 INF configuration loaded from /home/elf/stream_server/mediamtx_rk3588.yml
+2026/07/20 00:37:49 INF [RTSP] started with listeners on :8554 (TCP/RTSP), :8000 (UDP/RTP), :8001 (UDP/RTCP)
+2026/07/20 00:37:49 INF [RTMP] started with listener on :1935 (TCP/RTMP)
+2026/07/20 00:37:49 INF [HLS] started with listener on :8888 (TCP/HTTP)
+2026/07/20 00:37:49 INF [WebRTC] started with listeners on :8889 (TCP/HTTP), :8189 (UDP/ICE)
+2026/07/20 00:37:49 INF [SRT] started with listener on :8890 (UDP/SRT)
+2026/07/20 00:37:49 INF [MoQ] started with listeners on :8892 (TCP/HTTP2), :8892 (UDP/HTTP3)
+2026/07/20 00:37:51 INF [RTSP] [conn 127.0.0.1:34332] opened
+2026/07/20 00:37:51 INF [RTSP] [conn 127.0.0.1:34332] closed: no stream is available on path 'director'
+2026/07/20 00:37:52 INF [RTSP] [conn 127.0.0.1:34344] opened
+2026/07/20 00:37:52 INF [RTSP] [conn 127.0.0.1:34344] closed: no stream is available on path 'director'
+2026/07/20 00:37:53 INF [RTSP] [conn 127.0.0.1:58668] opened
+2026/07/20 00:37:53 INF [RTSP] [conn 127.0.0.1:58668] closed: no stream is available on path 'director'
+2026/07/20 00:37:53 INF [RTSP] [conn 127.0.0.1:58680] opened
+2026/07/20 00:37:53 INF [RTSP] [conn 127.0.0.1:58680] closed: EOF
+2026/07/20 00:37:53 INF [RTSP] [conn 127.0.0.1:58684] opened
+2026/07/20 00:37:53 INF [RTSP] [conn 127.0.0.1:58684] closed: no stream is available on path 'director'
+2026/07/20 00:37:54 INF [RTSP] [conn 127.0.0.1:58692] opened
+2026/07/20 00:37:54 INF [RTSP] [conn 127.0.0.1:58692] closed: no stream is available on path 'director'
+2026/07/20 00:37:54 INF [RTSP] [conn 127.0.0.1:58696] opened
+2026/07/20 00:37:54 INF [RTSP] [conn 127.0.0.1:58696] closed: no stream is available on path 'director'
+2026/07/20 00:37:54 INF [RTSP] [conn 127.0.0.1:58712] opened
+2026/07/20 00:37:55 INF [RTSP] [session 7a7427b6] created by 127.0.0.1:58712
+2026/07/20 00:37:55 INF [path director] stream is available and online, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:37:55 INF [RTSP] [session 7a7427b6] is publishing to path 'director'
+2026/07/20 00:37:55 INF [path director] RTP packets are too big (1460 > 1440), remuxing them into smaller ones
+2026/07/20 00:37:55 INF [RTSP] [conn 127.0.0.1:58726] opened
+2026/07/20 00:37:55 INF [RTSP] [conn 127.0.0.1:58726] closed: EOF
+2026/07/20 00:37:55 INF [RTSP] [conn 127.0.0.1:58730] opened
+2026/07/20 00:37:55 INF [RTSP] [session 02d865ad] created by 127.0.0.1:58730
+2026/07/20 00:37:55 INF [RTSP] [session 02d865ad] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:37:57 INF [RTSP] [conn 127.0.0.1:58730] closed: EOF
+2026/07/20 00:37:57 INF [RTSP] [session 02d865ad] destroyed: torn down by 127.0.0.1:58730
+2026/07/20 00:37:57 INF [RTSP] [conn 127.0.0.1:58738] opened
+2026/07/20 00:37:57 INF [RTSP] [conn 127.0.0.1:58738] closed: EOF
+2026/07/20 00:37:59 INF [RTSP] [conn 127.0.0.1:58742] opened
+2026/07/20 00:37:59 INF [RTSP] [conn 127.0.0.1:58742] closed: EOF
+2026/07/20 00:38:03 INF [RTSP] [conn 127.0.0.1:58474] opened
+2026/07/20 00:38:04 INF [RTSP] [conn 127.0.0.1:58474] closed: EOF
+2026/07/20 00:38:05 INF [RTSP] [conn 127.0.0.1:58482] opened
+2026/07/20 00:38:05 INF [RTSP] [conn 127.0.0.1:58482] closed: EOF
+2026/07/20 00:38:07 INF [RTSP] [conn 127.0.0.1:58492] opened
+2026/07/20 00:38:07 INF [RTSP] [conn 127.0.0.1:58492] closed: EOF
+2026/07/20 00:38:09 INF [RTSP] [conn 127.0.0.1:58496] opened
+2026/07/20 00:38:09 INF [RTSP] [conn 127.0.0.1:58496] closed: EOF
+2026/07/20 00:38:11 INF [RTSP] [conn 127.0.0.1:58504] opened
+2026/07/20 00:38:11 INF [RTSP] [conn 127.0.0.1:58504] closed: EOF
+2026/07/20 00:38:13 INF [RTSP] [conn 127.0.0.1:51134] opened
+2026/07/20 00:38:13 INF [RTSP] [conn 127.0.0.1:51134] closed: EOF
+2026/07/20 00:38:15 INF [RTSP] [conn 127.0.0.1:51140] opened
+2026/07/20 00:38:15 INF [RTSP] [conn 127.0.0.1:51140] closed: EOF
+2026/07/20 00:38:17 INF [RTSP] [conn 127.0.0.1:51144] opened
+2026/07/20 00:38:17 INF [RTSP] [conn 127.0.0.1:51144] closed: EOF
+2026/07/20 00:38:19 INF [RTSP] [conn 127.0.0.1:51152] opened
+2026/07/20 00:38:19 INF [RTSP] [conn 127.0.0.1:51152] closed: EOF
+2026/07/20 00:38:21 INF [RTSP] [conn 127.0.0.1:51154] opened
+2026/07/20 00:38:21 INF [RTSP] [conn 127.0.0.1:51154] closed: EOF
+2026/07/20 00:38:23 INF [RTSP] [conn 127.0.0.1:54412] opened
+2026/07/20 00:38:23 INF [RTSP] [conn 127.0.0.1:54412] closed: EOF
+2026/07/20 00:38:25 INF [RTSP] [conn 127.0.0.1:54426] opened
+2026/07/20 00:38:25 INF [RTSP] [conn 127.0.0.1:54426] closed: EOF
+2026/07/20 00:38:27 INF [RTSP] [conn 127.0.0.1:54432] opened
+2026/07/20 00:38:27 INF [RTSP] [conn 127.0.0.1:54432] closed: EOF
+2026/07/20 00:38:29 INF [RTSP] [conn 127.0.0.1:54436] opened
+2026/07/20 00:38:29 INF [RTSP] [conn 127.0.0.1:54436] closed: EOF
+2026/07/20 00:38:31 INF [RTSP] [conn 127.0.0.1:54438] opened
+2026/07/20 00:38:31 INF [RTSP] [conn 127.0.0.1:54438] closed: EOF
+2026/07/20 00:38:33 INF [RTSP] [conn 127.0.0.1:46212] opened
+2026/07/20 00:38:33 INF [RTSP] [conn 127.0.0.1:46212] closed: EOF
+2026/07/20 00:38:35 INF [RTSP] [conn 127.0.0.1:46224] opened
+2026/07/20 00:38:35 INF [RTSP] [conn 127.0.0.1:46224] closed: EOF
+2026/07/20 00:38:37 INF [RTSP] [conn 127.0.0.1:46236] opened
+2026/07/20 00:38:37 INF [RTSP] [conn 127.0.0.1:46236] closed: EOF
+2026/07/20 00:38:39 INF [RTSP] [conn 127.0.0.1:46252] opened
+2026/07/20 00:38:39 INF [RTSP] [conn 127.0.0.1:46252] closed: EOF
+2026/07/20 00:38:41 INF [RTSP] [conn 127.0.0.1:46268] opened
+2026/07/20 00:38:41 INF [RTSP] [conn 127.0.0.1:46268] closed: EOF
+2026/07/20 00:38:43 INF [RTSP] [conn 127.0.0.1:51608] opened
+2026/07/20 00:38:43 INF [RTSP] [conn 127.0.0.1:51608] closed: EOF
+2026/07/20 00:38:45 INF [RTSP] [conn 127.0.0.1:51612] opened
+2026/07/20 00:38:45 INF [RTSP] [conn 127.0.0.1:51612] closed: EOF
+2026/07/20 00:38:47 INF [RTSP] [conn 127.0.0.1:51624] opened
+2026/07/20 00:38:47 INF [RTSP] [conn 127.0.0.1:51624] closed: EOF
+2026/07/20 00:38:49 INF [RTSP] [conn 127.0.0.1:51638] opened
+2026/07/20 00:38:49 INF [RTSP] [conn 127.0.0.1:51638] closed: EOF
+2026/07/20 00:38:51 INF [RTSP] [conn 127.0.0.1:51644] opened
+2026/07/20 00:38:51 INF [RTSP] [conn 127.0.0.1:51644] closed: EOF
+2026/07/20 00:38:53 INF [RTSP] [conn 127.0.0.1:34596] opened
+2026/07/20 00:38:53 INF [RTSP] [conn 127.0.0.1:34596] closed: EOF
+2026/07/20 00:38:55 INF [RTSP] [conn 127.0.0.1:34606] opened
+2026/07/20 00:38:55 INF [RTSP] [conn 127.0.0.1:34606] closed: EOF
+2026/07/20 00:38:57 INF [RTSP] [conn 127.0.0.1:34610] opened
+2026/07/20 00:38:57 INF [RTSP] [conn 127.0.0.1:34610] closed: EOF
+2026/07/20 00:38:59 INF [RTSP] [conn 127.0.0.1:34618] opened
+2026/07/20 00:38:59 INF [RTSP] [conn 127.0.0.1:34618] closed: EOF
+2026/07/20 00:39:01 INF [RTSP] [conn 127.0.0.1:34620] opened
+2026/07/20 00:39:01 INF [RTSP] [conn 127.0.0.1:34620] closed: EOF
+2026/07/20 00:39:03 INF [RTSP] [conn 127.0.0.1:59920] opened
+2026/07/20 00:39:03 INF [RTSP] [conn 127.0.0.1:59920] closed: EOF
+2026/07/20 00:39:05 INF [RTSP] [conn 127.0.0.1:59934] opened
+2026/07/20 00:39:05 INF [RTSP] [conn 127.0.0.1:59934] closed: EOF
+2026/07/20 00:39:07 INF [RTSP] [conn 127.0.0.1:59940] opened
+2026/07/20 00:39:07 INF [RTSP] [conn 127.0.0.1:59940] closed: EOF
+2026/07/20 00:39:09 INF [RTSP] [conn 127.0.0.1:59954] opened
+2026/07/20 00:39:09 INF [RTSP] [conn 127.0.0.1:59954] closed: EOF
+2026/07/20 00:39:11 INF [RTSP] [conn 127.0.0.1:59956] opened
+2026/07/20 00:39:11 INF [RTSP] [conn 127.0.0.1:59956] closed: EOF
+2026/07/20 00:39:13 INF [RTSP] [conn 127.0.0.1:51392] opened
+2026/07/20 00:39:13 INF [RTSP] [conn 127.0.0.1:51392] closed: EOF
+2026/07/20 00:39:15 INF [RTSP] [conn 127.0.0.1:51396] opened
+2026/07/20 00:39:15 INF [RTSP] [conn 127.0.0.1:51396] closed: EOF
+2026/07/20 00:39:17 INF [RTSP] [conn 127.0.0.1:51412] opened
+2026/07/20 00:39:17 INF [RTSP] [conn 127.0.0.1:51412] closed: EOF
+2026/07/20 00:39:19 INF [RTSP] [conn 127.0.0.1:51416] opened
+2026/07/20 00:39:19 INF [RTSP] [conn 127.0.0.1:51416] closed: EOF
+2026/07/20 00:39:21 INF [RTSP] [conn 127.0.0.1:51430] opened
+2026/07/20 00:39:21 INF [RTSP] [conn 127.0.0.1:51430] closed: EOF
+2026/07/20 00:39:23 INF [path director] RTP packets are too big (1445 > 1440), remuxing them into smaller ones
+2026/07/20 00:39:23 INF [RTSP] [conn 127.0.0.1:35688] opened
+2026/07/20 00:39:23 INF [RTSP] [conn 127.0.0.1:35688] closed: EOF
+2026/07/20 00:39:25 INF [RTSP] [conn 127.0.0.1:35694] opened
+2026/07/20 00:39:25 INF [RTSP] [conn 127.0.0.1:35694] closed: EOF
+2026/07/20 00:39:27 INF [RTSP] [conn 127.0.0.1:35700] opened
+2026/07/20 00:39:27 INF [RTSP] [conn 127.0.0.1:35700] closed: EOF
+2026/07/20 00:39:29 INF [RTSP] [conn 127.0.0.1:35710] opened
+2026/07/20 00:39:29 INF [RTSP] [conn 127.0.0.1:35710] closed: EOF
+2026/07/20 00:39:31 INF [RTSP] [conn 127.0.0.1:35712] opened
+2026/07/20 00:39:31 INF [RTSP] [conn 127.0.0.1:35712] closed: EOF
+2026/07/20 00:39:33 INF [RTSP] [conn 127.0.0.1:33450] opened
+2026/07/20 00:39:33 INF [RTSP] [conn 127.0.0.1:33450] closed: EOF
+2026/07/20 00:39:35 INF [RTSP] [conn 127.0.0.1:33462] opened
+2026/07/20 00:39:35 INF [RTSP] [conn 127.0.0.1:33462] closed: EOF
+2026/07/20 00:39:37 INF [RTSP] [conn 127.0.0.1:33468] opened
+2026/07/20 00:39:37 INF [RTSP] [conn 127.0.0.1:33468] closed: EOF
+2026/07/20 00:39:39 INF [RTSP] [conn 127.0.0.1:33482] opened
+2026/07/20 00:39:39 INF [RTSP] [conn 127.0.0.1:33482] closed: EOF
+2026/07/20 00:39:41 INF [RTSP] [conn 127.0.0.1:33496] opened
+2026/07/20 00:39:41 INF [RTSP] [conn 127.0.0.1:33496] closed: EOF
+2026/07/20 00:39:43 INF [RTSP] [conn 127.0.0.1:55402] opened
+2026/07/20 00:39:43 INF [RTSP] [conn 127.0.0.1:55402] closed: EOF
+2026/07/20 00:39:45 INF [RTSP] [conn 127.0.0.1:55418] opened
+2026/07/20 00:39:45 INF [RTSP] [conn 127.0.0.1:55418] closed: EOF
+2026/07/20 00:39:47 INF [RTSP] [conn 127.0.0.1:55430] opened
+2026/07/20 00:39:47 INF [RTSP] [conn 127.0.0.1:55430] closed: EOF
+2026/07/20 00:39:49 INF [RTSP] [conn 127.0.0.1:55436] opened
+2026/07/20 00:39:49 INF [RTSP] [conn 127.0.0.1:55436] closed: EOF
+2026/07/20 00:39:51 INF [RTSP] [conn 127.0.0.1:55446] opened
+2026/07/20 00:39:51 INF [RTSP] [conn 127.0.0.1:55446] closed: EOF
+2026/07/20 00:39:53 INF [RTSP] [conn 127.0.0.1:44324] opened
+2026/07/20 00:39:53 INF [RTSP] [conn 127.0.0.1:44324] closed: EOF
+2026/07/20 00:39:55 INF [RTSP] [conn 127.0.0.1:44332] opened
+2026/07/20 00:39:55 INF [RTSP] [conn 127.0.0.1:44332] closed: EOF
+2026/07/20 00:39:57 INF [RTSP] [conn 127.0.0.1:44346] opened
+2026/07/20 00:39:57 INF [RTSP] [conn 127.0.0.1:44346] closed: EOF
+2026/07/20 00:39:59 INF [RTSP] [conn 127.0.0.1:44354] opened
+2026/07/20 00:39:59 INF [RTSP] [conn 127.0.0.1:44354] closed: EOF
+2026/07/20 00:40:00 INF [RTSP] [conn 127.0.0.1:58712] closed: EOF
+2026/07/20 00:40:00 INF [RTSP] [session 7a7427b6] destroyed: torn down by 127.0.0.1:58712
+2026/07/20 00:40:02 INF [RTSP] [conn 127.0.0.1:44370] opened
+2026/07/20 00:40:02 INF [RTSP] [conn 127.0.0.1:44370] closed: EOF
+2026/07/20 00:40:02 INF [RTSP] [conn 127.0.0.1:44378] opened
+2026/07/20 00:40:02 INF [RTSP] [session a277d362] created by 127.0.0.1:44378
+2026/07/20 00:40:02 INF [path director] stream is available and online, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:40:02 INF [RTSP] [session a277d362] is publishing to path 'director'
+2026/07/20 00:48:37 INF shutting down gracefully
+2026/07/20 00:48:37 INF [SRT] closing
+2026/07/20 00:48:37 INF [MoQ] closing
+2026/07/20 00:48:37 INF [WebRTC] closing
+2026/07/20 00:48:37 INF [HLS] closing
+2026/07/20 00:48:37 INF [RTMP] closing
+2026/07/20 00:48:37 INF [RTSP] closing
+2026/07/20 00:48:37 INF [RTSP] [conn 127.0.0.1:44378] closed: terminated
+2026/07/20 00:48:37 INF [RTSP] [session a277d362] destroyed: terminated
+2026/07/20 00:48:37 INF waiting for running hooks
+2026/07/20 00:49:59 INF MediaMTX v1.19.2, linux, arm64
+2026/07/20 00:49:59 INF configuration loaded from /home/elf/stream_server/mediamtx_rk3588.yml
+2026/07/20 00:49:59 INF [RTSP] started with listeners on :8554 (TCP/RTSP), :8000 (UDP/RTP), :8001 (UDP/RTCP)
+2026/07/20 00:49:59 INF [RTMP] started with listener on :1935 (TCP/RTMP)
+2026/07/20 00:49:59 INF [HLS] started with listener on :8888 (TCP/HTTP)
+2026/07/20 00:49:59 INF [WebRTC] started with listeners on :8889 (TCP/HTTP), :8189 (UDP/ICE)
+2026/07/20 00:49:59 INF [SRT] started with listener on :8890 (UDP/SRT)
+2026/07/20 00:49:59 INF [MoQ] started with listeners on :8892 (TCP/HTTP2), :8892 (UDP/HTTP3)
+2026/07/20 00:50:01 INF [RTSP] [conn 127.0.0.1:42538] opened
+2026/07/20 00:50:01 INF [RTSP] [conn 127.0.0.1:42538] closed: no stream is available on path 'director'
+2026/07/20 00:50:01 INF [RTSP] [conn 127.0.0.1:42540] opened
+2026/07/20 00:50:01 INF [RTSP] [conn 127.0.0.1:42540] closed: no stream is available on path 'director'
+2026/07/20 00:50:02 INF [RTSP] [conn 127.0.0.1:42552] opened
+2026/07/20 00:50:02 INF [RTSP] [conn 127.0.0.1:42552] closed: no stream is available on path 'director'
+2026/07/20 00:50:02 INF [RTSP] [conn 127.0.0.1:53558] opened
+2026/07/20 00:50:02 INF [RTSP] [conn 127.0.0.1:53558] closed: no stream is available on path 'director'
+2026/07/20 00:50:02 INF [RTSP] [conn 127.0.0.1:53564] opened
+2026/07/20 00:50:02 INF [RTSP] [conn 127.0.0.1:53564] closed: EOF
+2026/07/20 00:50:03 INF [RTSP] [conn 127.0.0.1:53578] opened
+2026/07/20 00:50:03 INF [RTSP] [session 69f4e419] created by 127.0.0.1:53578
+2026/07/20 00:50:03 INF [path director] stream is available and online, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:50:03 INF [RTSP] [session 69f4e419] is publishing to path 'director'
+2026/07/20 00:50:03 INF [path director] RTP packets are too big (1460 > 1440), remuxing them into smaller ones
+2026/07/20 00:50:03 INF [RTSP] [conn 127.0.0.1:53584] opened
+2026/07/20 00:50:03 INF [RTSP] [session ea94452d] created by 127.0.0.1:53584
+2026/07/20 00:50:03 INF [RTSP] [session ea94452d] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:50:04 INF [RTSP] [conn 127.0.0.1:53592] opened
+2026/07/20 00:50:04 INF [RTSP] [conn 127.0.0.1:53592] closed: EOF
+2026/07/20 00:50:05 INF [RTSP] [session ea94452d] destroyed: torn down by 127.0.0.1:53584
+2026/07/20 00:50:05 INF [RTSP] [conn 127.0.0.1:53584] closed: read tcp 127.0.0.1:8554->127.0.0.1:53584: read: connection reset by peer
+2026/07/20 00:50:06 INF [RTSP] [conn 127.0.0.1:53600] opened
+2026/07/20 00:50:06 INF [RTSP] [session 179faf0f] created by 127.0.0.1:53600
+2026/07/20 00:50:06 INF [RTSP] [session 179faf0f] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:50:06 INF [RTSP] [conn 127.0.0.1:53612] opened
+2026/07/20 00:50:06 INF [RTSP] [conn 127.0.0.1:53612] closed: EOF
+2026/07/20 00:50:08 INF [RTSP] [conn 127.0.0.1:53618] opened
+2026/07/20 00:50:08 INF [RTSP] [conn 127.0.0.1:53618] closed: EOF
+2026/07/20 00:50:10 INF [RTSP] [conn 127.0.0.1:53632] opened
+2026/07/20 00:50:10 INF [RTSP] [conn 127.0.0.1:53632] closed: EOF
+2026/07/20 00:50:12 INF [RTSP] [conn 127.0.0.1:52842] opened
+2026/07/20 00:50:12 INF [RTSP] [conn 127.0.0.1:52842] closed: EOF
+2026/07/20 00:50:14 INF [RTSP] [conn 127.0.0.1:52854] opened
+2026/07/20 00:50:14 INF [RTSP] [conn 127.0.0.1:52854] closed: EOF
+2026/07/20 00:50:16 INF [RTSP] [conn 127.0.0.1:52864] opened
+2026/07/20 00:50:16 INF [RTSP] [conn 127.0.0.1:52864] closed: EOF
+2026/07/20 00:50:18 INF [RTSP] [conn 127.0.0.1:52866] opened
+2026/07/20 00:50:18 INF [RTSP] [conn 127.0.0.1:52866] closed: EOF
+2026/07/20 00:50:20 INF [RTSP] [conn 127.0.0.1:52876] opened
+2026/07/20 00:50:20 INF [RTSP] [conn 127.0.0.1:52876] closed: EOF
+2026/07/20 00:50:22 INF [RTSP] [conn 127.0.0.1:37594] opened
+2026/07/20 00:50:22 INF [RTSP] [conn 127.0.0.1:37594] closed: EOF
+2026/07/20 00:50:24 INF [RTSP] [conn 127.0.0.1:37596] opened
+2026/07/20 00:50:24 INF [RTSP] [conn 127.0.0.1:37596] closed: EOF
+2026/07/20 00:50:26 INF [RTSP] [conn 127.0.0.1:37598] opened
+2026/07/20 00:50:26 INF [RTSP] [conn 127.0.0.1:37598] closed: EOF
+2026/07/20 00:50:28 INF [RTSP] [conn 127.0.0.1:37608] opened
+2026/07/20 00:50:28 INF [RTSP] [conn 127.0.0.1:37608] closed: EOF
+2026/07/20 00:50:30 INF [RTSP] [conn 127.0.0.1:37624] opened
+2026/07/20 00:50:30 INF [RTSP] [conn 127.0.0.1:37624] closed: EOF
+2026/07/20 00:50:32 INF [RTSP] [conn 127.0.0.1:45218] opened
+2026/07/20 00:50:32 INF [RTSP] [conn 127.0.0.1:45218] closed: EOF
+2026/07/20 00:50:34 INF [RTSP] [conn 127.0.0.1:45232] opened
+2026/07/20 00:50:34 INF [RTSP] [conn 127.0.0.1:45232] closed: EOF
+2026/07/20 00:50:36 INF [RTSP] [conn 127.0.0.1:45242] opened
+2026/07/20 00:50:36 INF [RTSP] [conn 127.0.0.1:45242] closed: EOF
+2026/07/20 00:50:38 INF [RTSP] [conn 127.0.0.1:45258] opened
+2026/07/20 00:50:38 INF [RTSP] [conn 127.0.0.1:45258] closed: EOF
+2026/07/20 00:50:40 INF [RTSP] [conn 127.0.0.1:45268] opened
+2026/07/20 00:50:40 INF [RTSP] [conn 127.0.0.1:45268] closed: EOF
+2026/07/20 00:50:42 INF [RTSP] [conn 127.0.0.1:41686] opened
+2026/07/20 00:50:42 INF [RTSP] [conn 127.0.0.1:41686] closed: EOF
+2026/07/20 00:50:44 INF [RTSP] [conn 127.0.0.1:41690] opened
+2026/07/20 00:50:44 INF [RTSP] [conn 127.0.0.1:41690] closed: EOF
+2026/07/20 00:50:46 INF [RTSP] [conn 127.0.0.1:41706] opened
+2026/07/20 00:50:46 INF [RTSP] [conn 127.0.0.1:41706] closed: EOF
+2026/07/20 00:50:48 INF [RTSP] [conn 127.0.0.1:41712] opened
+2026/07/20 00:50:48 INF [RTSP] [conn 127.0.0.1:41712] closed: EOF
+2026/07/20 00:50:50 INF [RTSP] [conn 127.0.0.1:41726] opened
+2026/07/20 00:50:50 INF [RTSP] [conn 127.0.0.1:41726] closed: EOF
+2026/07/20 00:50:52 INF [RTSP] [conn 127.0.0.1:52798] opened
+2026/07/20 00:50:52 INF [RTSP] [conn 127.0.0.1:52798] closed: EOF
+2026/07/20 00:50:54 INF [RTSP] [conn 127.0.0.1:52810] opened
+2026/07/20 00:50:54 INF [RTSP] [conn 127.0.0.1:52810] closed: EOF
+2026/07/20 00:50:56 INF [RTSP] [conn 127.0.0.1:52820] opened
+2026/07/20 00:50:56 INF [RTSP] [conn 127.0.0.1:52820] closed: EOF
+2026/07/20 00:50:58 INF [RTSP] [conn 127.0.0.1:52830] opened
+2026/07/20 00:50:58 INF [RTSP] [conn 127.0.0.1:52830] closed: EOF
+2026/07/20 00:51:00 INF [RTSP] [conn 127.0.0.1:52840] opened
+2026/07/20 00:51:00 INF [RTSP] [conn 127.0.0.1:52840] closed: EOF
+2026/07/20 00:51:02 INF [RTSP] [conn 127.0.0.1:40974] opened
+2026/07/20 00:51:02 INF [RTSP] [conn 127.0.0.1:40974] closed: EOF
+2026/07/20 00:51:04 INF [RTSP] [conn 127.0.0.1:40976] opened
+2026/07/20 00:51:04 INF [RTSP] [conn 127.0.0.1:40976] closed: EOF
+2026/07/20 00:51:06 INF [RTSP] [conn 127.0.0.1:40984] opened
+2026/07/20 00:51:06 INF [RTSP] [conn 127.0.0.1:40984] closed: EOF
+2026/07/20 00:51:08 INF [RTSP] [conn 127.0.0.1:41000] opened
+2026/07/20 00:51:08 INF [RTSP] [conn 127.0.0.1:41000] closed: EOF
+2026/07/20 00:51:10 INF [RTSP] [conn 127.0.0.1:41010] opened
+2026/07/20 00:51:10 INF [RTSP] [conn 127.0.0.1:41010] closed: EOF
+2026/07/20 00:51:12 INF [RTSP] [conn 127.0.0.1:43396] opened
+2026/07/20 00:51:12 INF [RTSP] [conn 127.0.0.1:43396] closed: EOF
+2026/07/20 00:51:14 INF [RTSP] [conn 127.0.0.1:43406] opened
+2026/07/20 00:51:14 INF [RTSP] [conn 127.0.0.1:43406] closed: EOF
+2026/07/20 00:51:17 INF [RTSP] [conn 127.0.0.1:43408] opened
+2026/07/20 00:51:17 INF [RTSP] [conn 127.0.0.1:43408] closed: EOF
+2026/07/20 00:51:19 INF [RTSP] [conn 127.0.0.1:43416] opened
+2026/07/20 00:51:19 INF [RTSP] [conn 127.0.0.1:43416] closed: EOF
+2026/07/20 00:51:21 INF [RTSP] [conn 127.0.0.1:43430] opened
+2026/07/20 00:51:21 INF [RTSP] [conn 127.0.0.1:43430] closed: EOF
+2026/07/20 00:51:23 INF [RTSP] [conn 127.0.0.1:51386] opened
+2026/07/20 00:51:23 INF [RTSP] [conn 127.0.0.1:51386] closed: EOF
+2026/07/20 00:51:25 INF [RTSP] [conn 127.0.0.1:51402] opened
+2026/07/20 00:51:25 INF [RTSP] [conn 127.0.0.1:51402] closed: EOF
+2026/07/20 00:51:27 INF [RTSP] [conn 127.0.0.1:51410] opened
+2026/07/20 00:51:27 INF [RTSP] [conn 127.0.0.1:51410] closed: EOF
+2026/07/20 00:51:29 INF [RTSP] [conn 127.0.0.1:51420] opened
+2026/07/20 00:51:29 INF [RTSP] [conn 127.0.0.1:51420] closed: EOF
+2026/07/20 00:51:31 INF [RTSP] [conn 127.0.0.1:51430] opened
+2026/07/20 00:51:31 INF [RTSP] [conn 127.0.0.1:51430] closed: EOF
+2026/07/20 00:51:33 INF [RTSP] [conn 127.0.0.1:52776] opened
+2026/07/20 00:51:33 INF [RTSP] [conn 127.0.0.1:52776] closed: EOF
+2026/07/20 00:51:35 INF [RTSP] [conn 127.0.0.1:52792] opened
+2026/07/20 00:51:35 INF [RTSP] [conn 127.0.0.1:52792] closed: EOF
+2026/07/20 00:51:37 INF [RTSP] [conn 127.0.0.1:52804] opened
+2026/07/20 00:51:37 INF [RTSP] [conn 127.0.0.1:52804] closed: EOF
+2026/07/20 00:51:39 INF [RTSP] [conn 127.0.0.1:52816] opened
+2026/07/20 00:51:39 INF [RTSP] [conn 127.0.0.1:52816] closed: EOF
+2026/07/20 00:51:41 INF [RTSP] [conn 127.0.0.1:52818] opened
+2026/07/20 00:51:41 INF [RTSP] [conn 127.0.0.1:52818] closed: EOF
+2026/07/20 00:51:43 INF [RTSP] [conn 127.0.0.1:42788] opened
+2026/07/20 00:51:43 INF [RTSP] [conn 127.0.0.1:42788] closed: EOF
+2026/07/20 00:51:45 INF [RTSP] [conn 127.0.0.1:42794] opened
+2026/07/20 00:51:45 INF [RTSP] [conn 127.0.0.1:42794] closed: EOF
+2026/07/20 00:51:47 INF [RTSP] [conn 127.0.0.1:42798] opened
+2026/07/20 00:51:47 INF [RTSP] [conn 127.0.0.1:42798] closed: EOF
+2026/07/20 00:51:49 INF [RTSP] [conn 127.0.0.1:42810] opened
+2026/07/20 00:51:49 INF [RTSP] [conn 127.0.0.1:42810] closed: EOF
+2026/07/20 00:51:51 INF [RTSP] [conn 127.0.0.1:42822] opened
+2026/07/20 00:51:51 INF [RTSP] [conn 127.0.0.1:42822] closed: EOF
+2026/07/20 00:51:53 INF [RTSP] [conn 127.0.0.1:58352] opened
+2026/07/20 00:51:53 INF [RTSP] [conn 127.0.0.1:58352] closed: EOF
+2026/07/20 00:51:55 INF [RTSP] [conn 127.0.0.1:58356] opened
+2026/07/20 00:51:55 INF [RTSP] [conn 127.0.0.1:58356] closed: EOF
+2026/07/20 00:51:57 INF [RTSP] [conn 127.0.0.1:58358] opened
+2026/07/20 00:51:57 INF [RTSP] [conn 127.0.0.1:58358] closed: EOF
+2026/07/20 00:51:59 INF [RTSP] [conn 127.0.0.1:58370] opened
+2026/07/20 00:51:59 INF [RTSP] [conn 127.0.0.1:58370] closed: EOF
+2026/07/20 00:52:01 INF [RTSP] [conn 127.0.0.1:58376] opened
+2026/07/20 00:52:01 INF [RTSP] [conn 127.0.0.1:58376] closed: EOF
+2026/07/20 00:52:03 INF [RTSP] [conn 127.0.0.1:54514] opened
+2026/07/20 00:52:03 INF [RTSP] [conn 127.0.0.1:54514] closed: EOF
+2026/07/20 00:52:05 INF [RTSP] [conn 127.0.0.1:54520] opened
+2026/07/20 00:52:05 INF [RTSP] [conn 127.0.0.1:54520] closed: EOF
+2026/07/20 00:52:07 INF [RTSP] [conn 127.0.0.1:54524] opened
+2026/07/20 00:52:07 INF [RTSP] [conn 127.0.0.1:54524] closed: EOF
+2026/07/20 00:52:09 INF [RTSP] [conn 127.0.0.1:54526] opened
+2026/07/20 00:52:09 INF [RTSP] [conn 127.0.0.1:54526] closed: EOF
+2026/07/20 00:52:11 INF [RTSP] [conn 127.0.0.1:54540] opened
+2026/07/20 00:52:11 INF [RTSP] [conn 127.0.0.1:54540] closed: EOF
+2026/07/20 00:52:13 INF [RTSP] [conn 127.0.0.1:35170] opened
+2026/07/20 00:52:13 INF [RTSP] [conn 127.0.0.1:35170] closed: EOF
+2026/07/20 00:52:15 INF [RTSP] [conn 127.0.0.1:35174] opened
+2026/07/20 00:52:15 INF [RTSP] [conn 127.0.0.1:35174] closed: EOF
+2026/07/20 00:52:17 INF [RTSP] [conn 127.0.0.1:35188] opened
+2026/07/20 00:52:17 INF [RTSP] [conn 127.0.0.1:35188] closed: EOF
+2026/07/20 00:52:19 INF [RTSP] [conn 127.0.0.1:35194] opened
+2026/07/20 00:52:19 INF [RTSP] [conn 127.0.0.1:35194] closed: EOF
+2026/07/20 00:52:21 INF [RTSP] [conn 127.0.0.1:35208] opened
+2026/07/20 00:52:21 INF [RTSP] [conn 127.0.0.1:35208] closed: EOF
+2026/07/20 00:52:21 INF [RTSP] [conn 192.168.137.1:52168] opened
+2026/07/20 00:52:21 INF [RTSP] [conn 192.168.137.1:52170] opened
+2026/07/20 00:52:21 INF [RTSP] [session f75c8615] created by 192.168.137.1:52168
+2026/07/20 00:52:21 INF [RTSP] [session f75c8615] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:52:21 INF [RTSP] [session a0995e8d] created by 192.168.137.1:52170
+2026/07/20 00:52:21 INF [RTSP] [session a0995e8d] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:52:23 INF [RTSP] [conn 127.0.0.1:58608] opened
+2026/07/20 00:52:23 INF [RTSP] [conn 127.0.0.1:58608] closed: EOF
+2026/07/20 00:52:23 INF [RTSP] [session a0995e8d] destroyed: torn down by 192.168.137.1:52170
+2026/07/20 00:52:23 INF [RTSP] [conn 192.168.137.1:52170] closed: EOF
+2026/07/20 00:52:23 INF [RTSP] [conn 192.168.137.1:59150] opened
+2026/07/20 00:52:23 INF [RTSP] [session c6acb3e3] created by 192.168.137.1:59150
+2026/07/20 00:52:23 INF [RTSP] [session c6acb3e3] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:52:25 INF [RTSP] [conn 127.0.0.1:58614] opened
+2026/07/20 00:52:25 INF [RTSP] [conn 127.0.0.1:58614] closed: EOF
+2026/07/20 00:52:27 INF [RTSP] [conn 127.0.0.1:58628] opened
+2026/07/20 00:52:27 INF [RTSP] [conn 127.0.0.1:58628] closed: EOF
+2026/07/20 00:52:29 INF [RTSP] [conn 127.0.0.1:58640] opened
+2026/07/20 00:52:29 INF [RTSP] [conn 127.0.0.1:58640] closed: EOF
+2026/07/20 00:52:31 INF [RTSP] [conn 127.0.0.1:58652] opened
+2026/07/20 00:52:31 INF [RTSP] [conn 127.0.0.1:58652] closed: EOF
+2026/07/20 00:52:33 INF [RTSP] [conn 127.0.0.1:45382] opened
+2026/07/20 00:52:33 INF [RTSP] [conn 127.0.0.1:45382] closed: EOF
+2026/07/20 00:52:35 INF [RTSP] [conn 127.0.0.1:45384] opened
+2026/07/20 00:52:35 INF [RTSP] [conn 127.0.0.1:45384] closed: EOF
+2026/07/20 00:52:37 INF [RTSP] [conn 127.0.0.1:45400] opened
+2026/07/20 00:52:37 INF [RTSP] [conn 127.0.0.1:45400] closed: EOF
+2026/07/20 00:52:39 INF [RTSP] [conn 127.0.0.1:45412] opened
+2026/07/20 00:52:39 INF [RTSP] [conn 127.0.0.1:45412] closed: EOF
+2026/07/20 00:52:41 INF [RTSP] [conn 127.0.0.1:45418] opened
+2026/07/20 00:52:41 INF [RTSP] [conn 127.0.0.1:45418] closed: EOF
+2026/07/20 00:52:43 INF [RTSP] [conn 127.0.0.1:43738] opened
+2026/07/20 00:52:43 INF [RTSP] [conn 127.0.0.1:43738] closed: EOF
+2026/07/20 00:52:45 INF [RTSP] [conn 127.0.0.1:43750] opened
+2026/07/20 00:52:45 INF [RTSP] [conn 127.0.0.1:43750] closed: EOF
+2026/07/20 00:52:47 INF [RTSP] [conn 127.0.0.1:43758] opened
+2026/07/20 00:52:47 INF [RTSP] [conn 127.0.0.1:43758] closed: EOF
+2026/07/20 00:52:49 INF [RTSP] [conn 127.0.0.1:43774] opened
+2026/07/20 00:52:49 INF [RTSP] [conn 127.0.0.1:43774] closed: EOF
+2026/07/20 00:52:51 INF [RTSP] [conn 127.0.0.1:43788] opened
+2026/07/20 00:52:51 INF [RTSP] [conn 127.0.0.1:43788] closed: EOF
+2026/07/20 00:52:53 INF [RTSP] [conn 127.0.0.1:33010] opened
+2026/07/20 00:52:53 INF [RTSP] [conn 127.0.0.1:33010] closed: EOF
+2026/07/20 00:52:55 INF [RTSP] [conn 127.0.0.1:33026] opened
+2026/07/20 00:52:55 INF [RTSP] [conn 127.0.0.1:33026] closed: EOF
+2026/07/20 00:52:57 INF [RTSP] [conn 127.0.0.1:33028] opened
+2026/07/20 00:52:57 INF [RTSP] [conn 127.0.0.1:33028] closed: EOF
+2026/07/20 00:52:59 INF [RTSP] [conn 127.0.0.1:33044] opened
+2026/07/20 00:52:59 INF [RTSP] [conn 127.0.0.1:33044] closed: EOF
+2026/07/20 00:53:01 INF [RTSP] [conn 127.0.0.1:33052] opened
+2026/07/20 00:53:01 INF [RTSP] [conn 127.0.0.1:33052] closed: EOF
+2026/07/20 00:53:03 INF [RTSP] [conn 127.0.0.1:37988] opened
+2026/07/20 00:53:03 INF [RTSP] [conn 127.0.0.1:37988] closed: EOF
+2026/07/20 00:53:05 INF [RTSP] [conn 127.0.0.1:37994] opened
+2026/07/20 00:53:05 INF [RTSP] [conn 127.0.0.1:37994] closed: EOF
+2026/07/20 00:53:07 INF [RTSP] [conn 127.0.0.1:38006] opened
+2026/07/20 00:53:07 INF [RTSP] [conn 127.0.0.1:38006] closed: EOF
+2026/07/20 00:53:09 INF [RTSP] [conn 127.0.0.1:38016] opened
+2026/07/20 00:53:09 INF [RTSP] [conn 127.0.0.1:38016] closed: EOF
+2026/07/20 00:53:11 INF [RTSP] [conn 127.0.0.1:38032] opened
+2026/07/20 00:53:11 INF [RTSP] [conn 127.0.0.1:38032] closed: EOF
+2026/07/20 00:53:13 INF [RTSP] [conn 127.0.0.1:33240] opened
+2026/07/20 00:53:13 INF [RTSP] [conn 127.0.0.1:33240] closed: EOF
+2026/07/20 00:53:15 INF [RTSP] [conn 127.0.0.1:33244] opened
+2026/07/20 00:53:15 INF [RTSP] [conn 127.0.0.1:33244] closed: EOF
+2026/07/20 00:53:17 INF [RTSP] [conn 127.0.0.1:33250] opened
+2026/07/20 00:53:17 INF [RTSP] [conn 127.0.0.1:33250] closed: EOF
+2026/07/20 00:53:19 INF [RTSP] [conn 127.0.0.1:33252] opened
+2026/07/20 00:53:19 INF [RTSP] [conn 127.0.0.1:33252] closed: EOF
+2026/07/20 00:53:21 INF [RTSP] [conn 127.0.0.1:33264] opened
+2026/07/20 00:53:21 INF [RTSP] [conn 127.0.0.1:33264] closed: EOF
+2026/07/20 00:53:23 INF [RTSP] [conn 127.0.0.1:34256] opened
+2026/07/20 00:53:23 INF [RTSP] [conn 127.0.0.1:34256] closed: EOF
+2026/07/20 00:53:25 INF [RTSP] [conn 127.0.0.1:34262] opened
+2026/07/20 00:53:25 INF [RTSP] [conn 127.0.0.1:34262] closed: EOF
+2026/07/20 00:53:27 INF [RTSP] [conn 127.0.0.1:34266] opened
+2026/07/20 00:53:27 INF [RTSP] [conn 127.0.0.1:34266] closed: EOF
+2026/07/20 00:53:29 INF [RTSP] [conn 127.0.0.1:34274] opened
+2026/07/20 00:53:29 INF [RTSP] [conn 127.0.0.1:34274] closed: EOF
+2026/07/20 00:53:31 INF [RTSP] [conn 127.0.0.1:34286] opened
+2026/07/20 00:53:31 INF [RTSP] [conn 127.0.0.1:34286] closed: EOF
+2026/07/20 00:53:33 INF [RTSP] [conn 127.0.0.1:45272] opened
+2026/07/20 00:53:33 INF [RTSP] [conn 127.0.0.1:45272] closed: EOF
+2026/07/20 00:53:35 INF [RTSP] [conn 127.0.0.1:45280] opened
+2026/07/20 00:53:35 INF [RTSP] [conn 127.0.0.1:45280] closed: EOF
+2026/07/20 00:53:37 INF [RTSP] [conn 127.0.0.1:45284] opened
+2026/07/20 00:53:37 INF [RTSP] [conn 127.0.0.1:45284] closed: EOF
+2026/07/20 00:53:39 INF [RTSP] [conn 127.0.0.1:45288] opened
+2026/07/20 00:53:39 INF [RTSP] [conn 127.0.0.1:45288] closed: EOF
+2026/07/20 00:53:41 INF [RTSP] [conn 127.0.0.1:45290] opened
+2026/07/20 00:53:41 INF [RTSP] [conn 127.0.0.1:45290] closed: EOF
+2026/07/20 00:53:43 INF [RTSP] [conn 127.0.0.1:57980] opened
+2026/07/20 00:53:43 INF [RTSP] [conn 127.0.0.1:57980] closed: EOF
+2026/07/20 00:53:45 INF [RTSP] [conn 127.0.0.1:57984] opened
+2026/07/20 00:53:45 INF [RTSP] [conn 127.0.0.1:57984] closed: EOF
+2026/07/20 00:53:47 INF [RTSP] [conn 127.0.0.1:57992] opened
+2026/07/20 00:53:47 INF [RTSP] [conn 127.0.0.1:57992] closed: EOF
+2026/07/20 00:53:49 INF [RTSP] [conn 127.0.0.1:57996] opened
+2026/07/20 00:53:49 INF [RTSP] [conn 127.0.0.1:57996] closed: EOF
+2026/07/20 00:53:51 INF [RTSP] [conn 127.0.0.1:58002] opened
+2026/07/20 00:53:51 INF [RTSP] [conn 127.0.0.1:58002] closed: EOF
+2026/07/20 00:53:53 INF [RTSP] [conn 127.0.0.1:59444] opened
+2026/07/20 00:53:53 INF [RTSP] [conn 127.0.0.1:59444] closed: EOF
+2026/07/20 00:53:55 INF [RTSP] [conn 127.0.0.1:59450] opened
+2026/07/20 00:53:55 INF [RTSP] [conn 127.0.0.1:59450] closed: EOF
+2026/07/20 00:53:57 INF [RTSP] [conn 127.0.0.1:59458] opened
+2026/07/20 00:53:57 INF [RTSP] [conn 127.0.0.1:59458] closed: EOF
+2026/07/20 00:53:59 INF [RTSP] [conn 127.0.0.1:59468] opened
+2026/07/20 00:53:59 INF [RTSP] [conn 127.0.0.1:59468] closed: EOF
+2026/07/20 00:54:01 INF [RTSP] [conn 127.0.0.1:59476] opened
+2026/07/20 00:54:01 INF [RTSP] [conn 127.0.0.1:59476] closed: EOF
+2026/07/20 00:54:03 INF [RTSP] [conn 127.0.0.1:59502] opened
+2026/07/20 00:54:03 INF [RTSP] [conn 127.0.0.1:59502] closed: EOF
+2026/07/20 00:54:05 INF [RTSP] [conn 127.0.0.1:59508] opened
+2026/07/20 00:54:05 INF [RTSP] [conn 127.0.0.1:59508] closed: EOF
+2026/07/20 00:54:07 INF [RTSP] [conn 127.0.0.1:59512] opened
+2026/07/20 00:54:07 INF [RTSP] [conn 127.0.0.1:59512] closed: EOF
+2026/07/20 00:54:09 INF [RTSP] [conn 127.0.0.1:59518] opened
+2026/07/20 00:54:09 INF [RTSP] [conn 127.0.0.1:59518] closed: EOF
+2026/07/20 00:54:11 INF [RTSP] [conn 127.0.0.1:59534] opened
+2026/07/20 00:54:11 INF [RTSP] [conn 127.0.0.1:59534] closed: EOF
+2026/07/20 00:54:13 INF [RTSP] [conn 127.0.0.1:41000] opened
+2026/07/20 00:54:13 INF [RTSP] [conn 127.0.0.1:41000] closed: EOF
+2026/07/20 00:54:15 INF [RTSP] [conn 127.0.0.1:41002] opened
+2026/07/20 00:54:15 INF [RTSP] [conn 127.0.0.1:41002] closed: EOF
+2026/07/20 00:54:17 INF [RTSP] [conn 127.0.0.1:41010] opened
+2026/07/20 00:54:17 INF [RTSP] [conn 127.0.0.1:41010] closed: EOF
+2026/07/20 00:54:19 INF [RTSP] [conn 127.0.0.1:41024] opened
+2026/07/20 00:54:19 INF [RTSP] [conn 127.0.0.1:41024] closed: EOF
+2026/07/20 00:54:21 INF [RTSP] [conn 127.0.0.1:41036] opened
+2026/07/20 00:54:21 INF [RTSP] [conn 127.0.0.1:41036] closed: EOF
+2026/07/20 00:54:23 INF [RTSP] [conn 127.0.0.1:43908] opened
+2026/07/20 00:54:23 INF [RTSP] [conn 127.0.0.1:43908] closed: EOF
+2026/07/20 00:54:25 INF [RTSP] [conn 127.0.0.1:43922] opened
+2026/07/20 00:54:25 INF [RTSP] [conn 127.0.0.1:43922] closed: EOF
+2026/07/20 00:54:27 INF [RTSP] [conn 127.0.0.1:43924] opened
+2026/07/20 00:54:27 INF [RTSP] [conn 127.0.0.1:43924] closed: EOF
+2026/07/20 00:54:29 INF [RTSP] [conn 127.0.0.1:43928] opened
+2026/07/20 00:54:29 INF [RTSP] [conn 127.0.0.1:43928] closed: EOF
+2026/07/20 00:54:31 INF [RTSP] [conn 127.0.0.1:43944] opened
+2026/07/20 00:54:31 INF [RTSP] [conn 127.0.0.1:43944] closed: EOF
+2026/07/20 00:54:33 INF [RTSP] [conn 127.0.0.1:52686] opened
+2026/07/20 00:54:33 INF [RTSP] [conn 127.0.0.1:52686] closed: EOF
+2026/07/20 00:54:34 WAR [RTSP] [session f75c8615] reader is too slow, discarding 4 frames
+2026/07/20 00:54:35 INF [RTSP] [conn 127.0.0.1:52700] opened
+2026/07/20 00:54:35 INF [RTSP] [conn 127.0.0.1:52700] closed: EOF
+2026/07/20 00:54:37 INF [RTSP] [conn 127.0.0.1:52714] opened
+2026/07/20 00:54:37 INF [RTSP] [conn 127.0.0.1:52714] closed: EOF
+2026/07/20 00:54:38 WAR [RTSP] [session f75c8615] reader is too slow, discarding 31 frames
+2026/07/20 00:54:39 INF [RTSP] [conn 127.0.0.1:52716] opened
+2026/07/20 00:54:39 INF [RTSP] [conn 127.0.0.1:52716] closed: EOF
+2026/07/20 00:54:41 INF [RTSP] [conn 127.0.0.1:52730] opened
+2026/07/20 00:54:41 INF [RTSP] [conn 127.0.0.1:52730] closed: EOF
+2026/07/20 00:54:42 WAR [RTSP] [session f75c8615] reader is too slow, discarding 17 frames
+2026/07/20 00:54:43 INF [RTSP] [conn 127.0.0.1:33446] opened
+2026/07/20 00:54:43 INF [RTSP] [conn 127.0.0.1:33446] closed: EOF
+2026/07/20 00:54:45 INF [RTSP] [conn 127.0.0.1:33448] opened
+2026/07/20 00:54:45 INF [RTSP] [conn 127.0.0.1:33448] closed: EOF
+2026/07/20 00:54:46 WAR [RTSP] [session f75c8615] reader is too slow, discarding 33 frames
+2026/07/20 00:54:47 INF [RTSP] [conn 127.0.0.1:33464] opened
+2026/07/20 00:54:47 INF [RTSP] [conn 127.0.0.1:33464] closed: EOF
+2026/07/20 00:54:49 INF [RTSP] [conn 127.0.0.1:33466] opened
+2026/07/20 00:54:49 INF [RTSP] [conn 127.0.0.1:33466] closed: EOF
+2026/07/20 00:54:49 WAR [RTSP] [session f75c8615] reader is too slow, discarding 18 frames
+2026/07/20 00:54:51 INF [RTSP] [conn 127.0.0.1:33468] opened
+2026/07/20 00:54:51 INF [RTSP] [conn 127.0.0.1:33468] closed: EOF
+2026/07/20 00:54:51 WAR [RTSP] [session f75c8615] reader is too slow, discarding 4 frames
+2026/07/20 00:54:52 WAR [RTSP] [session f75c8615] reader is too slow, discarding 12 frames
+2026/07/20 00:54:53 INF [RTSP] [conn 127.0.0.1:34810] opened
+2026/07/20 00:54:53 INF [RTSP] [conn 127.0.0.1:34810] closed: EOF
+2026/07/20 00:54:55 INF [RTSP] [conn 127.0.0.1:34814] opened
+2026/07/20 00:54:55 INF [RTSP] [conn 127.0.0.1:34814] closed: EOF
+2026/07/20 00:54:55 WAR [RTSP] [session f75c8615] reader is too slow, discarding 18 frames
+2026/07/20 00:54:57 INF [RTSP] [conn 127.0.0.1:34828] opened
+2026/07/20 00:54:57 INF [RTSP] [conn 127.0.0.1:34828] closed: EOF
+2026/07/20 00:54:59 INF [RTSP] [conn 127.0.0.1:34830] opened
+2026/07/20 00:54:59 INF [RTSP] [conn 127.0.0.1:34830] closed: EOF
+2026/07/20 00:54:59 WAR [RTSP] [session f75c8615] reader is too slow, discarding 45 frames
+2026/07/20 00:55:01 INF [RTSP] [conn 127.0.0.1:34836] opened
+2026/07/20 00:55:01 INF [RTSP] [conn 127.0.0.1:34836] closed: EOF
+2026/07/20 00:55:03 INF [RTSP] [conn 127.0.0.1:40152] opened
+2026/07/20 00:55:03 INF [RTSP] [conn 127.0.0.1:40152] closed: EOF
+2026/07/20 00:55:03 WAR [RTSP] [session f75c8615] reader is too slow, discarding 11 frames
+2026/07/20 00:55:05 INF [RTSP] [conn 127.0.0.1:40162] opened
+2026/07/20 00:55:05 INF [RTSP] [conn 127.0.0.1:40162] closed: EOF
+2026/07/20 00:55:06 WAR [RTSP] [session f75c8615] reader is too slow, discarding 9 frames
+2026/07/20 00:55:07 INF [RTSP] [conn 127.0.0.1:40172] opened
+2026/07/20 00:55:07 INF [RTSP] [conn 127.0.0.1:40172] closed: EOF
+2026/07/20 00:55:07 WAR [RTSP] [session f75c8615] reader is too slow, discarding 20 frames
+2026/07/20 00:55:08 WAR [RTSP] [session f75c8615] reader is too slow, discarding 35 frames
+2026/07/20 00:55:09 INF [RTSP] [conn 127.0.0.1:40188] opened
+2026/07/20 00:55:09 INF [RTSP] [conn 127.0.0.1:40188] closed: EOF
+2026/07/20 00:55:09 WAR [RTSP] [session f75c8615] reader is too slow, discarding 15 frames
+2026/07/20 00:55:10 WAR [RTSP] [session f75c8615] reader is too slow, discarding 12 frames
+2026/07/20 00:55:11 INF [RTSP] [conn 127.0.0.1:40192] opened
+2026/07/20 00:55:11 INF [RTSP] [conn 127.0.0.1:40192] closed: EOF
+2026/07/20 00:55:12 WAR [RTSP] [session f75c8615] reader is too slow, discarding 47 frames
+2026/07/20 00:55:13 INF [RTSP] [conn 127.0.0.1:58898] opened
+2026/07/20 00:55:13 INF [RTSP] [conn 127.0.0.1:58898] closed: EOF
+2026/07/20 00:55:14 WAR [RTSP] [session f75c8615] reader is too slow, discarding 44 frames
+2026/07/20 00:55:15 INF [RTSP] [conn 127.0.0.1:58906] opened
+2026/07/20 00:55:15 INF [RTSP] [conn 127.0.0.1:58906] closed: EOF
+2026/07/20 00:55:17 INF [RTSP] [conn 127.0.0.1:58916] opened
+2026/07/20 00:55:17 INF [RTSP] [conn 127.0.0.1:58916] closed: EOF
+2026/07/20 00:55:19 INF [RTSP] [conn 127.0.0.1:58922] opened
+2026/07/20 00:55:19 INF [RTSP] [conn 127.0.0.1:58922] closed: EOF
+2026/07/20 00:55:21 INF [RTSP] [conn 127.0.0.1:58926] opened
+2026/07/20 00:55:21 INF [RTSP] [conn 127.0.0.1:58926] closed: EOF
+2026/07/20 00:55:22 WAR [RTSP] [session f75c8615] reader is too slow, discarding 43 frames
+2026/07/20 00:55:23 INF [RTSP] [conn 127.0.0.1:39500] opened
+2026/07/20 00:55:23 INF [RTSP] [conn 127.0.0.1:39500] closed: EOF
+2026/07/20 00:55:24 WAR [RTSP] [session f75c8615] reader is too slow, discarding 16 frames
+2026/07/20 00:55:25 INF [RTSP] [conn 127.0.0.1:39508] opened
+2026/07/20 00:55:25 INF [RTSP] [conn 127.0.0.1:39508] closed: EOF
+2026/07/20 00:55:26 WAR [RTSP] [session f75c8615] reader is too slow, discarding 22 frames
+2026/07/20 00:55:27 INF [RTSP] [conn 127.0.0.1:39520] opened
+2026/07/20 00:55:27 INF [RTSP] [conn 127.0.0.1:39520] closed: EOF
+2026/07/20 00:55:28 WAR [RTSP] [session f75c8615] reader is too slow, discarding 18 frames
+2026/07/20 00:55:29 INF [RTSP] [conn 127.0.0.1:39532] opened
+2026/07/20 00:55:29 INF [RTSP] [conn 127.0.0.1:39532] closed: EOF
+2026/07/20 00:55:30 WAR [RTSP] [session f75c8615] reader is too slow, discarding 59 frames
+2026/07/20 00:55:31 INF [RTSP] [conn 127.0.0.1:39540] opened
+2026/07/20 00:55:31 INF [RTSP] [conn 127.0.0.1:39540] closed: EOF
+2026/07/20 00:55:32 WAR [RTSP] [session f75c8615] reader is too slow, discarding 3 frames
+2026/07/20 00:55:33 INF [RTSP] [conn 127.0.0.1:35184] opened
+2026/07/20 00:55:33 INF [RTSP] [conn 127.0.0.1:35184] closed: EOF
+2026/07/20 00:55:34 WAR [RTSP] [session f75c8615] reader is too slow, discarding 14 frames
+2026/07/20 00:55:35 INF [RTSP] [conn 127.0.0.1:35200] opened
+2026/07/20 00:55:35 INF [RTSP] [conn 127.0.0.1:35200] closed: EOF
+2026/07/20 00:55:35 WAR [RTSP] [session f75c8615] reader is too slow, discarding 20 frames
+2026/07/20 00:55:36 WAR [RTSP] [session f75c8615] reader is too slow, discarding 7 frames
+2026/07/20 00:55:37 INF [RTSP] [conn 127.0.0.1:35212] opened
+2026/07/20 00:55:37 INF [RTSP] [conn 127.0.0.1:35212] closed: EOF
+2026/07/20 00:55:37 WAR [RTSP] [session f75c8615] reader is too slow, discarding 27 frames
+2026/07/20 00:55:38 WAR [RTSP] [session f75c8615] reader is too slow, discarding 4 frames
+2026/07/20 00:55:39 INF [RTSP] [conn 127.0.0.1:35214] opened
+2026/07/20 00:55:39 INF [RTSP] [conn 127.0.0.1:35214] closed: EOF
+2026/07/20 00:55:39 WAR [RTSP] [session f75c8615] reader is too slow, discarding 70 frames
+2026/07/20 00:55:41 INF [RTSP] [conn 127.0.0.1:35222] opened
+2026/07/20 00:55:41 INF [RTSP] [conn 127.0.0.1:35222] closed: EOF
+2026/07/20 00:55:43 INF [RTSP] [conn 127.0.0.1:39714] opened
+2026/07/20 00:55:43 INF [RTSP] [conn 127.0.0.1:39714] closed: EOF
+2026/07/20 00:55:43 WAR [RTSP] [session f75c8615] reader is too slow, discarding 38 frames
+2026/07/20 00:55:45 INF [RTSP] [conn 127.0.0.1:39716] opened
+2026/07/20 00:55:45 INF [RTSP] [conn 127.0.0.1:39716] closed: EOF
+2026/07/20 00:55:45 WAR [RTSP] [session f75c8615] reader is too slow, discarding 15 frames
+2026/07/20 00:55:46 WAR [RTSP] [session f75c8615] reader is too slow, discarding 6 frames
+2026/07/20 00:55:47 INF [RTSP] [conn 127.0.0.1:39730] opened
+2026/07/20 00:55:47 INF [RTSP] [conn 127.0.0.1:39730] closed: EOF
+2026/07/20 00:55:49 INF [RTSP] [conn 127.0.0.1:39732] opened
+2026/07/20 00:55:49 INF [RTSP] [conn 127.0.0.1:39732] closed: EOF
+2026/07/20 00:55:49 WAR [RTSP] [session f75c8615] reader is too slow, discarding 25 frames
+2026/07/20 00:55:50 WAR [RTSP] [session f75c8615] reader is too slow, discarding 19 frames
+2026/07/20 00:55:51 INF [RTSP] [conn 127.0.0.1:39738] opened
+2026/07/20 00:55:51 INF [RTSP] [conn 127.0.0.1:39738] closed: EOF
+2026/07/20 00:55:51 WAR [RTSP] [session f75c8615] reader is too slow, discarding 17 frames
+2026/07/20 00:55:53 INF [RTSP] [conn 127.0.0.1:36766] opened
+2026/07/20 00:55:53 INF [RTSP] [conn 127.0.0.1:36766] closed: EOF
+2026/07/20 00:55:53 WAR [RTSP] [session f75c8615] reader is too slow, discarding 35 frames
+2026/07/20 00:55:55 INF [RTSP] [conn 127.0.0.1:36768] opened
+2026/07/20 00:55:55 INF [RTSP] [conn 127.0.0.1:36768] closed: EOF
+2026/07/20 00:55:57 INF [RTSP] [conn 127.0.0.1:36778] opened
+2026/07/20 00:55:57 INF [RTSP] [conn 127.0.0.1:36778] closed: EOF
+2026/07/20 00:55:57 WAR [RTSP] [session f75c8615] reader is too slow, discarding 67 frames
+2026/07/20 00:55:59 INF [RTSP] [conn 127.0.0.1:36792] opened
+2026/07/20 00:55:59 INF [RTSP] [conn 127.0.0.1:36792] closed: EOF
+2026/07/20 00:56:01 INF [RTSP] [conn 127.0.0.1:36794] opened
+2026/07/20 00:56:01 INF [RTSP] [conn 127.0.0.1:36794] closed: EOF
+2026/07/20 00:56:01 WAR [RTSP] [session f75c8615] reader is too slow, discarding 2 frames
+2026/07/20 00:56:03 INF [RTSP] [conn 127.0.0.1:45830] opened
+2026/07/20 00:56:03 INF [RTSP] [conn 127.0.0.1:45830] closed: EOF
+2026/07/20 00:56:03 WAR [RTSP] [session f75c8615] reader is too slow, discarding 6 frames
+2026/07/20 00:56:04 WAR [RTSP] [session f75c8615] reader is too slow, discarding 75 frames
+2026/07/20 00:56:05 INF [RTSP] [conn 127.0.0.1:45838] opened
+2026/07/20 00:56:05 INF [RTSP] [conn 127.0.0.1:45838] closed: EOF
+2026/07/20 00:56:07 INF [RTSP] [conn 127.0.0.1:45854] opened
+2026/07/20 00:56:07 INF [RTSP] [conn 127.0.0.1:45854] closed: EOF
+2026/07/20 00:56:08 WAR [RTSP] [session f75c8615] reader is too slow, discarding 19 frames
+2026/07/20 00:56:09 INF [RTSP] [conn 127.0.0.1:45862] opened
+2026/07/20 00:56:09 INF [RTSP] [conn 127.0.0.1:45862] closed: EOF
+2026/07/20 00:56:09 WAR [RTSP] [session f75c8615] reader is too slow, discarding 13 frames
+2026/07/20 00:56:11 INF [RTSP] [conn 127.0.0.1:45874] opened
+2026/07/20 00:56:11 INF [RTSP] [conn 127.0.0.1:45874] closed: EOF
+2026/07/20 00:56:12 WAR [RTSP] [session f75c8615] reader is too slow, discarding 22 frames
+2026/07/20 00:56:13 INF [RTSP] [conn 127.0.0.1:52232] opened
+2026/07/20 00:56:13 INF [RTSP] [conn 127.0.0.1:52232] closed: EOF
+2026/07/20 00:56:15 INF [RTSP] [conn 127.0.0.1:52242] opened
+2026/07/20 00:56:15 INF [RTSP] [conn 127.0.0.1:52242] closed: EOF
+2026/07/20 00:56:15 WAR [RTSP] [session f75c8615] reader is too slow, discarding 23 frames
+2026/07/20 00:56:17 INF [RTSP] [conn 127.0.0.1:52250] opened
+2026/07/20 00:56:17 INF [RTSP] [conn 127.0.0.1:52250] closed: EOF
+2026/07/20 00:56:17 WAR [RTSP] [session f75c8615] reader is too slow, discarding 1 frame
+2026/07/20 00:56:19 INF [RTSP] [conn 127.0.0.1:52254] opened
+2026/07/20 00:56:19 INF [RTSP] [conn 127.0.0.1:52254] closed: EOF
+2026/07/20 00:56:19 WAR [RTSP] [session f75c8615] reader is too slow, discarding 64 frames
+2026/07/20 00:56:21 INF [RTSP] [conn 127.0.0.1:52266] opened
+2026/07/20 00:56:21 INF [RTSP] [conn 127.0.0.1:52266] closed: EOF
+2026/07/20 00:56:23 INF [RTSP] [conn 127.0.0.1:45150] opened
+2026/07/20 00:56:23 INF [RTSP] [conn 127.0.0.1:45150] closed: EOF
+2026/07/20 00:56:23 WAR [RTSP] [session f75c8615] reader is too slow, discarding 1 frame
+2026/07/20 00:56:25 INF [RTSP] [conn 127.0.0.1:45158] opened
+2026/07/20 00:56:25 INF [RTSP] [conn 127.0.0.1:45158] closed: EOF
+2026/07/20 00:56:26 WAR [RTSP] [session f75c8615] reader is too slow, discarding 11 frames
+2026/07/20 00:56:27 INF [RTSP] [conn 127.0.0.1:45166] opened
+2026/07/20 00:56:27 INF [RTSP] [conn 127.0.0.1:45166] closed: EOF
+2026/07/20 00:56:27 WAR [RTSP] [session f75c8615] reader is too slow, discarding 44 frames
+2026/07/20 00:56:29 INF [RTSP] [conn 127.0.0.1:45174] opened
+2026/07/20 00:56:29 INF [RTSP] [conn 127.0.0.1:45174] closed: EOF
+2026/07/20 00:56:30 WAR [RTSP] [session f75c8615] reader is too slow, discarding 32 frames
+2026/07/20 00:56:31 INF [RTSP] [conn 127.0.0.1:45182] opened
+2026/07/20 00:56:31 INF [RTSP] [conn 127.0.0.1:45182] closed: EOF
+2026/07/20 00:56:33 INF [RTSP] [conn 127.0.0.1:43600] opened
+2026/07/20 00:56:33 INF [RTSP] [conn 127.0.0.1:43600] closed: EOF
+2026/07/20 00:56:35 INF [RTSP] [conn 127.0.0.1:43608] opened
+2026/07/20 00:56:35 INF [RTSP] [conn 127.0.0.1:43608] closed: EOF
+2026/07/20 00:56:35 WAR [RTSP] [session f75c8615] reader is too slow, discarding 32 frames
+2026/07/20 00:56:36 WAR [RTSP] [session f75c8615] reader is too slow, discarding 17 frames
+2026/07/20 00:56:37 INF [RTSP] [conn 127.0.0.1:43610] opened
+2026/07/20 00:56:37 INF [RTSP] [conn 127.0.0.1:43610] closed: EOF
+2026/07/20 00:56:37 WAR [RTSP] [session f75c8615] reader is too slow, discarding 13 frames
+2026/07/20 00:56:39 INF [RTSP] [conn 127.0.0.1:43626] opened
+2026/07/20 00:56:39 INF [RTSP] [conn 127.0.0.1:43626] closed: EOF
+2026/07/20 00:56:40 WAR [RTSP] [session f75c8615] reader is too slow, discarding 37 frames
+2026/07/20 00:56:41 INF [RTSP] [conn 127.0.0.1:43632] opened
+2026/07/20 00:56:41 INF [RTSP] [conn 127.0.0.1:43632] closed: EOF
+2026/07/20 00:56:41 WAR [RTSP] [session f75c8615] reader is too slow, discarding 25 frames
+2026/07/20 00:56:43 INF [RTSP] [conn 127.0.0.1:39648] opened
+2026/07/20 00:56:43 INF [RTSP] [conn 127.0.0.1:39648] closed: EOF
+2026/07/20 00:56:43 WAR [RTSP] [session f75c8615] reader is too slow, discarding 18 frames
+2026/07/20 00:56:45 INF [RTSP] [conn 127.0.0.1:39650] opened
+2026/07/20 00:56:45 INF [RTSP] [conn 127.0.0.1:39650] closed: EOF
+2026/07/20 00:56:47 INF [RTSP] [conn 127.0.0.1:39666] opened
+2026/07/20 00:56:47 INF [RTSP] [conn 127.0.0.1:39666] closed: EOF
+2026/07/20 00:56:49 INF [RTSP] [conn 127.0.0.1:39678] opened
+2026/07/20 00:56:49 INF [RTSP] [conn 127.0.0.1:39678] closed: EOF
+2026/07/20 00:56:49 WAR [RTSP] [session f75c8615] reader is too slow, discarding 27 frames
+2026/07/20 00:56:50 WAR [RTSP] [session f75c8615] reader is too slow, discarding 4 frames
+2026/07/20 00:56:51 INF [RTSP] [conn 127.0.0.1:39692] opened
+2026/07/20 00:56:51 INF [RTSP] [conn 127.0.0.1:39692] closed: EOF
+2026/07/20 00:56:51 WAR [RTSP] [session f75c8615] reader is too slow, discarding 42 frames
+2026/07/20 00:56:53 INF [RTSP] [conn 127.0.0.1:40294] opened
+2026/07/20 00:56:53 INF [RTSP] [conn 127.0.0.1:40294] closed: EOF
+2026/07/20 00:56:53 WAR [RTSP] [session f75c8615] reader is too slow, discarding 28 frames
+2026/07/20 00:56:55 INF [RTSP] [conn 127.0.0.1:40302] opened
+2026/07/20 00:56:55 INF [RTSP] [conn 127.0.0.1:40302] closed: EOF
+2026/07/20 00:56:55 WAR [RTSP] [session f75c8615] reader is too slow, discarding 14 frames
+2026/07/20 00:56:57 INF [RTSP] [conn 127.0.0.1:40312] opened
+2026/07/20 00:56:57 INF [RTSP] [conn 127.0.0.1:40312] closed: EOF
+2026/07/20 00:56:57 WAR [RTSP] [session f75c8615] reader is too slow, discarding 14 frames
+2026/07/20 00:56:58 WAR [RTSP] [session f75c8615] reader is too slow, discarding 1 frame
+2026/07/20 00:56:59 INF [RTSP] [conn 127.0.0.1:40326] opened
+2026/07/20 00:56:59 INF [RTSP] [conn 127.0.0.1:40326] closed: EOF
+2026/07/20 00:56:59 WAR [RTSP] [session f75c8615] reader is too slow, discarding 49 frames
+2026/07/20 00:57:01 INF [RTSP] [conn 127.0.0.1:40330] opened
+2026/07/20 00:57:01 INF [RTSP] [conn 127.0.0.1:40330] closed: EOF
+2026/07/20 00:57:01 WAR [RTSP] [session f75c8615] reader is too slow, discarding 35 frames
+2026/07/20 00:57:02 WAR [RTSP] [session f75c8615] reader is too slow, discarding 47 frames
+2026/07/20 00:57:03 INF [RTSP] [conn 127.0.0.1:54006] opened
+2026/07/20 00:57:03 INF [RTSP] [conn 127.0.0.1:54006] closed: EOF
+2026/07/20 00:57:04 WAR [RTSP] [session f75c8615] reader is too slow, discarding 5 frames
+2026/07/20 00:57:05 INF [RTSP] [conn 127.0.0.1:54022] opened
+2026/07/20 00:57:05 INF [RTSP] [conn 127.0.0.1:54022] closed: EOF
+2026/07/20 00:57:06 WAR [RTSP] [session f75c8615] reader is too slow, discarding 22 frames
+2026/07/20 00:57:07 INF [RTSP] [conn 127.0.0.1:54028] opened
+2026/07/20 00:57:07 INF [RTSP] [conn 127.0.0.1:54028] closed: EOF
+2026/07/20 00:57:09 INF [RTSP] [conn 127.0.0.1:54042] opened
+2026/07/20 00:57:09 INF [RTSP] [conn 127.0.0.1:54042] closed: EOF
+2026/07/20 00:57:11 INF [RTSP] [conn 127.0.0.1:54052] opened
+2026/07/20 00:57:11 INF [RTSP] [conn 127.0.0.1:54052] closed: EOF
+2026/07/20 00:57:12 WAR [RTSP] [session f75c8615] reader is too slow, discarding 19 frames
+2026/07/20 00:57:13 INF [RTSP] [conn 127.0.0.1:46894] opened
+2026/07/20 00:57:13 INF [RTSP] [conn 127.0.0.1:46894] closed: EOF
+2026/07/20 00:57:13 WAR [RTSP] [session f75c8615] reader is too slow, discarding 17 frames
+2026/07/20 00:57:14 WAR [RTSP] [session f75c8615] reader is too slow, discarding 14 frames
+2026/07/20 00:57:15 INF [RTSP] [conn 127.0.0.1:46904] opened
+2026/07/20 00:57:15 INF [RTSP] [conn 127.0.0.1:46904] closed: EOF
+2026/07/20 00:57:15 WAR [RTSP] [session f75c8615] reader is too slow, discarding 8 frames
+2026/07/20 00:57:17 INF [RTSP] [conn 127.0.0.1:46912] opened
+2026/07/20 00:57:17 INF [RTSP] [conn 127.0.0.1:46912] closed: EOF
+2026/07/20 00:57:17 WAR [RTSP] [session f75c8615] reader is too slow, discarding 36 frames
+2026/07/20 00:57:18 WAR [RTSP] [session f75c8615] reader is too slow, discarding 34 frames
+2026/07/20 00:57:19 INF [RTSP] [conn 127.0.0.1:46916] opened
+2026/07/20 00:57:19 INF [RTSP] [conn 127.0.0.1:46916] closed: EOF
+2026/07/20 00:57:21 INF [RTSP] [conn 127.0.0.1:46932] opened
+2026/07/20 00:57:21 INF [RTSP] [conn 127.0.0.1:46932] closed: EOF
+2026/07/20 00:57:23 INF [RTSP] [conn 127.0.0.1:46110] opened
+2026/07/20 00:57:23 INF [RTSP] [conn 127.0.0.1:46110] closed: EOF
+2026/07/20 00:57:24 WAR [RTSP] [session f75c8615] reader is too slow, discarding 31 frames
+2026/07/20 00:57:25 INF [RTSP] [conn 127.0.0.1:46116] opened
+2026/07/20 00:57:25 INF [RTSP] [conn 127.0.0.1:46116] closed: EOF
+2026/07/20 00:57:26 WAR [RTSP] [session f75c8615] reader is too slow, discarding 8 frames
+2026/07/20 00:57:27 INF [RTSP] [conn 127.0.0.1:46118] opened
+2026/07/20 00:57:27 INF [RTSP] [conn 127.0.0.1:46118] closed: EOF
+2026/07/20 00:57:28 WAR [RTSP] [session f75c8615] reader is too slow, discarding 39 frames
+2026/07/20 00:57:29 INF [RTSP] [conn 127.0.0.1:46124] opened
+2026/07/20 00:57:29 INF [RTSP] [conn 127.0.0.1:46124] closed: EOF
+2026/07/20 00:57:31 INF [RTSP] [conn 127.0.0.1:46128] opened
+2026/07/20 00:57:31 INF [RTSP] [conn 127.0.0.1:46128] closed: EOF
+2026/07/20 00:57:31 WAR [RTSP] [session f75c8615] reader is too slow, discarding 35 frames
+2026/07/20 00:57:32 WAR [RTSP] [session f75c8615] reader is too slow, discarding 41 frames
+2026/07/20 00:57:33 INF [RTSP] [conn 127.0.0.1:59834] opened
+2026/07/20 00:57:33 INF [RTSP] [conn 127.0.0.1:59834] closed: EOF
+2026/07/20 00:57:35 INF [RTSP] [conn 127.0.0.1:59848] opened
+2026/07/20 00:57:35 INF [RTSP] [conn 127.0.0.1:59848] closed: EOF
+2026/07/20 00:57:37 INF [RTSP] [conn 127.0.0.1:59856] opened
+2026/07/20 00:57:37 INF [RTSP] [conn 127.0.0.1:59856] closed: EOF
+2026/07/20 00:57:37 WAR [RTSP] [session f75c8615] reader is too slow, discarding 20 frames
+2026/07/20 00:57:39 INF [RTSP] [conn 127.0.0.1:59872] opened
+2026/07/20 00:57:39 INF [RTSP] [conn 127.0.0.1:59872] closed: EOF
+2026/07/20 00:57:39 WAR [RTSP] [session f75c8615] reader is too slow, discarding 46 frames
+2026/07/20 00:57:41 INF [RTSP] [conn 127.0.0.1:59878] opened
+2026/07/20 00:57:41 INF [RTSP] [conn 127.0.0.1:59878] closed: EOF
+2026/07/20 00:57:43 INF [RTSP] [conn 127.0.0.1:58446] opened
+2026/07/20 00:57:43 INF [RTSP] [conn 127.0.0.1:58446] closed: EOF
+2026/07/20 00:57:45 INF [RTSP] [conn 127.0.0.1:58458] opened
+2026/07/20 00:57:45 INF [RTSP] [conn 127.0.0.1:58458] closed: EOF
+2026/07/20 00:57:46 WAR [RTSP] [session f75c8615] reader is too slow, discarding 37 frames
+2026/07/20 00:57:47 INF [RTSP] [conn 127.0.0.1:58468] opened
+2026/07/20 00:57:47 INF [RTSP] [conn 127.0.0.1:58468] closed: EOF
+2026/07/20 00:57:47 WAR [RTSP] [session f75c8615] reader is too slow, discarding 1 frame
+2026/07/20 00:57:49 INF [RTSP] [conn 127.0.0.1:58480] opened
+2026/07/20 00:57:49 INF [RTSP] [conn 127.0.0.1:58480] closed: EOF
+2026/07/20 00:57:50 WAR [RTSP] [session f75c8615] reader is too slow, discarding 5 frames
+2026/07/20 00:57:51 INF [RTSP] [conn 127.0.0.1:58490] opened
+2026/07/20 00:57:51 INF [RTSP] [conn 127.0.0.1:58490] closed: EOF
+2026/07/20 00:57:53 INF [RTSP] [conn 127.0.0.1:37880] opened
+2026/07/20 00:57:53 INF [RTSP] [conn 127.0.0.1:37880] closed: EOF
+2026/07/20 00:57:53 WAR [RTSP] [session f75c8615] reader is too slow, discarding 1 frame
+2026/07/20 00:57:54 WAR [RTSP] [session f75c8615] reader is too slow, discarding 67 frames
+2026/07/20 00:57:55 INF [RTSP] [conn 127.0.0.1:37884] opened
+2026/07/20 00:57:55 INF [RTSP] [conn 127.0.0.1:37884] closed: EOF
+2026/07/20 00:57:57 INF [RTSP] [conn 127.0.0.1:37900] opened
+2026/07/20 00:57:57 INF [RTSP] [conn 127.0.0.1:37900] closed: EOF
+2026/07/20 00:57:59 INF [RTSP] [conn 127.0.0.1:37912] opened
+2026/07/20 00:57:59 INF [RTSP] [conn 127.0.0.1:37912] closed: EOF
+2026/07/20 00:58:01 INF [RTSP] [conn 127.0.0.1:37924] opened
+2026/07/20 00:58:01 INF [RTSP] [conn 127.0.0.1:37924] closed: EOF
+2026/07/20 00:58:01 WAR [RTSP] [session f75c8615] reader is too slow, discarding 59 frames
+2026/07/20 00:58:03 INF [RTSP] [conn 127.0.0.1:37798] opened
+2026/07/20 00:58:03 INF [RTSP] [conn 127.0.0.1:37798] closed: EOF
+2026/07/20 00:58:04 WAR [RTSP] [session f75c8615] reader is too slow, discarding 5 frames
+2026/07/20 00:58:05 INF [RTSP] [conn 127.0.0.1:37806] opened
+2026/07/20 00:58:05 INF [RTSP] [conn 127.0.0.1:37806] closed: EOF
+2026/07/20 00:58:05 WAR [RTSP] [session f75c8615] reader is too slow, discarding 43 frames
+2026/07/20 00:58:07 INF [RTSP] [conn 127.0.0.1:37822] opened
+2026/07/20 00:58:07 INF [RTSP] [conn 127.0.0.1:37822] closed: EOF
+2026/07/20 00:58:09 INF [RTSP] [conn 127.0.0.1:37826] opened
+2026/07/20 00:58:09 INF [RTSP] [conn 127.0.0.1:37826] closed: EOF
+2026/07/20 00:58:09 WAR [RTSP] [session f75c8615] reader is too slow, discarding 33 frames
+2026/07/20 00:58:10 WAR [RTSP] [session f75c8615] reader is too slow, discarding 4 frames
+2026/07/20 00:58:11 INF [RTSP] [conn 127.0.0.1:37842] opened
+2026/07/20 00:58:11 INF [RTSP] [conn 127.0.0.1:37842] closed: EOF
+2026/07/20 00:58:11 WAR [RTSP] [session f75c8615] reader is too slow, discarding 17 frames
+2026/07/20 00:58:12 WAR [RTSP] [session f75c8615] reader is too slow, discarding 21 frames
+2026/07/20 00:58:13 INF [RTSP] [conn 127.0.0.1:35816] opened
+2026/07/20 00:58:13 INF [RTSP] [conn 127.0.0.1:35816] closed: EOF
+2026/07/20 00:58:13 WAR [RTSP] [session f75c8615] reader is too slow, discarding 5 frames
+2026/07/20 00:58:15 INF [RTSP] [conn 127.0.0.1:35832] opened
+2026/07/20 00:58:15 INF [RTSP] [conn 127.0.0.1:35832] closed: EOF
+2026/07/20 00:58:15 WAR [RTSP] [session f75c8615] reader is too slow, discarding 9 frames
+2026/07/20 00:58:16 WAR [RTSP] [session f75c8615] reader is too slow, discarding 1 frame
+2026/07/20 00:58:17 INF [RTSP] [conn 127.0.0.1:35842] opened
+2026/07/20 00:58:17 INF [RTSP] [conn 127.0.0.1:35842] closed: EOF
+2026/07/20 00:58:18 WAR [RTSP] [session f75c8615] reader is too slow, discarding 54 frames
+2026/07/20 00:58:19 INF [RTSP] [conn 127.0.0.1:35844] opened
+2026/07/20 00:58:19 INF [RTSP] [conn 127.0.0.1:35844] closed: EOF
+2026/07/20 00:58:19 WAR [RTSP] [session f75c8615] reader is too slow, discarding 44 frames
+2026/07/20 00:58:21 INF [RTSP] [conn 127.0.0.1:35848] opened
+2026/07/20 00:58:21 INF [RTSP] [conn 127.0.0.1:35848] closed: EOF
+2026/07/20 00:58:21 WAR [RTSP] [session f75c8615] reader is too slow, discarding 7 frames
+2026/07/20 00:58:23 INF [RTSP] [conn 127.0.0.1:56326] opened
+2026/07/20 00:58:23 INF [RTSP] [conn 127.0.0.1:56326] closed: EOF
+2026/07/20 00:58:25 INF [RTSP] [conn 127.0.0.1:56338] opened
+2026/07/20 00:58:25 INF [RTSP] [conn 127.0.0.1:56338] closed: EOF
+2026/07/20 00:58:26 WAR [RTSP] [session f75c8615] reader is too slow, discarding 8 frames
+2026/07/20 00:58:27 INF [RTSP] [conn 127.0.0.1:56340] opened
+2026/07/20 00:58:27 INF [RTSP] [conn 127.0.0.1:56340] closed: EOF
+2026/07/20 00:58:27 WAR [RTSP] [session f75c8615] reader is too slow, discarding 21 frames
+2026/07/20 00:58:28 WAR [RTSP] [session f75c8615] reader is too slow, discarding 28 frames
+2026/07/20 00:58:29 INF [RTSP] [conn 127.0.0.1:56348] opened
+2026/07/20 00:58:29 INF [RTSP] [conn 127.0.0.1:56348] closed: EOF
+2026/07/20 00:58:30 WAR [RTSP] [session f75c8615] reader is too slow, discarding 2 frames
+2026/07/20 00:58:31 INF [RTSP] [conn 127.0.0.1:56356] opened
+2026/07/20 00:58:31 INF [RTSP] [conn 127.0.0.1:56356] closed: EOF
+2026/07/20 00:58:33 INF [RTSP] [conn 127.0.0.1:40576] opened
+2026/07/20 00:58:33 INF [RTSP] [conn 127.0.0.1:40576] closed: EOF
+2026/07/20 00:58:33 WAR [RTSP] [session f75c8615] reader is too slow, discarding 24 frames
+2026/07/20 00:58:34 INF [RTSP] [conn 127.0.0.1:53600] closed: read tcp 127.0.0.1:8554->127.0.0.1:53600: read: connection reset by peer
+2026/07/20 00:58:34 INF [RTSP] [session 179faf0f] destroyed: not in use
+2026/07/20 00:58:34 WAR [RTSP] [session f75c8615] reader is too slow, discarding 31 frames
+2026/07/20 00:58:35 INF [RTSP] [conn 127.0.0.1:40578] opened
+2026/07/20 00:58:35 INF [RTSP] [conn 127.0.0.1:40578] closed: EOF
+2026/07/20 00:58:37 INF [RTSP] [conn 127.0.0.1:53578] closed: EOF
+2026/07/20 00:58:37 INF [RTSP] [session 69f4e419] destroyed: torn down by 127.0.0.1:53578
+2026/07/20 00:58:37 INF [RTSP] [conn 192.168.137.1:52168] closed: terminated
+2026/07/20 00:58:37 INF [RTSP] [conn 192.168.137.1:59150] closed: terminated
+2026/07/20 00:58:37 INF [RTSP] [session f75c8615] destroyed: terminated
+2026/07/20 00:58:37 INF [RTSP] [session c6acb3e3] destroyed: terminated
+2026/07/20 00:58:37 INF [RTSP] [conn 127.0.0.1:40582] opened
+2026/07/20 00:58:37 INF [RTSP] [conn 127.0.0.1:40582] closed: EOF
+2026/07/20 00:58:38 INF [RTSP] [conn 127.0.0.1:40598] opened
+2026/07/20 00:58:38 INF [RTSP] [session 37e13f3c] created by 127.0.0.1:40598
+2026/07/20 00:58:38 INF [path director] stream is available and online, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:58:38 INF [RTSP] [session 37e13f3c] is publishing to path 'director'
+2026/07/20 00:58:40 INF [RTSP] [conn 192.168.137.1:56244] opened
+2026/07/20 00:58:40 INF [RTSP] [session 20559d2c] created by 192.168.137.1:56244
+2026/07/20 00:58:40 INF [RTSP] [session 20559d2c] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/20 00:58:45 INF shutting down gracefully
+2026/07/20 00:58:45 INF [SRT] closing
+2026/07/20 00:58:45 INF [MoQ] closing
+2026/07/20 00:58:45 INF [WebRTC] closing
+2026/07/20 00:58:45 INF [HLS] closing
+2026/07/20 00:58:45 INF [RTMP] closing
+2026/07/20 00:58:45 INF [RTSP] closing
+2026/07/20 00:58:45 INF [RTSP] [conn 192.168.137.1:56244] closed: terminated
+2026/07/20 00:58:45 INF [RTSP] [conn 127.0.0.1:40598] closed: terminated
+2026/07/20 00:58:45 INF [RTSP] [session 37e13f3c] destroyed: terminated
+2026/07/20 00:58:45 INF [RTSP] [session 20559d2c] destroyed: terminated
+2026/07/20 00:58:45 INF waiting for running hooks

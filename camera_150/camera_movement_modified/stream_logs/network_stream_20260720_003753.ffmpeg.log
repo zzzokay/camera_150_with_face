@@ -1,0 +1,9 @@
+Guessed Channel Layout for Input Stream #1.0 : stereo
+[rawvideo @ 0x5597247400] Thread message queue blocking; consider raising the thread_queue_size option (current value: 8)
+[alsa @ 0x55972593d0] Thread message queue blocking; consider raising the thread_queue_size option (current value: 1024)
+[alsa @ 0x55972593d0] ALSA buffer xrun.
+    Last message repeated 22 times
+Guessed Channel Layout for Input Stream #1.0 : stereo
+av_interleaved_write_frame(): Broken pipe
+[out#0/rtsp @ 0x558716b200] Error muxing a packet
+[out#0/rtsp @ 0x558716b200] Error writing trailer: Broken pipe

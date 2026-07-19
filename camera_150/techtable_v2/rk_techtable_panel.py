@@ -1,44 +1,87 @@
 # -*- coding: utf-8 -*-
 """
-RK3588 篮球技术台 V2.1 主控端。
+rk_techtable_panel.py - RK3588 篮球技术台 V3
+=================================================
 
-功能：
-1. 拉 RTSP 视频并在本地窗口显示。
-2. 在客户端侧叠加比分条，不修改 RK3588 原始推流。
-3. 右侧按钮记录比分、队犯规、球员得分、球员犯规、节次和时间。
-4. 使用 JSON 保存状态，使用 JSONL 保存事件。
-5. 内置 HTTP 状态服务，电脑端 viewer_client.py 可实时读取同一份比分。
+本文件只负责“界面与网络接口”，比赛规则位于 state_store.py。
 
-推荐运行：
-python3 techtable_v2/rk_techtable_panel.py \
-  --rtsp rtsp://127.0.0.1:8554/director \
-  --state techtable_v2/game_state.json \
-  --roster techtable_v2/sample_roster.json
+结构
+----
+    GameController
+        ├── LCD PyQt5 界面
+        ├── 网页 /api/action
+        ├── game_state.json
+        └── events.jsonl
+
+LCD 和网页不再各写一套加分/犯规/节次逻辑。所有按钮最终都会调用：
+
+    controller.apply_action(action, payload, source)
+
+这样 24 秒、暂停、罚球、加时、换人、撤销和导播提示在两端完全一致。
+
+LCD UI 设计
+------------
+为了适配 RK3588 板载 LCD：
+    - 视频仍占主要区域；
+    - 操作区使用 QTabWidget 分页；
+    - 按钮默认高度 28~32 px；
+    - 字号 11~13 px；
+    - 不使用巨型按钮；
+    - 导播脚本的本地预览仍由 start_all_techtable.py 固定
+      --display-scale 0.35，本技术台不改变该参数。
 """
 
 from __future__ import annotations
 
 import argparse
-import copy
+import html
 import json
 import os
 import sys
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+
+# 必须使用 RK3588 系统自带的 Qt5 插件。
+#
+# 注意：
+#   某些带 GUI 的 OpenCV wheel 会在 import cv2 时，把
+#   QT_QPA_PLATFORM_PLUGIN_PATH 改成 cv2/qt/plugins。
+#   因此这里不仅要在 import cv2 前设置，还必须在 import cv2 后再恢复一次。
+os.environ.setdefault("DISPLAY", ":0")
+
+SYSTEM_QT_PLUGIN_DIR = "/usr/lib/aarch64-linux-gnu/qt5/plugins"
+SYSTEM_QT_PLATFORM_DIR = os.path.join(
+    SYSTEM_QT_PLUGIN_DIR,
+    "platforms",
+)
+
+os.environ["QT_QPA_PLATFORM"] = "xcb"
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = SYSTEM_QT_PLATFORM_DIR
+os.environ["QT_PLUGIN_PATH"] = SYSTEM_QT_PLUGIN_DIR
 
 import cv2
-
-os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = "/usr/lib/aarch64-linux-gnu/qt5/plugins/platforms"
-os.environ.pop("QT_PLUGIN_PATH", None)
-
 import numpy as np
-from PyQt5.QtCore import Qt, QThread, QTimer, pyqtSignal
+
+# OpenCV 导入后再次恢复系统 Qt 路径，避免加载：
+# /usr/local/lib/python3.10/dist-packages/cv2/qt/plugins/platforms/libqxcb.so
+os.environ["QT_QPA_PLATFORM"] = "xcb"
+os.environ["QT_QPA_PLATFORM_PLUGIN_PATH"] = SYSTEM_QT_PLATFORM_DIR
+os.environ["QT_PLUGIN_PATH"] = SYSTEM_QT_PLUGIN_DIR
+
+from PyQt5.QtCore import (
+    QCoreApplication,
+    Qt,
+    QThread,
+    QTimer,
+    pyqtSignal,
+)
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import (
     QApplication,
     QComboBox,
+    QFormLayout,
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
@@ -49,301 +92,496 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QSizePolicy,
     QSplitter,
+    QTabWidget,
     QVBoxLayout,
     QWidget,
 )
 
-# 允许直接运行本文件。
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
-# LCD 主控端不再把比分条画进视频帧，比分/时间改为放在视频上方 UI 区域。
 from state_store import (
-    atomic_write_json,
+    FREE_THROW,
+    GAME_END,
+    OVERTIME,
+    PERIOD_END,
+    PERIOD_PAUSED,
+    PERIOD_RUNNING,
+    PRE_GAME,
+    TIMEOUT,
+    GameController,
     default_roster,
-    find_player_index,
     format_clock,
     get_player_text,
-    load_json,
     load_roster,
-    make_default_state,
-    make_snapshot,
-    save_event,
+    period_label,
 )
+
+
+# ---------------------------------------------------------------------------
+# 一、网页技术台
+# ---------------------------------------------------------------------------
 
 INDEX_HTML = r"""<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>篮球技术台 V2 网页计分</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>篮球技术台 V3</title>
 <style>
-body { margin:0; font-family:Arial,"Microsoft YaHei",sans-serif; background:#111827; color:#f9fafb; }
-.wrap { max-width:900px; margin:0 auto; padding:16px; }
-.card { background:#1f2937; border-radius:14px; padding:16px; margin-bottom:14px; }
-.score { text-align:center; font-size:48px; font-weight:900; margin:10px 0; }
-.meta { text-align:center; font-size:22px; color:#fde68a; }
-.row { display:flex; flex-wrap:wrap; gap:10px; margin:10px 0; align-items:center; }
-button { border:0; border-radius:12px; padding:15px 20px; font-size:20px; font-weight:800; cursor:pointer; }
-.home { background:#93c5fd; }
-.away { background:#fca5a5; }
-.warn { background:#fcd34d; }
-.danger { background:#f87171; }
-.ok { background:#86efac; }
-input { font-size:18px; padding:10px; border-radius:8px; border:1px solid #475569; background:#0f172a; color:white; }
+:root {
+  --bg:#0f172a; --card:#1e293b; --line:#334155; --text:#f8fafc;
+  --muted:#94a3b8; --home:#60a5fa; --away:#fb7185; --ok:#4ade80;
+  --warn:#facc15; --danger:#f87171;
+}
+* { box-sizing:border-box; }
+body { margin:0; font-family:Arial,"Microsoft YaHei",sans-serif; background:var(--bg); color:var(--text); }
+.wrap { max-width:1100px; margin:0 auto; padding:10px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:10px; margin-bottom:9px; }
+.scoreline { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; text-align:center; }
+.team { font-size:20px; font-weight:800; }
+.score { font-size:38px; font-weight:900; }
+.meta { display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:6px; font-size:16px; color:#fde68a; }
+.submeta { display:flex; flex-wrap:wrap; justify-content:center; gap:14px; margin-top:5px; font-size:13px; color:#cbd5e1; }
+.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+.row { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:6px 0; }
+h2 { font-size:16px; margin:2px 0 7px; }
+button {
+  border:0; border-radius:7px; padding:8px 10px; min-height:34px;
+  font-size:14px; font-weight:700; cursor:pointer; color:#111827;
+}
+button:active { transform:scale(.98); }
+.home { background:var(--home); }
+.away { background:var(--away); }
+.ok { background:var(--ok); }
+.warn { background:var(--warn); }
+.danger { background:var(--danger); }
+.neutral { background:#e2e8f0; }
+select,input {
+  min-height:32px; border-radius:6px; border:1px solid #64748b;
+  background:#0f172a; color:white; padding:5px; font-size:13px;
+}
+.small { font-size:12px; color:var(--muted); }
+.alert { color:#fca5a5; font-weight:700; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th,td { border-bottom:1px solid var(--line); padding:5px; text-align:center; }
+.oncourt { color:#86efac; font-weight:700; }
+.bench { color:#94a3b8; }
+@media(max-width:760px) {
+  .grid2,.grid3 { grid-template-columns:1fr; }
+  .score { font-size:30px; }
+  button { flex:1; }
+}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <div class="score">
-      <span id="homeName">主队</span>
-      <span id="homeScore">0</span> :
-      <span id="awayScore">0</span>
-      <span id="awayName">客队</span>
+    <div class="scoreline">
+      <div class="team" id="homeName">主队</div>
+      <div class="score"><span id="homeScore">0</span> : <span id="awayScore">0</span></div>
+      <div class="team" id="awayName">客队</div>
     </div>
     <div class="meta">
-      第 <span id="period">1</span> 节　
-      <span id="clock">10:00</span>　
-      <span id="running">PAUSE</span>
+      <span id="periodText">第1节</span>
+      <span>比赛 <b id="gameClock">10:00</b></span>
+      <span>进攻 <b id="shotClock">24</b></span>
+      <span id="phase">PRE_GAME</span>
     </div>
-    <div class="meta" id="lastEvent">比赛未开始</div>
+    <div class="submeta">
+      <span>球权：<b id="possession">-</b></span>
+      <span>犯规：<b id="homeFouls">0</b> / <b id="awayFouls">0</b></span>
+      <span>暂停：<b id="homeTimeouts">2</b> / <b id="awayTimeouts">2</b></span>
+      <span id="bonusText">BONUS -</span>
+    </div>
+    <div class="submeta" id="lastEvent">比赛未开始</div>
+    <div class="submeta alert" id="alertText"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>主队计分与球员</h2>
+      <div class="row">
+        <select id="homePlayer"></select>
+        <button class="home" onclick="selectPlayer('home')">选择球员</button>
+      </div>
+      <div class="row">
+        <button class="home" onclick="act('score',{team:'home',value:1})">+1</button>
+        <button class="home" onclick="act('score',{team:'home',value:2})">+2</button>
+        <button class="home" onclick="act('score',{team:'home',value:3})">+3</button>
+        <button class="warn" onclick="act('foul',{team:'home'})">犯规</button>
+      </div>
+      <div class="row">
+        <button class="ok" onclick="act('free_throw',{team:'home',made:true})">罚中</button>
+        <button class="danger" onclick="act('free_throw',{team:'home',made:false})">罚丢</button>
+        <button class="neutral" onclick="act('timeout',{team:'home'})">暂停</button>
+      </div>
+      <div class="row">
+        <button class="neutral" onclick="selectedStat('home','rebounds')">篮板</button>
+        <button class="neutral" onclick="selectedStat('home','assists')">助攻</button>
+        <button class="neutral" onclick="selectedStat('home','steals')">抢断</button>
+        <button class="neutral" onclick="selectedStat('home','blocks')">盖帽</button>
+        <button class="danger" onclick="selectedTurnover('home')">失误</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>客队计分与球员</h2>
+      <div class="row">
+        <select id="awayPlayer"></select>
+        <button class="away" onclick="selectPlayer('away')">选择球员</button>
+      </div>
+      <div class="row">
+        <button class="away" onclick="act('score',{team:'away',value:1})">+1</button>
+        <button class="away" onclick="act('score',{team:'away',value:2})">+2</button>
+        <button class="away" onclick="act('score',{team:'away',value:3})">+3</button>
+        <button class="warn" onclick="act('foul',{team:'away'})">犯规</button>
+      </div>
+      <div class="row">
+        <button class="ok" onclick="act('free_throw',{team:'away',made:true})">罚中</button>
+        <button class="danger" onclick="act('free_throw',{team:'away',made:false})">罚丢</button>
+        <button class="neutral" onclick="act('timeout',{team:'away'})">暂停</button>
+      </div>
+      <div class="row">
+        <button class="neutral" onclick="selectedStat('away','rebounds')">篮板</button>
+        <button class="neutral" onclick="selectedStat('away','assists')">助攻</button>
+        <button class="neutral" onclick="selectedStat('away','steals')">抢断</button>
+        <button class="neutral" onclick="selectedStat('away','blocks')">盖帽</button>
+        <button class="danger" onclick="selectedTurnover('away')">失误</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>比赛时间 / 24秒 / 球权</h2>
+      <div class="row">
+        <button class="ok" onclick="act('clock_toggle',{})">比赛开始/暂停</button>
+        <button class="neutral" onclick="act('shot_toggle',{})">24秒开始/暂停</button>
+        <button class="warn" onclick="act('shot_reset_24',{})">回24</button>
+        <button class="warn" onclick="act('shot_reset_14',{})">回14</button>
+      </div>
+      <div class="row">
+        <button class="home" onclick="act('possession',{team:'home'})">主队球权</button>
+        <button class="away" onclick="act('possession',{team:'away'})">客队球权</button>
+        <button class="neutral" onclick="act('possession',{team:null})">清球权</button>
+      </div>
+      <div class="row">
+        <button class="neutral" onclick="act('timeout_end',{})">暂停结束</button>
+        <button class="neutral" onclick="act('free_throw_end',{})">罚球结束</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>节次 / 状态 / 撤销</h2>
+      <div class="row">
+        <button class="neutral" onclick="act('period_end',{})">本节结束</button>
+        <button class="ok" onclick="act('next_period',{})">下一节/加时</button>
+        <button class="danger" onclick="act('game_end',{})">全场结束</button>
+      </div>
+      <div class="row">
+        <button class="warn" onclick="act('undo',{})">撤销</button>
+        <button class="danger" onclick="confirmReset()">重置整场</button>
+      </div>
+      <div class="row">
+        <input id="periodInput" type="number" min="1" value="1" style="width:70px">
+        <button class="neutral" onclick="setPeriod()">指定节次</button>
+      </div>
+    </div>
   </div>
 
   <div class="card">
-    <h2>快速记分</h2>
-    <div class="row">
-      <button class="home" onclick="act('score',{team:'home',value:1})">主队 +1</button>
-      <button class="home" onclick="act('score',{team:'home',value:2})">主队 +2</button>
-      <button class="home" onclick="act('score',{team:'home',value:3})">主队 +3</button>
-      <button class="away" onclick="act('score',{team:'away',value:1})">客队 +1</button>
-      <button class="away" onclick="act('score',{team:'away',value:2})">客队 +2</button>
-      <button class="away" onclick="act('score',{team:'away',value:3})">客队 +3</button>
+    <h2>换人 / 在场球员</h2>
+    <div class="grid2">
+      <div>
+        <b>主队</b>
+        <div class="row">
+          <select id="homeOut"></select>
+          <span>换下</span>
+          <select id="homeIn"></select>
+          <button class="home" onclick="substitute('home')">确认换人</button>
+        </div>
+      </div>
+      <div>
+        <b>客队</b>
+        <div class="row">
+          <select id="awayOut"></select>
+          <span>换下</span>
+          <select id="awayIn"></select>
+          <button class="away" onclick="substitute('away')">确认换人</button>
+        </div>
+      </div>
     </div>
-    <div class="row">
-      <button class="warn" onclick="act('foul',{team:'home'})">主队犯规</button>
-      <button class="warn" onclick="act('foul',{team:'away'})">客队犯规</button>
-      <button class="danger" onclick="act('undo',{})">撤销</button>
-    </div>
+    <div id="lineupTables"></div>
   </div>
 
   <div class="card">
-    <h2>时间 / 节次</h2>
-    <div class="row">
-      <button class="ok" onclick="act('clock_toggle',{})">开始 / 暂停</button>
-      <button class="warn" onclick="act('reset_clock',{})">重置时间</button>
-      <button onclick="act('next_period',{})">下一节</button>
-    </div>
-    <div class="row">
-      <button onclick="act('set_period',{period:1})">第1节</button>
-      <button onclick="act('set_period',{period:2})">第2节</button>
-      <button onclick="act('set_period',{period:3})">第3节</button>
-      <button onclick="act('set_period',{period:4})">第4节</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>队名</h2>
-    <div class="row">
-      <input id="homeInput" placeholder="主队名">
-      <input id="awayInput" placeholder="客队名">
-      <button class="ok" onclick="setNames()">应用队名</button>
-    </div>
+    <h2>单节与全场统计</h2>
+    <div id="stats"></div>
   </div>
 </div>
 
 <script>
+let state = {};
 function fmtClock(sec) {
-  sec = Math.max(0, Math.round(sec || 0));
-  const m = Math.floor(sec / 60).toString().padStart(2, '0');
-  const s = Math.floor(sec % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
+  sec = Math.max(0, Math.round(Number(sec || 0)));
+  return String(Math.floor(sec / 60)).padStart(2,'0') + ':' +
+         String(sec % 60).padStart(2,'0');
 }
-
-async function refresh() {
-  const r = await fetch('/state?ts=' + Date.now());
-  const s = await r.json();
-  document.getElementById('homeName').textContent = s.home_name || '主队';
-  document.getElementById('awayName').textContent = s.away_name || '客队';
-  document.getElementById('homeScore').textContent = s.home_score || 0;
-  document.getElementById('awayScore').textContent = s.away_score || 0;
-  document.getElementById('period').textContent = s.period || 1;
-  document.getElementById('clock').textContent = fmtClock(s.clock_sec_left);
-  document.getElementById('running').textContent = s.clock_running ? 'RUN' : 'PAUSE';
-  document.getElementById('lastEvent').textContent = s.last_event || '';
+function playerText(p) {
+  return `${p.number || ''} ${p.name || ''}`.trim();
 }
-
-async function act(action, payload) {
-  await fetch('/api/action', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({action, ...payload})
+function fillSelect(id, players, predicate) {
+  const el = document.getElementById(id);
+  const old = el.value;
+  el.innerHTML = '';
+  (players || []).filter(predicate || (()=>true)).forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.number;
+    o.textContent = `${playerText(p)} | ${p.points||0}分 ${p.fouls||0}犯${p.on_court?' | 在场':''}`;
+    el.appendChild(o);
   });
-  await refresh();
+  if ([...el.options].some(o=>o.value===old)) el.value = old;
 }
-
-async function setNames() {
-  const home_name = document.getElementById('homeInput').value;
-  const away_name = document.getElementById('awayInput').value;
-  await act('team_names', {home_name, away_name});
+function renderTeamTable(team) {
+  const players = ((state.players || {})[team] || []);
+  const rows = players.map(p => `
+    <tr>
+      <td class="${p.on_court?'oncourt':'bench'}">${p.on_court?'在场':'替补'}</td>
+      <td>${playerText(p)}</td>
+      <td>${p.points||0}</td><td>${p.fouls||0}</td>
+      <td>${p.ft_made||0}/${p.ft_attempts||0}</td>
+      <td>${p.rebounds||0}/${p.assists||0}/${p.steals||0}/${p.blocks||0}</td>
+      <td>${p.fouled_out?'满犯':''}</td>
+    </tr>`).join('');
+  return `<table><tr><th>状态</th><th>球员</th><th>分</th><th>犯</th><th>罚球</th><th>板/助/断/帽</th><th>提醒</th></tr>${rows}</table>`;
 }
+function renderStats() {
+  const s = state.statistics || {};
+  const current = s.current_period || {};
+  const full = s.full_game || {};
+  function row(title, d) {
+    d = d || {};
+    return `<tr><td>${title}</td><td>${d.points||0}</td><td>${d.fouls||0}</td>
+      <td>${d.ft_made||0}/${d.ft_attempts||0}</td><td>${d.two_made||0}</td>
+      <td>${d.three_made||0}</td><td>${d.rebounds||0}</td>
+      <td>${d.assists||0}</td><td>${d.steals||0}</td><td>${d.blocks||0}</td>
+      <td>${d.turnovers||0}</td></tr>`;
+  }
+  document.getElementById('stats').innerHTML =
+    `<table><tr><th>范围</th><th>得分</th><th>犯规</th><th>罚球</th><th>2分</th><th>3分</th><th>篮板</th><th>助攻</th><th>抢断</th><th>盖帽</th><th>失误</th></tr>
+     ${row('本节主队',current.home)}${row('本节客队',current.away)}
+     ${row('全场主队',full.home)}${row('全场客队',full.away)}</table>`;
+}
+function render(s) {
+  state = s;
+  homeName.textContent = s.home_name || '主队';
+  awayName.textContent = s.away_name || '客队';
+  homeScore.textContent = s.home_score || 0;
+  awayScore.textContent = s.away_score || 0;
+  periodText.textContent = s.period_label || `第${s.period || 1}节`;
+  gameClock.textContent = fmtClock(s.clock_sec_left);
+  shotClock.textContent = Math.ceil(Number(s.shot_clock_sec || 0));
+  phase.textContent = s.phase || '';
+  homeFouls.textContent = s.home_fouls || 0;
+  awayFouls.textContent = s.away_fouls || 0;
+  homeTimeouts.textContent = (s.timeouts_remaining || {}).home ?? 0;
+  awayTimeouts.textContent = (s.timeouts_remaining || {}).away ?? 0;
+  possession.textContent =
+    s.possession === 'home' ? (s.home_name || '主队') :
+    s.possession === 'away' ? (s.away_name || '客队') : '-';
+  const bonus = s.bonus || {};
+  bonusText.textContent = `BONUS 主:${bonus.home?'是':'否'} 客:${bonus.away?'是':'否'}`;
+  lastEvent.textContent = s.last_event || '';
+  const alerts = s.alerts || [];
+  alertText.textContent = alerts.length ? alerts[alerts.length-1].text : '';
 
-setInterval(refresh, 500);
+  const home = ((s.players || {}).home || []);
+  const away = ((s.players || {}).away || []);
+  fillSelect('homePlayer', home);
+  fillSelect('awayPlayer', away);
+  fillSelect('homeOut', home, p=>p.on_court);
+  fillSelect('awayOut', away, p=>p.on_court);
+  fillSelect('homeIn', home, p=>!p.on_court && !p.fouled_out);
+  fillSelect('awayIn', away, p=>!p.on_court && !p.fouled_out);
+  lineupTables.innerHTML =
+    `<div class="grid2"><div><b>主队阵容</b>${renderTeamTable('home')}</div>
+    <div><b>客队阵容</b>${renderTeamTable('away')}</div></div>`;
+  renderStats();
+}
+async function refresh() {
+  try {
+    const r = await fetch('/state?ts=' + Date.now(), {cache:'no-store'});
+    render(await r.json());
+  } catch(e) {
+    lastEvent.textContent = '状态连接失败：' + e;
+  }
+}
+async function act(action,payload) {
+  const r = await fetch('/api/action', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({action,...payload})
+  });
+  const data = await r.json();
+  if (!r.ok) alert(data.error || '操作失败');
+  else render(data);
+}
+function selectPlayer(team) {
+  const el = document.getElementById(team + 'Player');
+  const players = ((state.players || {})[team] || []);
+  const p = players.find(x=>String(x.number)===String(el.value));
+  if (p) act('select_player',{team,number:p.number,name:p.name});
+}
+async function selectedStat(team, stat) {
+  const el = document.getElementById(team + 'Player');
+  const players = ((state.players || {})[team] || []);
+  const p = players.find(x=>String(x.number)===String(el.value));
+  if (!p) return;
+  await act('select_player',{team,number:p.number,name:p.name});
+  await act('player_stat',{team,stat});
+}
+async function selectedTurnover(team) {
+  const el = document.getElementById(team + 'Player');
+  const players = ((state.players || {})[team] || []);
+  const p = players.find(x=>String(x.number)===String(el.value));
+  if (!p) return;
+  await act('select_player',{team,number:p.number,name:p.name});
+  await act('turnover',{team});
+}
+function substitute(team) {
+  act('substitution',{
+    team,
+    out_number:document.getElementById(team+'Out').value,
+    in_number:document.getElementById(team+'In').value
+  });
+}
+function setPeriod() {
+  act('set_period',{period:Number(periodInput.value || 1)});
+}
+function confirmReset() {
+  if (confirm('确定重置整场比赛吗？')) act('reset_game',{});
+}
+setInterval(refresh,500);
 refresh();
 </script>
 </body>
 </html>
 """
 
-def apply_http_action_to_state(state: Dict[str, Any], action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-    state = dict(state)
-
-    if action == "score":
-        team = payload.get("team")
-        value = int(payload.get("value", 1) or 1)
-        if team == "home":
-            state["home_score"] = int(state.get("home_score", 0) or 0) + value
-            state["last_event"] = f"{state.get('home_name', '主队')} +{value}"
-        elif team == "away":
-            state["away_score"] = int(state.get("away_score", 0) or 0) + value
-            state["last_event"] = f"{state.get('away_name', '客队')} +{value}"
-
-    elif action == "foul":
-        team = payload.get("team")
-        if team == "home":
-            state["home_fouls"] = int(state.get("home_fouls", 0) or 0) + 1
-            state["last_event"] = f"{state.get('home_name', '主队')} 队犯规 +1"
-        elif team == "away":
-            state["away_fouls"] = int(state.get("away_fouls", 0) or 0) + 1
-            state["last_event"] = f"{state.get('away_name', '客队')} 队犯规 +1"
-
-    elif action == "clock_toggle":
-        state["clock_running"] = not bool(state.get("clock_running", False))
-        state["last_event"] = "比赛时间开始" if state["clock_running"] else "比赛时间暂停"
-
-    elif action == "reset_clock":
-        minutes = int(state.get("period_minutes", 10) or 10)
-        state["clock_sec_left"] = minutes * 60
-        state["clock_running"] = False
-        state["last_event"] = "已重置本节时间"
-
-    elif action == "next_period":
-        period = int(state.get("period", 1) or 1) + 1
-        state["period"] = min(period, 4)
-        minutes = int(state.get("period_minutes", 10) or 10)
-        state["clock_sec_left"] = minutes * 60
-        state["clock_running"] = False
-        state["home_fouls"] = 0
-        state["away_fouls"] = 0
-        state["last_event"] = f"进入第{state['period']}节"
-
-    elif action == "set_period":
-        period = int(payload.get("period", 1) or 1)
-        state["period"] = max(1, min(period, 4))
-        state["last_event"] = f"已切换到第{state['period']}节"
-
-    elif action == "team_names":
-        state["home_name"] = str(payload.get("home_name", "")).strip() or state.get("home_name", "主队")
-        state["away_name"] = str(payload.get("away_name", "")).strip() or state.get("away_name", "客队")
-        state["last_event"] = "已更新队名"
-
-    elif action == "undo":
-        state["last_event"] = "网页端暂不支持撤销，请在 LCD 端撤销"
-
-    state["updated_at_ms"] = int(time.time() * 1000)
-    return state
-
-
 
 class StateHttpServer:
-    """极简 HTTP 状态服务器。
+    """
+    内置 HTTP 技术台。
 
-    只读输出当前 game_state.json，不负责操作比赛。
-    电脑端通过 http://RK_IP:8010/state 读取这个状态，实现 RK 与电脑比分同步。
+    注意：Handler 不直接读写 JSON，而是调用同一个 GameController。
+    这保证网页动作和 LCD 动作共享历史栈、规则、事件日志与锁。
     """
 
-    def __init__(self, state_path: str, host: str = "0.0.0.0", port: int = 8010):
-        self.state_path = os.path.abspath(state_path)
-        self.host = host
+    def __init__(
+        self,
+        controller: GameController,
+        host: str = "0.0.0.0",
+        port: int = 8010,
+    ):
+        self.controller = controller
+        self.host = str(host)
         self.port = int(port)
         self.httpd: Optional[ThreadingHTTPServer] = None
         self.thread: Optional[threading.Thread] = None
         self.error: Optional[str] = None
 
     def start(self) -> bool:
-        state_path = self.state_path
+        controller = self.controller
 
         class Handler(BaseHTTPRequestHandler):
-            def _send(self, code: int, body: bytes, content_type: str = "application/json; charset=utf-8") -> None:
-                self.send_response(code)
+            def _send(
+                self,
+                status: int,
+                body: bytes,
+                content_type: str = "application/json; charset=utf-8",
+            ) -> None:
+                self.send_response(status)
                 self.send_header("Content-Type", content_type)
                 self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header(
+                    "Access-Control-Allow-Methods",
+                    "GET,POST,OPTIONS",
+                )
+                self.send_header(
+                    "Access-Control-Allow-Headers",
+                    "Content-Type",
+                )
                 self.send_header("Cache-Control", "no-store")
                 self.send_header("Content-Length", str(len(body)))
                 self.end_headers()
                 self.wfile.write(body)
 
+            def _json(self, status: int, payload: Dict[str, Any]) -> None:
+                body = json.dumps(
+                    payload,
+                    ensure_ascii=False,
+                ).encode("utf-8")
+                self._send(status, body)
+
+            def do_OPTIONS(self) -> None:  # noqa: N802
+                self._send(204, b"")
+
             def do_GET(self) -> None:  # noqa: N802
                 path = self.path.split("?", 1)[0]
-
                 if path == "/":
-                    body = INDEX_HTML.encode("utf-8")
-                    self._send(200, body, "text/html; charset=utf-8")
+                    self._send(
+                        200,
+                        INDEX_HTML.encode("utf-8"),
+                        "text/html; charset=utf-8",
+                    )
                     return
-
                 if path == "/health":
                     self._send(200, b"OK", "text/plain; charset=utf-8")
                     return
-
                 if path == "/state":
-                    try:
-                        with open(state_path, "rb") as f:
-                            body = f.read()
-                        self._send(200, body)
-                    except Exception as exc:
-                        body = json.dumps({"error": str(exc)}, ensure_ascii=False).encode("utf-8")
-                        self._send(500, body)
+                    self._json(200, enrich_state_for_clients(controller.get_state()))
                     return
-
                 self._send(404, b"Not Found", "text/plain; charset=utf-8")
-
 
             def do_POST(self) -> None:  # noqa: N802
                 path = self.path.split("?", 1)[0]
-
                 if path != "/api/action":
                     self._send(404, b"Not Found", "text/plain; charset=utf-8")
                     return
-
                 try:
                     length = int(self.headers.get("Content-Length", "0"))
-                    raw = self.rfile.read(length).decode("utf-8") if length > 0 else "{}"
+                    raw = (
+                        self.rfile.read(length).decode("utf-8")
+                        if length > 0
+                        else "{}"
+                    )
                     payload = json.loads(raw)
-                    action = str(payload.get("action", "")).strip()
-
-                    with open(state_path, "r", encoding="utf-8") as f:
-                        state = json.load(f)
-
-                    state = apply_http_action_to_state(state, action, payload)
-                    atomic_write_json(state_path, state)
-
-                    body = json.dumps(state, ensure_ascii=False).encode("utf-8")
-                    self._send(200, body)
-
+                    action = str(payload.pop("action", "")).strip()
+                    state = controller.apply_action(
+                        action,
+                        payload,
+                        source="web",
+                    )
+                    self._json(200, enrich_state_for_clients(state))
                 except Exception as exc:
-                    body = json.dumps({"error": str(exc)}, ensure_ascii=False).encode("utf-8")
-                    self._send(500, body)
+                    self._json(400, {"error": str(exc)})
 
-
-
-
-            def log_message(self, fmt: str, *args) -> None:
+            def log_message(self, fmt: str, *args: Any) -> None:
+                # HTTP 轮询频率较高，默认关闭访问日志，避免终端刷屏。
                 return
 
         try:
-            self.httpd = ThreadingHTTPServer((self.host, self.port), Handler)
-            self.thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
+            self.httpd = ThreadingHTTPServer(
+                (self.host, self.port),
+                Handler,
+            )
+            self.thread = threading.Thread(
+                target=self.httpd.serve_forever,
+                name="techtable-http",
+                daemon=True,
+            )
             self.thread.start()
             return True
         except Exception as exc:
@@ -352,644 +590,1061 @@ class StateHttpServer:
             return False
 
     def stop(self) -> None:
-        if self.httpd is not None:
-            try:
-                self.httpd.shutdown()
-                self.httpd.server_close()
-            except Exception:
-                pass
-            self.httpd = None
+        if self.httpd is None:
+            return
+        try:
+            self.httpd.shutdown()
+            self.httpd.server_close()
+        except Exception:
+            pass
+        self.httpd = None
 
+
+def enrich_state_for_clients(state: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    添加纯显示字段。
+
+    基础 state 仍使用数值和枚举；客户端无需重复实现节次文本转换。
+    """
+    result = dict(state)
+    result["period_label"] = period_label(
+        int(state.get("period", 1) or 1),
+        int(state.get("regulation_periods", 4) or 4),
+    )
+    result["game_clock"] = format_clock(
+        float(state.get("clock_sec_left", 0) or 0)
+    )
+    result["shot_clock_text"] = str(
+        int(np.ceil(float(state.get("shot_clock_sec", 0) or 0)))
+    )
+    return result
+
+
+# ---------------------------------------------------------------------------
+# 二、RTSP 视频线程
+# ---------------------------------------------------------------------------
 
 class VideoThread(QThread):
     frame_ready = pyqtSignal(object)
     status_ready = pyqtSignal(str)
 
-    def __init__(self, rtsp_url: str, target_fps: float = 25.0, parent: Optional[QWidget] = None):
+    def __init__(
+        self,
+        rtsp_url: str,
+        target_fps: float = 25.0,
+        parent: Optional[QWidget] = None,
+    ):
         super().__init__(parent)
-        self.rtsp_url = rtsp_url
+        self.rtsp_url = str(rtsp_url)
         self.target_fps = max(1.0, float(target_fps))
         self._running = True
 
     def stop(self) -> None:
         self._running = False
-        self.wait(1500)
+        self.wait(1800)
 
     def run(self) -> None:
-        last_status_ts = 0.0
+        os.environ.setdefault(
+            "OPENCV_FFMPEG_CAPTURE_OPTIONS",
+            "rtsp_transport;tcp|max_delay;500000|stimeout;3000000",
+        )
         while self._running:
-            cap = cv2.VideoCapture(self.rtsp_url)
+            cap = cv2.VideoCapture(self.rtsp_url, cv2.CAP_FFMPEG)
             try:
                 cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
             except Exception:
                 pass
 
             if not cap.isOpened():
-                now = time.time()
-                if now - last_status_ts > 2.0:
-                    self.status_ready.emit("等待视频流……")
-                    last_status_ts = now
+                self.status_ready.emit("等待 RTSP 视频流")
                 cap.release()
-                time.sleep(1.0)
+                time.sleep(0.8)
                 continue
 
-            self.status_ready.emit("视频流已连接")
-            frame_interval = 1.0 / self.target_fps
+            self.status_ready.emit("RTSP 视频已连接")
+            period = 1.0 / self.target_fps
             while self._running:
-                t0 = time.time()
+                started = time.monotonic()
                 ok, frame = cap.read()
                 if not ok or frame is None:
-                    self.status_ready.emit("视频流中断，正在重连……")
+                    self.status_ready.emit("RTSP 中断，正在重连")
                     break
                 self.frame_ready.emit(frame)
-                cost = time.time() - t0
-                if cost < frame_interval:
-                    time.sleep(frame_interval - cost)
-            cap.release()
-            time.sleep(0.5)
+                remain = period - (time.monotonic() - started)
+                if remain > 0:
+                    time.sleep(remain)
 
+            cap.release()
+            time.sleep(0.3)
+
+
+# ---------------------------------------------------------------------------
+# 三、LCD 技术台
+# ---------------------------------------------------------------------------
 
 class TechTableWindow(QMainWindow):
     def __init__(self, args: argparse.Namespace):
         super().__init__()
         self.args = args
-        self.state_path = os.path.abspath(args.state)
-        self.events_path = os.path.abspath(args.events)
-        self.font_path = args.font
-        self.state_server: Optional[StateHttpServer] = None
-        self.history: List[Dict[str, Any]] = []
-        self.current_frame: Optional[np.ndarray] = None
-        self.last_clock_tick = time.monotonic()
-        self.last_saved_clock_sec: Optional[int] = None
-
         roster = load_roster(args.roster) or default_roster()
-        loaded_state = load_json(self.state_path)
-        if loaded_state:
-            self.state = self._upgrade_state(loaded_state, roster)
-        else:
-            self.state = make_default_state(args.period_minutes, roster)
-            atomic_write_json(self.state_path, self.state)
+
+        self.controller = GameController(
+            state_path=args.state,
+            events_path=args.events,
+            roster=roster,
+            period_minutes=args.period_minutes,
+        )
+        self.state = self.controller.get_state()
 
         self.video_thread: Optional[VideoThread] = None
+        self.state_server: Optional[StateHttpServer] = None
+        self.last_tick = time.monotonic()
+
         self._build_ui()
-        self._connect_shortcuts_hint()
-        self.refresh_ui_from_state()
-        self.start_video()
-        self.start_state_server()
+        self._start_video()
+        self._start_http()
 
-        self.clock_timer = QTimer(self)
-        self.clock_timer.timeout.connect(self.on_clock_timer)
-        self.clock_timer.start(200)
-        self.external_state_timer = QTimer(self)
-        self.external_state_timer.timeout.connect(self.reload_state_from_file)
-        self.external_state_timer.start(300)
+        # 比赛计时器：100 ms 精度足够技术台显示，同时不会给 Qt 主线程太大压力。
+        self.tick_timer = QTimer(self)
+        self.tick_timer.timeout.connect(self._on_tick)
+        self.tick_timer.start(100)
 
+        # 网页动作发生在 HTTP 线程，LCD 定期读取 controller 的新快照。
+        self.refresh_timer = QTimer(self)
+        self.refresh_timer.timeout.connect(self._refresh_from_controller)
+        self.refresh_timer.start(250)
 
-    def _upgrade_state(self, state: Dict[str, Any], roster: Dict[str, Any]) -> Dict[str, Any]:
-        """兼容第一版或手写 JSON。"""
-        new_state = make_default_state(self.args.period_minutes, roster)
-        for key, value in state.items():
-            new_state[key] = value
-        new_state.setdefault("players", make_default_state(self.args.period_minutes, roster)["players"])
-        new_state.setdefault("selected_player", None)
-        new_state.setdefault("period_minutes", self.args.period_minutes)
-        new_state.setdefault("clock_sec_left", int(new_state.get("period_minutes", self.args.period_minutes)) * 60)
-        new_state.setdefault("clock_running", False)
-        new_state.setdefault("last_event", "比赛未开始")
-        return new_state
+        self.refresh_ui()
+
+    # ------------------------------ UI 构建 ------------------------------
+
+    def _small_button(
+        self,
+        text: str,
+        danger: bool = False,
+        accent: bool = False,
+    ) -> QPushButton:
+        button = QPushButton(text)
+        button.setMinimumHeight(28)
+        if danger:
+            bg = "#9b2c2c"
+            fg = "white"
+        elif accent:
+            bg = "#1e5aa8"
+            fg = "white"
+        else:
+            bg = "#e7eaf0"
+            fg = "#111"
+        button.setStyleSheet(
+            "QPushButton {"
+            f"font-size:12px; font-weight:bold; color:{fg}; background:{bg};"
+            "border-radius:5px; padding:3px 6px;"
+            "}"
+            "QPushButton:pressed {background:#888;}"
+        )
+        return button
 
     def _build_ui(self) -> None:
-        self.setWindowTitle("RK Basketball TechTable V2 - 客户端侧叠加")
+        self.setWindowTitle("RK Basketball TechTable V3")
         self.resize(self.args.window_width, self.args.window_height)
 
         root = QWidget(self)
         self.setCentralWidget(root)
         root_layout = QHBoxLayout(root)
         root_layout.setContentsMargins(4, 4, 4, 4)
+        root_layout.setSpacing(4)
 
         splitter = QSplitter(Qt.Horizontal)
         root_layout.addWidget(splitter)
 
-        # 左侧：视频区
+        # 左侧：紧凑比分条 + 视频。
         left = QWidget()
         left_layout = QVBoxLayout(left)
-        left_layout.setContentsMargins(0, 0, 4, 0)
-        left_layout.setSpacing(4)
+        left_layout.setContentsMargins(0, 0, 3, 0)
+        left_layout.setSpacing(3)
 
-        # LCD 顶部比分条：放在视频画面上方的 UI 区域，不再遮挡视频帧。
-        top_score_bar = QWidget()
-        top_score_layout = QHBoxLayout(top_score_bar)
-        top_score_layout.setContentsMargins(8, 4, 8, 4)
-        top_score_layout.setSpacing(8)
-        top_score_bar.setStyleSheet("background:#050505; border-radius:4px;")
+        top = QWidget()
+        top.setStyleSheet("background:#080808; border-radius:4px;")
+        top_layout = QGridLayout(top)
+        top_layout.setContentsMargins(5, 3, 5, 3)
+        top_layout.setSpacing(3)
 
         self.score_label = QLabel()
         self.score_label.setAlignment(Qt.AlignCenter)
-        self.score_label.setMinimumHeight(48)
+        self.score_label.setMinimumHeight(38)
         self.score_label.setStyleSheet(
-            "font-size:26px; font-weight:bold; padding:4px; background:#111; color:white; border-radius:4px;"
+            "font-size:22px; font-weight:bold; color:white;"
         )
 
-        self.clock_label = QLabel()
-        self.clock_label.setAlignment(Qt.AlignCenter)
-        self.clock_label.setMinimumHeight(48)
-        self.clock_label.setStyleSheet(
-            "font-size:22px; font-weight:bold; padding:4px; background:#222; color:#ffe28a; border-radius:4px;"
+        self.game_clock_label = QLabel()
+        self.game_clock_label.setAlignment(Qt.AlignCenter)
+        self.game_clock_label.setStyleSheet(
+            "font-size:20px; font-weight:bold; color:#fde68a;"
         )
 
-        top_score_layout.addWidget(self.score_label, stretch=3)
-        top_score_layout.addWidget(self.clock_label, stretch=2)
-        left_layout.addWidget(top_score_bar, stretch=0)
+        self.shot_clock_label = QLabel()
+        self.shot_clock_label.setAlignment(Qt.AlignCenter)
+        self.shot_clock_label.setMinimumWidth(70)
+        self.shot_clock_label.setStyleSheet(
+            "font-size:26px; font-weight:bold; color:#f87171;"
+        )
 
-        self.video_label = QLabel("等待视频流……")
+        self.meta_label = QLabel()
+        self.meta_label.setAlignment(Qt.AlignCenter)
+        self.meta_label.setStyleSheet(
+            "font-size:11px; color:#cbd5e1;"
+        )
+
+        top_layout.addWidget(self.score_label, 0, 0, 1, 3)
+        top_layout.addWidget(self.game_clock_label, 1, 0)
+        top_layout.addWidget(self.shot_clock_label, 1, 1)
+        top_layout.addWidget(self.meta_label, 1, 2)
+        left_layout.addWidget(top)
+
+        self.video_label = QLabel("等待视频流")
         self.video_label.setAlignment(Qt.AlignCenter)
         self.video_label.setMinimumSize(560, 315)
-        self.video_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        self.video_label.setStyleSheet("background:#111; color:#ddd; font-size:20px;")
+        self.video_label.setSizePolicy(
+            QSizePolicy.Expanding,
+            QSizePolicy.Expanding,
+        )
+        self.video_label.setStyleSheet(
+            "background:#111; color:#ddd; font-size:16px;"
+        )
         left_layout.addWidget(self.video_label, stretch=1)
 
+        self.event_label = QLabel()
+        self.event_label.setWordWrap(True)
+        self.event_label.setStyleSheet(
+            "font-size:11px; padding:3px; color:#ffe600; background:#111;"
+        )
+        left_layout.addWidget(self.event_label)
+
         self.status_label = QLabel("状态：初始化")
-        self.status_label.setStyleSheet("font-size:13px; padding:3px;")
+        self.status_label.setStyleSheet("font-size:10px; padding:2px;")
         left_layout.addWidget(self.status_label)
         splitter.addWidget(left)
 
-        # 右侧：操作区
-        right = QWidget()
-        right_layout = QVBoxLayout(right)
-        right_layout.setContentsMargins(4, 0, 0, 0)
-        right_layout.setSpacing(4)
+        # 右侧：分页操作，避免所有按钮挤在一屏。
+        self.tabs = QTabWidget()
+        self.tabs.setStyleSheet(
+            "QTabBar::tab {font-size:11px; padding:5px 8px;}"
+            "QGroupBox {font-size:11px; font-weight:bold; margin-top:6px;}"
+            "QComboBox,QLineEdit {font-size:11px; min-height:25px;}"
+            "QLabel {font-size:11px;}"
+        )
+        self.tabs.addTab(self._build_score_tab(), "计分")
+        self.tabs.addTab(self._build_clock_tab(), "时间")
+        self.tabs.addTab(self._build_lineup_tab(), "阵容")
+        self.tabs.addTab(self._build_stats_tab(), "统计")
+        splitter.addWidget(self.tabs)
 
-        # 队名设置
-        team_box = QGroupBox("队名")
-        team_layout = QGridLayout(team_box)
-        self.home_name_edit = QLineEdit(str(self.state.get("home_name", "主队")))
-        self.away_name_edit = QLineEdit(str(self.state.get("away_name", "客队")))
-        self.apply_names_btn = QPushButton("应用队名")
-        self.apply_names_btn.clicked.connect(self.apply_team_names)
-        team_layout.addWidget(QLabel("主队"), 0, 0)
-        team_layout.addWidget(self.home_name_edit, 0, 1)
-        team_layout.addWidget(QLabel("客队"), 1, 0)
-        team_layout.addWidget(self.away_name_edit, 1, 1)
-        team_layout.addWidget(self.apply_names_btn, 2, 0, 1, 2)
-        right_layout.addWidget(team_box)
+        # 右侧只占约 29%，按钮不会被拉得很大。
+        splitter.setSizes(
+            [
+                int(self.args.window_width * 0.71),
+                int(self.args.window_width * 0.29),
+            ]
+        )
 
-        # 当前球员选择
+    def _build_score_tab(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setSpacing(4)
+
         player_box = QGroupBox("球员选择")
         player_layout = QGridLayout(player_box)
+        player_layout.setContentsMargins(5, 8, 5, 5)
+        player_layout.setSpacing(3)
+
         self.home_player_combo = QComboBox()
         self.away_player_combo = QComboBox()
-        self.select_home_btn = QPushButton("选主队球员")
-        self.select_away_btn = QPushButton("选客队球员")
-        self.clear_player_btn = QPushButton("清除选择")
-        self.selected_label = QLabel("当前选择：未选择球员")
-        self.selected_label.setStyleSheet("font-size:13px; font-weight:bold; color:#005bbb;")
-        self.select_home_btn.clicked.connect(lambda: self.select_player("home"))
-        self.select_away_btn.clicked.connect(lambda: self.select_player("away"))
-        self.clear_player_btn.clicked.connect(self.clear_selected_player)
-        player_layout.addWidget(QLabel("主队"), 0, 0)
+        select_home = self._small_button("选主队", accent=True)
+        select_away = self._small_button("选客队", accent=True)
+        clear = self._small_button("清除")
+        select_home.clicked.connect(lambda: self._select_combo_player("home"))
+        select_away.clicked.connect(lambda: self._select_combo_player("away"))
+        clear.clicked.connect(
+            lambda: self.do_action("clear_selected_player")
+        )
+
+        player_layout.addWidget(QLabel("主"), 0, 0)
         player_layout.addWidget(self.home_player_combo, 0, 1)
-        player_layout.addWidget(self.select_home_btn, 0, 2)
-        player_layout.addWidget(QLabel("客队"), 1, 0)
+        player_layout.addWidget(select_home, 0, 2)
+        player_layout.addWidget(QLabel("客"), 1, 0)
         player_layout.addWidget(self.away_player_combo, 1, 1)
-        player_layout.addWidget(self.select_away_btn, 1, 2)
-        player_layout.addWidget(self.clear_player_btn, 2, 0)
-        player_layout.addWidget(self.selected_label, 2, 1, 1, 2)
-        right_layout.addWidget(player_box)
+        player_layout.addWidget(select_away, 1, 2)
+        player_layout.addWidget(clear, 2, 2)
+        layout.addWidget(player_box)
 
-        # 快速记分
-        score_box = QGroupBox("快速记分 / 犯规")
+        score_box = QGroupBox("得分 / 犯规")
         score_layout = QGridLayout(score_box)
-        self.home_score_buttons = []
-        self.away_score_buttons = []
-        for idx, value in enumerate([1, 2, 3]):
-            btn = QPushButton(f"主队 +{value}")
-            btn.clicked.connect(lambda _, v=value: self.add_score("home", v))
-            self._style_big_button(btn)
-            self.home_score_buttons.append(btn)
-            score_layout.addWidget(btn, 0, idx)
-        home_foul_btn = QPushButton("主队犯规")
-        home_foul_btn.clicked.connect(lambda: self.add_foul("home"))
-        self._style_big_button(home_foul_btn, danger=True)
-        score_layout.addWidget(home_foul_btn, 0, 3)
+        score_layout.setContentsMargins(5, 8, 5, 5)
+        score_layout.setSpacing(3)
 
-        for idx, value in enumerate([1, 2, 3]):
-            btn = QPushButton(f"客队 +{value}")
-            btn.clicked.connect(lambda _, v=value: self.add_score("away", v))
-            self._style_big_button(btn)
-            self.away_score_buttons.append(btn)
-            score_layout.addWidget(btn, 1, idx)
-        away_foul_btn = QPushButton("客队犯规")
-        away_foul_btn.clicked.connect(lambda: self.add_foul("away"))
-        self._style_big_button(away_foul_btn, danger=True)
-        score_layout.addWidget(away_foul_btn, 1, 3)
-        right_layout.addWidget(score_box)
-
-        # 时间节次
-        clock_box = QGroupBox("时间 / 节次")
-        clock_layout = QGridLayout(clock_box)
-        self.toggle_clock_btn = QPushButton("开始/暂停")
-        self.toggle_clock_btn.clicked.connect(self.toggle_clock)
-        self.next_period_btn = QPushButton("下一节")
-        self.next_period_btn.clicked.connect(self.next_period)
-        self.reset_clock_btn = QPushButton("重置本节时间")
-        self.reset_clock_btn.clicked.connect(self.reset_clock)
-        self.undo_btn = QPushButton("撤销上一步")
-        self.undo_btn.clicked.connect(self.undo_last)
-        self.reset_game_btn = QPushButton("重置整场")
-        self.reset_game_btn.clicked.connect(self.reset_game_confirm)
-
-        for b in [self.toggle_clock_btn, self.next_period_btn, self.reset_clock_btn, self.undo_btn, self.reset_game_btn]:
-            self._style_normal_button(b)
-        clock_layout.addWidget(self.toggle_clock_btn, 0, 0)
-        clock_layout.addWidget(self.next_period_btn, 0, 1)
-        clock_layout.addWidget(self.reset_clock_btn, 0, 2)
-        clock_layout.addWidget(self.undo_btn, 1, 0)
-        clock_layout.addWidget(self.reset_game_btn, 1, 1, 1, 2)
-        right_layout.addWidget(clock_box)
-
-        # 事件显示
-        self.event_label = QLabel()
-        self.event_label.setWordWrap(True)
-        self.event_label.setStyleSheet("font-size:15px; padding:5px; background:#111; color:#ffe600;")
-        right_layout.addWidget(self.event_label)
-
-        hint = QLabel(
-            "快捷键：Q/W/E 主队+1/+2/+3，A/S/D 客队+1/+2/+3，F 当前球员犯规，Space 开始/暂停，U 撤销，1-4 切节。"
-        )
-        hint.setWordWrap(True)
-        hint.setStyleSheet("font-size:11px; color:#666;")
-        right_layout.addWidget(hint)
-        right_layout.addStretch(1)
-
-        splitter.addWidget(right)
-        splitter.setSizes([int(self.args.window_width * 0.74), int(self.args.window_width * 0.26)])
-
-    def _style_big_button(self, btn: QPushButton, danger: bool = False) -> None:
-        color = "#8b1a1a" if danger else "#1e5aa8"
-        btn.setMinimumHeight(32)
-        btn.setStyleSheet(
-            f"QPushButton {{font-size:16px; font-weight:bold; color:white; background:{color}; border-radius:6px; padding:5px;}}"
-            "QPushButton:pressed {background:#333;}"
-        )
-
-    def _style_normal_button(self, btn: QPushButton) -> None:
-        btn.setMinimumHeight(32)
-        btn.setStyleSheet(
-            "QPushButton {font-size:13px; font-weight:bold; background:#efefef; border-radius:5px; padding:4px;}"
-            "QPushButton:pressed {background:#ccc;}"
-        )
-
-    def _connect_shortcuts_hint(self) -> None:
-        # 使用 keyPressEvent 处理，避免额外 QAction 代码。
-        pass
-
-
-    def start_state_server(self) -> None:
-        if not bool(getattr(self.args, "serve_state", True)):
-            return
-        self.state_server = StateHttpServer(self.state_path, self.args.state_host, self.args.state_port)
-        ok = self.state_server.start()
-        if ok:
-            self.status_label.setText(
-                f"状态：状态服务已开启 http://{self.args.state_host}:{self.args.state_port}/state"
+        for column, value in enumerate((1, 2, 3)):
+            home = self._small_button(f"主+{value}", accent=True)
+            away = self._small_button(f"客+{value}", accent=True)
+            home.clicked.connect(
+                lambda _=False, v=value: self.do_action(
+                    "score", {"team": "home", "value": v}
+                )
             )
-        else:
-            self.status_label.setText(f"状态：状态服务启动失败：{self.state_server.error}")
+            away.clicked.connect(
+                lambda _=False, v=value: self.do_action(
+                    "score", {"team": "away", "value": v}
+                )
+            )
+            score_layout.addWidget(home, 0, column)
+            score_layout.addWidget(away, 1, column)
 
-    def start_video(self) -> None:
-        if not self.args.rtsp:
-            self.status_label.setText("状态：未提供 RTSP 地址")
-            return
-        self.video_thread = VideoThread(self.args.rtsp, self.args.preview_fps, self)
-        self.video_thread.frame_ready.connect(self.on_frame_ready)
-        self.video_thread.status_ready.connect(lambda s: self.status_label.setText(f"状态：{s}"))
+        home_foul = self._small_button("主犯规", danger=True)
+        away_foul = self._small_button("客犯规", danger=True)
+        home_foul.clicked.connect(
+            lambda: self.do_action("foul", {"team": "home"})
+        )
+        away_foul.clicked.connect(
+            lambda: self.do_action("foul", {"team": "away"})
+        )
+        score_layout.addWidget(home_foul, 0, 3)
+        score_layout.addWidget(away_foul, 1, 3)
+        layout.addWidget(score_box)
+
+        ft_box = QGroupBox("罚球")
+        ft_layout = QGridLayout(ft_box)
+        ft_layout.setContentsMargins(5, 8, 5, 5)
+        ft_layout.setSpacing(3)
+        buttons = [
+            ("主罚中", "home", True, False),
+            ("主罚丢", "home", False, True),
+            ("客罚中", "away", True, False),
+            ("客罚丢", "away", False, True),
+        ]
+        for index, (text, team, made, danger) in enumerate(buttons):
+            button = self._small_button(text, danger=danger, accent=not danger)
+            button.clicked.connect(
+                lambda _=False, t=team, m=made: self.do_action(
+                    "free_throw",
+                    {"team": t, "made": m},
+                )
+            )
+            ft_layout.addWidget(button, index // 2, index % 2)
+        end_ft = self._small_button("罚球结束")
+        end_ft.clicked.connect(lambda: self.do_action("free_throw_end"))
+        ft_layout.addWidget(end_ft, 2, 0, 1, 2)
+        layout.addWidget(ft_box)
+
+        stat_box = QGroupBox("当前球员技术统计")
+        stat_grid = QGridLayout(stat_box)
+        stat_grid.setContentsMargins(5, 8, 5, 5)
+        stat_grid.setSpacing(3)
+        stat_defs = [
+            ("篮板+1", "rebounds"),
+            ("助攻+1", "assists"),
+            ("抢断+1", "steals"),
+            ("盖帽+1", "blocks"),
+        ]
+        for index, (title, stat_name) in enumerate(stat_defs):
+            button = self._small_button(title)
+            button.clicked.connect(
+                lambda _=False, s=stat_name: self._selected_stat(s)
+            )
+            stat_grid.addWidget(button, index // 2, index % 2)
+        turnover = self._small_button("失误+1", danger=True)
+        turnover.clicked.connect(self._selected_turnover)
+        stat_grid.addWidget(turnover, 2, 0, 1, 2)
+        layout.addWidget(stat_box)
+
+        self.selected_label = QLabel("当前：未选择球员")
+        self.selected_label.setWordWrap(True)
+        self.selected_label.setStyleSheet(
+            "font-size:11px; color:#2563eb; font-weight:bold;"
+        )
+        layout.addWidget(self.selected_label)
+
+        undo = self._small_button("撤销上一步", danger=True)
+        undo.clicked.connect(lambda: self.do_action("undo"))
+        layout.addWidget(undo)
+        layout.addStretch(1)
+        return page
+
+    def _build_clock_tab(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setSpacing(4)
+
+        game_box = QGroupBox("比赛时间")
+        grid = QGridLayout(game_box)
+        grid.setContentsMargins(5, 8, 5, 5)
+        self.clock_toggle_button = self._small_button(
+            "开始/暂停",
+            accent=True,
+        )
+        reset_clock = self._small_button("重置本节")
+        period_end = self._small_button("本节结束", danger=True)
+        next_period = self._small_button("下一节/加时", accent=True)
+        self.clock_toggle_button.clicked.connect(
+            lambda: self.do_action("clock_toggle")
+        )
+        reset_clock.clicked.connect(lambda: self.do_action("reset_clock"))
+        period_end.clicked.connect(lambda: self.do_action("period_end"))
+        next_period.clicked.connect(lambda: self.do_action("next_period"))
+        grid.addWidget(self.clock_toggle_button, 0, 0)
+        grid.addWidget(reset_clock, 0, 1)
+        grid.addWidget(period_end, 1, 0)
+        grid.addWidget(next_period, 1, 1)
+        layout.addWidget(game_box)
+
+        shot_box = QGroupBox("24秒")
+        grid = QGridLayout(shot_box)
+        grid.setContentsMargins(5, 8, 5, 5)
+        self.shot_toggle_button = self._small_button(
+            "开始/暂停",
+            accent=True,
+        )
+        reset24 = self._small_button("回24")
+        reset14 = self._small_button("回14")
+        self.shot_toggle_button.clicked.connect(
+            lambda: self.do_action("shot_toggle")
+        )
+        reset24.clicked.connect(lambda: self.do_action("shot_reset_24"))
+        reset14.clicked.connect(lambda: self.do_action("shot_reset_14"))
+        grid.addWidget(self.shot_toggle_button, 0, 0)
+        grid.addWidget(reset24, 0, 1)
+        grid.addWidget(reset14, 0, 2)
+        layout.addWidget(shot_box)
+
+        possession_box = QGroupBox("球权")
+        grid = QGridLayout(possession_box)
+        grid.setContentsMargins(5, 8, 5, 5)
+        home = self._small_button("主队", accent=True)
+        away = self._small_button("客队", accent=True)
+        clear = self._small_button("清除")
+        home.clicked.connect(
+            lambda: self.do_action("possession", {"team": "home"})
+        )
+        away.clicked.connect(
+            lambda: self.do_action("possession", {"team": "away"})
+        )
+        clear.clicked.connect(
+            lambda: self.do_action("possession", {"team": None})
+        )
+        grid.addWidget(home, 0, 0)
+        grid.addWidget(away, 0, 1)
+        grid.addWidget(clear, 0, 2)
+        layout.addWidget(possession_box)
+
+        timeout_box = QGroupBox("暂停")
+        grid = QGridLayout(timeout_box)
+        grid.setContentsMargins(5, 8, 5, 5)
+        home_timeout = self._small_button("主队暂停", danger=True)
+        away_timeout = self._small_button("客队暂停", danger=True)
+        timeout_end = self._small_button("暂停结束")
+        home_timeout.clicked.connect(
+            lambda: self.do_action("timeout", {"team": "home"})
+        )
+        away_timeout.clicked.connect(
+            lambda: self.do_action("timeout", {"team": "away"})
+        )
+        timeout_end.clicked.connect(lambda: self.do_action("timeout_end"))
+        grid.addWidget(home_timeout, 0, 0)
+        grid.addWidget(away_timeout, 0, 1)
+        grid.addWidget(timeout_end, 1, 0, 1, 2)
+        layout.addWidget(timeout_box)
+
+        end_game = self._small_button("全场结束", danger=True)
+        end_game.clicked.connect(self._confirm_game_end)
+        reset_game = self._small_button("重置整场", danger=True)
+        reset_game.clicked.connect(self._confirm_reset_game)
+        layout.addWidget(end_game)
+        layout.addWidget(reset_game)
+        layout.addStretch(1)
+        return page
+
+    def _build_lineup_tab(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(4, 4, 4, 4)
+        layout.setSpacing(4)
+
+        team_row = QHBoxLayout()
+        team_row.addWidget(QLabel("队伍"))
+        self.lineup_team_combo = QComboBox()
+        self.lineup_team_combo.addItem("主队", "home")
+        self.lineup_team_combo.addItem("客队", "away")
+        self.lineup_team_combo.currentIndexChanged.connect(
+            self._refresh_lineup_combos
+        )
+        team_row.addWidget(self.lineup_team_combo)
+        layout.addLayout(team_row)
+
+        sub_box = QGroupBox("换人")
+        form = QFormLayout(sub_box)
+        form.setContentsMargins(5, 8, 5, 5)
+        self.out_player_combo = QComboBox()
+        self.in_player_combo = QComboBox()
+        form.addRow("换出", self.out_player_combo)
+        form.addRow("换入", self.in_player_combo)
+        substitute = self._small_button("确认换人", accent=True)
+        substitute.clicked.connect(self._substitute)
+        form.addRow(substitute)
+        layout.addWidget(sub_box)
+
+        manage_box = QGroupBox("首发 / 在场")
+        form = QFormLayout(manage_box)
+        form.setContentsMargins(5, 8, 5, 5)
+        self.manage_player_combo = QComboBox()
+        form.addRow("球员", self.manage_player_combo)
+        set_on = self._small_button("设为在场", accent=True)
+        set_off = self._small_button("设为替补")
+        set_starter = self._small_button("设为首发")
+        set_on.clicked.connect(lambda: self._set_on_court(True))
+        set_off.clicked.connect(lambda: self._set_on_court(False))
+        set_starter.clicked.connect(self._set_starter)
+        form.addRow(set_on)
+        form.addRow(set_off)
+        form.addRow(set_starter)
+        layout.addWidget(manage_box)
+
+        self.lineup_label = QLabel()
+        self.lineup_label.setWordWrap(True)
+        self.lineup_label.setTextFormat(Qt.RichText)
+        self.lineup_label.setStyleSheet(
+            "font-size:10px; background:#f5f5f5; padding:4px;"
+        )
+        layout.addWidget(self.lineup_label)
+        layout.addStretch(1)
+        return page
+
+    def _build_stats_tab(self) -> QWidget:
+        page = QWidget()
+        layout = QVBoxLayout(page)
+        layout.setContentsMargins(4, 4, 4, 4)
+        self.stats_label = QLabel()
+        self.stats_label.setWordWrap(True)
+        self.stats_label.setTextFormat(Qt.RichText)
+        self.stats_label.setAlignment(Qt.AlignTop)
+        self.stats_label.setStyleSheet(
+            "font-size:10px; background:#f8fafc; padding:5px;"
+        )
+        layout.addWidget(self.stats_label)
+        return page
+
+    # ------------------------------ 后台服务 ------------------------------
+
+    def _start_video(self) -> None:
+        self.video_thread = VideoThread(
+            self.args.rtsp,
+            self.args.preview_fps,
+            self,
+        )
+        self.video_thread.frame_ready.connect(self._on_frame)
+        self.video_thread.status_ready.connect(
+            lambda text: self.status_label.setText(f"状态：{text}")
+        )
         self.video_thread.start()
 
-    def on_frame_ready(self, frame: np.ndarray) -> None:
-        self.current_frame = frame
-        # LCD 主控端只显示原始视频帧；比分/时间由视频上方的 QLabel 显示，避免遮挡画面。
-        self.show_frame(frame)
+    def _start_http(self) -> None:
+        if not self.args.serve_state:
+            return
+        self.state_server = StateHttpServer(
+            self.controller,
+            self.args.state_host,
+            self.args.state_port,
+        )
+        if self.state_server.start():
+            self.status_label.setText(
+                f"状态：网页技术台 http://{self.args.state_host}:"
+                f"{self.args.state_port}/"
+            )
+        else:
+            self.status_label.setText(
+                f"状态：网页服务失败 {self.state_server.error}"
+            )
 
-    def show_frame(self, frame_bgr: np.ndarray) -> None:
-        rgb = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB)
-        h, w, ch = rgb.shape
-        bytes_per_line = ch * w
-        qimg = QImage(rgb.data, w, h, bytes_per_line, QImage.Format_RGB888).copy()
-        pix = QPixmap.fromImage(qimg)
-        pix = pix.scaled(self.video_label.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        self.video_label.setPixmap(pix)
+    def _on_frame(self, frame: np.ndarray) -> None:
+        rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        height, width, channels = rgb.shape
+        qimage = QImage(
+            rgb.data,
+            width,
+            height,
+            channels * width,
+            QImage.Format_RGB888,
+        ).copy()
+        pixmap = QPixmap.fromImage(qimage).scaled(
+            self.video_label.size(),
+            Qt.KeepAspectRatio,
+            Qt.SmoothTransformation,
+        )
+        self.video_label.setPixmap(pixmap)
 
-    def refresh_ui_from_state(self) -> None:
-        home_name = str(self.state.get("home_name", "主队"))
-        away_name = str(self.state.get("away_name", "客队"))
-        home_score = int(self.state.get("home_score", 0) or 0)
-        away_score = int(self.state.get("away_score", 0) or 0)
-        home_fouls = int(self.state.get("home_fouls", 0) or 0)
-        away_fouls = int(self.state.get("away_fouls", 0) or 0)
-        period = int(self.state.get("period", 1) or 1)
-        clock = format_clock(float(self.state.get("clock_sec_left", 0) or 0))
-        running = bool(self.state.get("clock_running", False))
+    # ------------------------------ 比赛动作 ------------------------------
 
-        self.score_label.setText(f"{home_name}  {home_score} : {away_score}  {away_name}")
-        self.clock_label.setText(f"第{period}节  {clock}  {'RUN' if running else 'PAUSE'}")
-        self.event_label.setText(f"最近：{self.state.get('last_event', '')}\n队犯规：{home_name} {home_fouls} / {away_name} {away_fouls}")
-        self.selected_label.setText(f"当前选择：{get_player_text(self.state.get('selected_player'))}")
+    def do_action(
+        self,
+        action: str,
+        payload: Optional[Dict[str, Any]] = None,
+    ) -> None:
+        try:
+            self.state = self.controller.apply_action(
+                action,
+                payload,
+                source="lcd",
+            )
+            self.refresh_ui()
+        except Exception as exc:
+            QMessageBox.warning(self, "操作失败", str(exc))
 
-        self._refresh_player_combos()
-        self.toggle_clock_btn.setText("暂停时间" if running else "开始时间")
+    def _combo_player_data(
+        self,
+        combo: QComboBox,
+    ) -> Optional[Dict[str, str]]:
+        data = combo.currentData()
+        return dict(data) if isinstance(data, dict) else None
 
-    def _refresh_player_combos(self) -> None:
-        def current_key(combo: QComboBox) -> str:
-            data = combo.currentData()
-            if isinstance(data, dict):
-                return f"{data.get('team')}:{data.get('number')}:{data.get('name')}"
-            return ""
+    def _select_combo_player(self, team: str) -> None:
+        combo = (
+            self.home_player_combo
+            if team == "home"
+            else self.away_player_combo
+        )
+        data = self._combo_player_data(combo)
+        if data:
+            self.do_action("select_player", data)
 
-        home_key = current_key(self.home_player_combo)
-        away_key = current_key(self.away_player_combo)
+    def _selected_stat(self, stat_name: str) -> None:
+        selected = self.state.get("selected_player")
+        if not isinstance(selected, dict):
+            QMessageBox.information(self, "技术统计", "请先选择球员。")
+            return
+        self.do_action(
+            "player_stat",
+            {
+                "team": selected.get("team"),
+                "stat": stat_name,
+            },
+        )
 
-        self.home_player_combo.blockSignals(True)
-        self.away_player_combo.blockSignals(True)
-        self.home_player_combo.clear()
-        self.away_player_combo.clear()
+    def _selected_turnover(self) -> None:
+        selected = self.state.get("selected_player")
+        if not isinstance(selected, dict):
+            QMessageBox.information(self, "失误", "请先选择球员。")
+            return
+        self.do_action(
+            "turnover",
+            {"team": selected.get("team")},
+        )
 
-        for team, combo in [("home", self.home_player_combo), ("away", self.away_player_combo)]:
-            for p in self.state.get("players", {}).get(team, []):
-                text = f"{p.get('number', '')} {p.get('name', '')}｜{p.get('points', 0)}分 {p.get('fouls', 0)}犯"
-                data = {"team": team, "number": str(p.get("number", "")), "name": str(p.get("name", ""))}
-                combo.addItem(text, data)
+    def _substitute(self) -> None:
+        team = str(self.lineup_team_combo.currentData())
+        outgoing = self._combo_player_data(self.out_player_combo)
+        incoming = self._combo_player_data(self.in_player_combo)
+        if not outgoing or not incoming:
+            QMessageBox.information(
+                self,
+                "换人",
+                "需要同时选择换出和换入球员。",
+            )
+            return
+        self.do_action(
+            "substitution",
+            {
+                "team": team,
+                "out_number": outgoing["number"],
+                "in_number": incoming["number"],
+            },
+        )
 
-        for combo, key in [(self.home_player_combo, home_key), (self.away_player_combo, away_key)]:
-            for i in range(combo.count()):
-                d = combo.itemData(i)
-                if isinstance(d, dict) and f"{d.get('team')}:{d.get('number')}:{d.get('name')}" == key:
-                    combo.setCurrentIndex(i)
-                    break
-        self.home_player_combo.blockSignals(False)
-        self.away_player_combo.blockSignals(False)
+    def _set_on_court(self, on_court: bool) -> None:
+        data = self._combo_player_data(self.manage_player_combo)
+        if data:
+            self.do_action(
+                "set_on_court",
+                {
+                    "team": data["team"],
+                    "number": data["number"],
+                    "on_court": on_court,
+                },
+            )
 
-    def save_state(self) -> None:
-        self.state["updated_at_ms"] = int(time.time() * 1000)
-        atomic_write_json(self.state_path, self.state)
+    def _set_starter(self) -> None:
+        data = self._combo_player_data(self.manage_player_combo)
+        if data:
+            self.do_action(
+                "set_starter",
+                {
+                    "team": data["team"],
+                    "number": data["number"],
+                    "starter": True,
+                },
+            )
 
-    def push_history(self) -> None:
-        self.history.append(make_snapshot(self.state))
-        if len(self.history) > 100:
-            self.history.pop(0)
+    def _confirm_game_end(self) -> None:
+        if QMessageBox.question(
+            self,
+            "确认",
+            "确定结束全场比赛吗？",
+        ) == QMessageBox.Yes:
+            self.do_action("game_end")
 
-    def append_event(self, event: Dict[str, Any]) -> None:
-        event = dict(event)
-        event.setdefault("period", self.state.get("period", 1))
-        event.setdefault("clock", format_clock(float(self.state.get("clock_sec_left", 0) or 0)))
-        save_event(self.events_path, event)
+    def _confirm_reset_game(self) -> None:
+        if QMessageBox.question(
+            self,
+            "确认重置",
+            "比分、犯规、球员统计和计时都会清零，确定继续吗？",
+        ) == QMessageBox.Yes:
+            self.do_action("reset_game")
 
-    def apply_team_names(self) -> None:
-        self.push_history()
-        self.state["home_name"] = self.home_name_edit.text().strip() or "主队"
-        self.state["away_name"] = self.away_name_edit.text().strip() or "客队"
-        self.state["last_event"] = "已更新队名"
-        self.append_event({"type": "team_names", "home_name": self.state["home_name"], "away_name": self.state["away_name"]})
-        self.save_state()
-        self.refresh_ui_from_state()
+    # ------------------------------ 定时与刷新 ------------------------------
 
-    def select_player(self, team: str) -> None:
-        combo = self.home_player_combo if team == "home" else self.away_player_combo
+    def _on_tick(self) -> None:
+        now = time.monotonic()
+        elapsed = now - self.last_tick
+        self.last_tick = now
+        self.state = self.controller.tick(elapsed)
+        self.refresh_ui(lightweight=True)
+
+    def _refresh_from_controller(self) -> None:
+        latest = self.controller.get_state()
+        if latest.get("updated_at_ms") != self.state.get("updated_at_ms"):
+            self.state = latest
+            self.refresh_ui()
+
+    @staticmethod
+    def _preserve_combo_key(combo: QComboBox) -> str:
         data = combo.currentData()
         if not isinstance(data, dict):
-            return
-        self.state["selected_player"] = data
-        self.state["last_event"] = f"已选择 {get_player_text(data)}"
-        self.save_state()
-        self.refresh_ui_from_state()
+            return ""
+        return (
+            f"{data.get('team')}|{data.get('number')}|{data.get('name')}"
+        )
 
-    def clear_selected_player(self) -> None:
-        self.state["selected_player"] = None
-        self.state["last_event"] = "已清除球员选择"
-        self.save_state()
-        self.refresh_ui_from_state()
-
-    def add_score(self, team: str, value: int) -> None:
-        self.push_history()
-        score_key = "home_score" if team == "home" else "away_score"
-        self.state[score_key] = int(self.state.get(score_key, 0) or 0) + int(value)
-
-        selected = self.state.get("selected_player")
-        player_text = None
-        if isinstance(selected, dict) and selected.get("team") == team:
-            idx = find_player_index(self.state, team, str(selected.get("number", "")), str(selected.get("name", "")))
-            if idx >= 0:
-                self.state["players"][team][idx]["points"] = int(self.state["players"][team][idx].get("points", 0) or 0) + int(value)
-                p = self.state["players"][team][idx]
-                player_text = f"{get_player_text(p)} +{value}，本场{p.get('points', 0)}分"
-
-        team_name = self.state.get("home_name", "主队") if team == "home" else self.state.get("away_name", "客队")
-        if player_text:
-            self.state["last_event"] = player_text
-        else:
-            self.state["last_event"] = f"{team_name} +{value}"
-
-        self.append_event({"type": "score", "team": team, "value": value, "selected_player": selected})
-        self.save_state()
-        self.refresh_ui_from_state()
-
-    def add_foul(self, team: Optional[str] = None) -> None:
-        selected = self.state.get("selected_player")
-        if team is None:
-            if isinstance(selected, dict):
-                team = str(selected.get("team"))
-            else:
+    @staticmethod
+    def _restore_combo_key(combo: QComboBox, key: str) -> None:
+        for index in range(combo.count()):
+            data = combo.itemData(index)
+            if not isinstance(data, dict):
+                continue
+            current = (
+                f"{data.get('team')}|{data.get('number')}|"
+                f"{data.get('name')}"
+            )
+            if current == key:
+                combo.setCurrentIndex(index)
                 return
-        if team not in ("home", "away"):
+
+    def _fill_player_combo(
+        self,
+        combo: QComboBox,
+        team: str,
+        predicate=None,
+    ) -> None:
+        old_key = self._preserve_combo_key(combo)
+        combo.blockSignals(True)
+        combo.clear()
+        for player in self.state.get("players", {}).get(team, []):
+            if predicate and not predicate(player):
+                continue
+            text = (
+                f"{player.get('number', '')} {player.get('name', '')} | "
+                f"{player.get('points', 0)}分 {player.get('fouls', 0)}犯"
+            )
+            if player.get("on_court"):
+                text += " | 场上"
+            if player.get("fouled_out"):
+                text += " | 满犯"
+            data = {
+                "team": team,
+                "number": str(player.get("number", "")),
+                "name": str(player.get("name", "")),
+            }
+            combo.addItem(text, data)
+        self._restore_combo_key(combo, old_key)
+        combo.blockSignals(False)
+
+    def _refresh_lineup_combos(self) -> None:
+        team = str(self.lineup_team_combo.currentData() or "home")
+        self._fill_player_combo(
+            self.out_player_combo,
+            team,
+            lambda player: bool(player.get("on_court")),
+        )
+        self._fill_player_combo(
+            self.in_player_combo,
+            team,
+            lambda player: (
+                not bool(player.get("on_court"))
+                and not bool(player.get("fouled_out"))
+            ),
+        )
+        self._fill_player_combo(self.manage_player_combo, team)
+
+    def _stats_html(self) -> str:
+        statistics = self.state.get("statistics", {})
+        current = statistics.get("current_period", {})
+        full = statistics.get("full_game", {})
+
+        def line(title: str, data: Dict[str, Any]) -> str:
+            return (
+                f"<tr><td>{html.escape(title)}</td>"
+                f"<td>{data.get('points', 0)}</td>"
+                f"<td>{data.get('fouls', 0)}</td>"
+                f"<td>{data.get('ft_made', 0)}/"
+                f"{data.get('ft_attempts', 0)}</td>"
+                f"<td>{data.get('two_made', 0)}</td>"
+                f"<td>{data.get('three_made', 0)}</td>"
+                f"<td>{data.get('rebounds', 0)}</td>"
+                f"<td>{data.get('assists', 0)}</td>"
+                f"<td>{data.get('steals', 0)}</td>"
+                f"<td>{data.get('blocks', 0)}</td>"
+                f"<td>{data.get('turnovers', 0)}</td></tr>"
+            )
+
+        table = (
+            "<table border='1' cellspacing='0' cellpadding='3'>"
+            "<tr><th>范围</th><th>分</th><th>犯</th><th>罚球</th>"
+            "<th>2分</th><th>3分</th><th>板</th><th>助</th>"
+            "<th>断</th><th>帽</th><th>失误</th></tr>"
+            + line("本节主", current.get("home", {}))
+            + line("本节客", current.get("away", {}))
+            + line("全场主", full.get("home", {}))
+            + line("全场客", full.get("away", {}))
+            + "</table>"
+        )
+
+        players = []
+        for team in ("home", "away"):
+            for player in self.state.get("players", {}).get(team, []):
+                players.append(
+                    "<tr>"
+                    f"<td>{'主' if team == 'home' else '客'}</td>"
+                    f"<td>{html.escape(get_player_text(player))}</td>"
+                    f"<td>{player.get('points', 0)}</td>"
+                    f"<td>{player.get('fouls', 0)}</td>"
+                    f"<td>{player.get('ft_made', 0)}/"
+                    f"{player.get('ft_attempts', 0)}</td>"
+                    f"<td>{player.get('rebounds', 0)}/"
+                    f"{player.get('assists', 0)}/"
+                    f"{player.get('steals', 0)}/"
+                    f"{player.get('blocks', 0)}</td>"
+                    f"<td>{'场上' if player.get('on_court') else '替补'}</td>"
+                    "</tr>"
+                )
+        return (
+            table
+            + "<br><b>球员统计</b>"
+            + "<table border='1' cellspacing='0' cellpadding='3'>"
+            + "<tr><th>队</th><th>球员</th><th>分</th><th>犯</th>"
+              "<th>罚球</th><th>板/助/断/帽</th><th>状态</th></tr>"
+            + "".join(players)
+            + "</table>"
+        )
+
+    def refresh_ui(self, lightweight: bool = False) -> None:
+        state = self.state
+        home_name = str(state.get("home_name", "主队"))
+        away_name = str(state.get("away_name", "客队"))
+        home_score = int(state.get("home_score", 0) or 0)
+        away_score = int(state.get("away_score", 0) or 0)
+        period = int(state.get("period", 1) or 1)
+
+        self.score_label.setText(
+            f"{home_name}  {home_score} : {away_score}  {away_name}"
+        )
+        self.game_clock_label.setText(
+            f"{period_label(period, state.get('regulation_periods', 4))} "
+            f"{format_clock(state.get('clock_sec_left', 0))}"
+        )
+        self.shot_clock_label.setText(
+            str(int(np.ceil(float(state.get("shot_clock_sec", 0) or 0))))
+        )
+
+        possession = state.get("possession")
+        possession_text = (
+            home_name
+            if possession == "home"
+            else away_name if possession == "away" else "-"
+        )
+        timeouts = state.get("timeouts_remaining", {})
+        bonus = state.get("bonus", {})
+        self.meta_label.setText(
+            f"{state.get('phase', '')} | 球权 {possession_text} | "
+            f"犯规 {state.get('home_fouls', 0)}/"
+            f"{state.get('away_fouls', 0)} | "
+            f"暂停 {timeouts.get('home', 0)}/"
+            f"{timeouts.get('away', 0)} | "
+            f"BONUS {'主' if bonus.get('home') else '-'}"
+            f"/{'客' if bonus.get('away') else '-'}"
+        )
+
+        alerts = state.get("alerts", [])
+        alert_text = alerts[-1].get("text", "") if alerts else ""
+        self.event_label.setText(
+            f"最近：{state.get('last_event', '')}"
+            + (f"  |  提醒：{alert_text}" if alert_text else "")
+        )
+        self.selected_label.setText(
+            f"当前：{get_player_text(state.get('selected_player'))}"
+        )
+        self.clock_toggle_button.setText(
+            "暂停比赛" if state.get("clock_running") else "开始比赛"
+        )
+        self.shot_toggle_button.setText(
+            "暂停24秒"
+            if state.get("shot_clock_running")
+            else "开始24秒"
+        )
+
+        if lightweight:
             return
 
-        self.push_history()
-        foul_key = "home_fouls" if team == "home" else "away_fouls"
-        self.state[foul_key] = int(self.state.get(foul_key, 0) or 0) + 1
+        self._fill_player_combo(self.home_player_combo, "home")
+        self._fill_player_combo(self.away_player_combo, "away")
+        self._refresh_lineup_combos()
 
-        player_text = None
-        if isinstance(selected, dict) and selected.get("team") == team:
-            idx = find_player_index(self.state, team, str(selected.get("number", "")), str(selected.get("name", "")))
-            if idx >= 0:
-                self.state["players"][team][idx]["fouls"] = int(self.state["players"][team][idx].get("fouls", 0) or 0) + 1
-                p = self.state["players"][team][idx]
-                player_text = f"{get_player_text(p)} 犯规，第{p.get('fouls', 0)}犯"
+        team = str(self.lineup_team_combo.currentData() or "home")
+        lineup_lines = []
+        for player in state.get("players", {}).get(team, []):
+            status = "场上" if player.get("on_court") else "替补"
+            if player.get("fouled_out"):
+                status = "满犯"
+            lineup_lines.append(
+                f"{html.escape(get_player_text(player))}：{status}，"
+                f"{player.get('points', 0)}分，{player.get('fouls', 0)}犯"
+            )
+        self.lineup_label.setText("<br>".join(lineup_lines))
+        self.stats_label.setText(self._stats_html())
 
-        team_name = self.state.get("home_name", "主队") if team == "home" else self.state.get("away_name", "客队")
-        self.state["last_event"] = player_text or f"{team_name} 队犯规 +1"
-        self.append_event({"type": "foul", "team": team, "selected_player": selected})
-        self.save_state()
-        self.refresh_ui_from_state()
-
-    def toggle_clock(self) -> None:
-        self.push_history()
-        self.state["clock_running"] = not bool(self.state.get("clock_running", False))
-        self.last_clock_tick = time.monotonic()
-        self.state["last_event"] = "比赛时间开始" if self.state["clock_running"] else "比赛时间暂停"
-        self.append_event({"type": "clock", "running": self.state["clock_running"]})
-        self.save_state()
-        self.refresh_ui_from_state()
-
-    def reset_clock(self) -> None:
-        self.push_history()
-        minutes = int(self.state.get("period_minutes", self.args.period_minutes) or self.args.period_minutes)
-        self.state["clock_sec_left"] = minutes * 60
-        self.state["clock_running"] = False
-        self.state["last_event"] = "已重置本节时间"
-        self.append_event({"type": "reset_clock"})
-        self.save_state()
-        self.refresh_ui_from_state()
-
-    def next_period(self) -> None:
-        self.push_history()
-        self.state["period"] = int(self.state.get("period", 1) or 1) + 1
-        if self.state["period"] > 4:
-            self.state["period"] = 4
-        minutes = int(self.state.get("period_minutes", self.args.period_minutes) or self.args.period_minutes)
-        self.state["clock_sec_left"] = minutes * 60
-        self.state["clock_running"] = False
-        self.state["home_fouls"] = 0
-        self.state["away_fouls"] = 0
-        self.state["last_event"] = f"进入第{self.state['period']}节"
-        self.append_event({"type": "period", "period": self.state["period"]})
-        self.save_state()
-        self.refresh_ui_from_state()
-
-    def undo_last(self) -> None:
-        if not self.history:
-            self.state["last_event"] = "没有可撤销操作"
-            self.save_state()
-            self.refresh_ui_from_state()
-            return
-        prev = self.history.pop()
-        last_text = self.state.get("last_event", "上一操作")
-        self.state = prev
-        self.state["last_event"] = f"已撤销：{last_text}"
-        self.append_event({"type": "undo", "undo_text": last_text})
-        self.save_state()
-        self.refresh_ui_from_state()
-
-    def reset_game_confirm(self) -> None:
-        ret = QMessageBox.question(self, "确认重置", "确定要重置整场比赛吗？比分、犯规、球员数据都会清零。")
-        if ret != QMessageBox.Yes:
-            return
-        self.push_history()
-        roster = {
-            "home_name": self.home_name_edit.text().strip() or self.state.get("home_name", "主队"),
-            "away_name": self.away_name_edit.text().strip() or self.state.get("away_name", "客队"),
-            "players": {
-                "home": [{"number": p.get("number", ""), "name": p.get("name", "")} for p in self.state.get("players", {}).get("home", [])],
-                "away": [{"number": p.get("number", ""), "name": p.get("name", "")} for p in self.state.get("players", {}).get("away", [])],
-            },
-        }
-        self.state = make_default_state(self.args.period_minutes, roster)
-        self.state["last_event"] = "已重置整场比赛"
-        self.append_event({"type": "reset_game"})
-        self.save_state()
-        self.refresh_ui_from_state()
-
-    def on_clock_timer(self) -> None:
-        now = time.monotonic()
-        dt = now - self.last_clock_tick
-        self.last_clock_tick = now
-        if not bool(self.state.get("clock_running", False)):
-            return
-        left = float(self.state.get("clock_sec_left", 0) or 0) - dt
-        if left <= 0:
-            left = 0
-            self.state["clock_running"] = False
-            self.state["last_event"] = "本节时间结束"
-            self.append_event({"type": "clock_zero"})
-        self.state["clock_sec_left"] = left
-        sec_int = int(left)
-        if self.last_saved_clock_sec != sec_int:
-            self.last_saved_clock_sec = sec_int
-            self.save_state()
-            self.refresh_ui_from_state()
+    # ------------------------------ 快捷键 ------------------------------
 
     def keyPressEvent(self, event) -> None:  # noqa: N802
         key = event.key()
-        if key == Qt.Key_Q:
-            self.add_score("home", 1)
-        elif key == Qt.Key_W:
-            self.add_score("home", 2)
-        elif key == Qt.Key_E:
-            self.add_score("home", 3)
-        elif key == Qt.Key_A:
-            self.add_score("away", 1)
-        elif key == Qt.Key_S:
-            self.add_score("away", 2)
-        elif key == Qt.Key_D:
-            self.add_score("away", 3)
-        elif key == Qt.Key_F:
-            selected = self.state.get("selected_player")
-            if isinstance(selected, dict):
-                self.add_foul(str(selected.get("team")))
-        elif key == Qt.Key_Space:
-            self.toggle_clock()
-        elif key == Qt.Key_U:
-            self.undo_last()
-        elif key in (Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4):
-            self.push_history()
-            self.state["period"] = int(event.text())
-            self.state["last_event"] = f"已切换到第{self.state['period']}节"
-            self.append_event({"type": "period", "period": self.state["period"]})
-            self.save_state()
-            self.refresh_ui_from_state()
-        elif key == Qt.Key_Escape:
-            if self.isFullScreen():
-                self.showNormal()
+        mapping = {
+            Qt.Key_Q: ("score", {"team": "home", "value": 1}),
+            Qt.Key_W: ("score", {"team": "home", "value": 2}),
+            Qt.Key_E: ("score", {"team": "home", "value": 3}),
+            Qt.Key_A: ("score", {"team": "away", "value": 1}),
+            Qt.Key_S: ("score", {"team": "away", "value": 2}),
+            Qt.Key_D: ("score", {"team": "away", "value": 3}),
+            Qt.Key_U: ("undo", {}),
+            Qt.Key_Space: ("clock_toggle", {}),
+        }
+        if key in mapping:
+            action, payload = mapping[key]
+            self.do_action(action, payload)
         elif key == Qt.Key_F11:
             self.showNormal() if self.isFullScreen() else self.showFullScreen()
+        elif key == Qt.Key_Escape and self.isFullScreen():
+            self.showNormal()
         else:
             super().keyPressEvent(event)
 
     def closeEvent(self, event) -> None:  # noqa: N802
+        try:
+            self.controller.save()
+        except Exception:
+            pass
         if self.video_thread is not None:
             self.video_thread.stop()
         if self.state_server is not None:
             self.state_server.stop()
-        self.save_state()
         event.accept()
 
 
-    def reload_state_from_file(self) -> None:
-        loaded = load_json(self.state_path)
-        if not loaded:
-            return
-
-        old_ts = int(self.state.get("updated_at_ms", 0) or 0)
-        new_ts = int(loaded.get("updated_at_ms", 0) or 0)
-
-        if new_ts > old_ts:
-            self.state = self._upgrade_state(loaded, {
-                "home_name": loaded.get("home_name", "主队"),
-                "away_name": loaded.get("away_name", "客队"),
-                "players": loaded.get("players", {}),
-            })
-            self.refresh_ui_from_state()
-
+# ---------------------------------------------------------------------------
+# 四、启动参数
+# ---------------------------------------------------------------------------
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="篮球技术台 V2.1：RK主控 + 状态同步 + 客户端侧比分叠加")
-    parser.add_argument("--rtsp", default="rtsp://127.0.0.1:8554/director", help="RTSP 拉流地址")
-    parser.add_argument("--state", default=os.path.join(CURRENT_DIR, "game_state.json"), help="比赛状态 JSON 路径")
-    parser.add_argument("--events", default=os.path.join(CURRENT_DIR, "events.jsonl"), help="事件日志 JSONL 路径")
-    parser.add_argument("--roster", default=os.path.join(CURRENT_DIR, "sample_roster.json"), help="赛前名单 JSON 路径")
-    parser.add_argument("--font", default=None, help="中文字体路径，例如 /usr/share/fonts/truetype/wqy/wqy-zenhei.ttc")
-    parser.add_argument("--period-minutes", type=int, default=10, help="每节默认分钟数")
-    parser.add_argument("--preview-fps", type=float, default=25.0, help="本地预览帧率")
-    parser.add_argument("--window-width", type=int, default=600, help="窗口宽度")
-    parser.add_argument("--window-height", type=int, default=350, help="窗口高度")
-    parser.add_argument("--serve-state", dest="serve_state", action="store_true", default=True, help="开启 HTTP 状态服务，默认开启")
-    parser.add_argument("--no-serve-state", dest="serve_state", action="store_false", help="关闭 HTTP 状态服务")
-    parser.add_argument("--state-host", default="0.0.0.0", help="状态服务监听地址")
-    parser.add_argument("--state-port", type=int, default=8010, help="状态服务端口")
+    parser = argparse.ArgumentParser(
+        description="篮球技术台 V3：LCD + 网页统一比赛引擎"
+    )
+    parser.add_argument(
+        "--rtsp",
+        default="rtsp://127.0.0.1:8554/director",
+        help="导播 RTSP 地址",
+    )
+    parser.add_argument(
+        "--state",
+        default=os.path.join(CURRENT_DIR, "game_state.json"),
+        help="比赛状态 JSON",
+    )
+    parser.add_argument(
+        "--events",
+        default=os.path.join(CURRENT_DIR, "events.jsonl"),
+        help="事件日志 JSONL",
+    )
+    parser.add_argument(
+        "--roster",
+        default=os.path.join(CURRENT_DIR, "sample_roster.json"),
+        help="赛前名单 JSON",
+    )
+    parser.add_argument(
+        "--period-minutes",
+        type=int,
+        default=10,
+        help="常规每节分钟数",
+    )
+    parser.add_argument(
+        "--preview-fps",
+        type=float,
+        default=25.0,
+        help="LCD 视频预览帧率",
+    )
+    parser.add_argument(
+        "--window-width",
+        type=int,
+        default=1366,
+        help="LCD 窗口宽度",
+    )
+    parser.add_argument(
+        "--window-height",
+        type=int,
+        default=768,
+        help="LCD 窗口高度",
+    )
+    parser.add_argument(
+        "--state-host",
+        default="0.0.0.0",
+        help="网页技术台监听地址",
+    )
+    parser.add_argument(
+        "--state-port",
+        type=int,
+        default=8010,
+        help="网页技术台端口",
+    )
+    parser.add_argument(
+        "--no-serve-state",
+        dest="serve_state",
+        action="store_false",
+        help="关闭内置网页技术台",
+    )
+    parser.set_defaults(serve_state=True)
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
+
+    # 在 QApplication 创建前锁定 Qt 插件搜索路径。
+    # 这一步比只设置环境变量更可靠，可以避免 cv2 的 Qt 插件抢占 xcb。
+    if os.path.isdir(SYSTEM_QT_PLUGIN_DIR):
+        QCoreApplication.setLibraryPaths([SYSTEM_QT_PLUGIN_DIR])
+
+    print("[Qt] DISPLAY =", os.environ.get("DISPLAY"))
+    print(
+        "[Qt] platform path =",
+        os.environ.get("QT_QPA_PLATFORM_PLUGIN_PATH"),
+    )
+    print("[Qt] library paths =", QCoreApplication.libraryPaths())
+    print("[OpenCV] cv2 =", cv2.__file__)
+
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     window = TechTableWindow(args)
     window.show()
     sys.exit(app.exec_())

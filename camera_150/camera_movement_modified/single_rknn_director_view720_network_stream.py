@@ -111,6 +111,12 @@ from audio_chain import (
     build_audio_output_args,
 )
 
+from director_game_policy import (
+    DirectorGamePolicyConfig,
+    GameStateReader,
+    apply_game_state_to_analysis,
+)
+
 # RK3588 / Mali 平台上 OpenCV 有时会尝试启用 OpenCL，可能带来额外开销。
 # 这个环境变量必须尽量在 import cv2 前设置。
 os.environ["OPENCV_OPENCL_RUNTIME"] = "disabled"
@@ -988,6 +994,22 @@ def run(args: argparse.Namespace) -> None:
     fps_counter = base.FPSCounter()
 
     # -------------------------------------------------------------------------
+    # 技术台状态驱动的导播策略
+    # -------------------------------------------------------------------------
+    # GameStateReader 带缓存和 mtime 检查，不会每帧都读取 JSON。
+    game_policy_config = DirectorGamePolicyConfig(
+        enabled=not args.disable_game_policy,
+        state_file=args.game_state_file,
+        refresh_interval=args.game_state_refresh,
+        left_basket_x_ratio=args.left_basket_x_ratio,
+        right_basket_x_ratio=args.right_basket_x_ratio,
+        home_first_half_attack=args.home_first_half_attack,
+        freeze_zoom_frames=args.game_policy_freeze_zoom_frames,
+    )
+    game_state_reader = GameStateReader(game_policy_config)
+    game_policy_text = "NORMAL"
+
+    # -------------------------------------------------------------------------
     # 5）启动网络推流器
     # -------------------------------------------------------------------------
     output_url = resolve_stream_url(args)
@@ -1079,7 +1101,27 @@ def run(args: argparse.Namespace) -> None:
             # -----------------------------------------------------------------
             director_t0 = time.perf_counter()
             boxes_info = single_detections_to_boxes_info(last_detections)
-            analysis = analyze_single_view_frame(boxes_info, frame_w, frame_h, analysis_state)
+            analysis = analyze_single_view_frame(
+                boxes_info,
+                frame_w,
+                frame_h,
+                analysis_state,
+            )
+
+            # 在原运镜状态机之前应用比赛阶段策略：
+            #   NORMAL     原自动导播不变；
+            #   HOLD       暂停/死球时保持当前区域；
+            #   FREE_THROW 罚球时平滑引导至对应篮筐。
+            game_state = game_state_reader.get_state()
+            analysis, game_policy_text = apply_game_state_to_analysis(
+                analysis,
+                game_state,
+                director_state,
+                frame_w,
+                frame_h,
+                game_policy_config,
+            )
+
             director_info = update_overlay_director_state(
                 analysis,
                 frame_w,
@@ -1136,7 +1178,9 @@ def run(args: argparse.Namespace) -> None:
                 director_ms=director_ms,
                 view_ms=view_ms,
                 frame_idx=frame_idx,
-                stream_status=streamer.status_text(),
+                stream_status=(
+                    f"{streamer.status_text()} | {game_policy_text}"
+                ),
             )
 
             # -----------------------------------------------------------------
@@ -1300,6 +1344,54 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--stream-heartbeat-timeout", type=float, default=8.0, help="推流心跳超时，单位秒")
     parser.add_argument("--stream-restart-backoff", type=float, default=2.0, help="FFmpeg 最小重启间隔，单位秒")
 
+    # ---------------------------------------------------------------------
+    # 技术台状态驱动导播
+    # ---------------------------------------------------------------------
+    parser.add_argument(
+        "--game-state-file",
+        default=str(
+            SCRIPT_DIR.parent
+            / "techtable_v2"
+            / "game_state.json"
+        ),
+        help="技术台 game_state.json；导播只读，不会修改该文件",
+    )
+    parser.add_argument(
+        "--disable-game-policy",
+        action="store_true",
+        help="关闭技术台状态策略，完全恢复原自动导播逻辑",
+    )
+    parser.add_argument(
+        "--game-state-refresh",
+        type=float,
+        default=0.20,
+        help="技术台状态缓存刷新间隔，单位秒",
+    )
+    parser.add_argument(
+        "--left-basket-x-ratio",
+        type=float,
+        default=0.18,
+        help="矫正画面中左篮筐归一化 X，需要按现场标定",
+    )
+    parser.add_argument(
+        "--right-basket-x-ratio",
+        type=float,
+        default=0.82,
+        help="矫正画面中右篮筐归一化 X，需要按现场标定",
+    )
+    parser.add_argument(
+        "--home-first-half-attack",
+        choices=["left", "right"],
+        default="right",
+        help="主队第1、2节进攻方向；下半场和加时自动交换",
+    )
+    parser.add_argument(
+        "--game-policy-freeze-zoom-frames",
+        type=int,
+        default=50,
+        help="暂停/罚球策略触发后冻结快速 zoom 的帧数",
+    )
+
     # NAU8822 / ALSA 正式音频链路。
     add_audio_cli_args(parser, "stream")
 
@@ -1326,6 +1418,10 @@ def main() -> None:
     print(f"stream_encoder      : {args.stream_encoder}")
     print(f"stream_bitrate      : {args.stream_bitrate}")
     print(f"stream_audio        : {audio_summary(audio_config_from_args(args, 'stream'))}")
+    print(f"game_state_file     : {args.game_state_file}")
+    print(f"game_policy         : {not args.disable_game_policy}")
+    print(f"basket_x_ratio      : {args.left_basket_x_ratio:.3f} / {args.right_basket_x_ratio:.3f}")
+    print(f"home_first_attack   : {args.home_first_half_attack}")
     print(f"stream_overlay      : {args.stream_overlay}")
     print("=============================================================\n")
 

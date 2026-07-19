@@ -901,6 +901,17 @@ class ProcessManager:
                     str(PROJECT_DIR / "model" / "labels.txt"),
                     "--render-mode",
                     "sample",
+                    # 技术台状态只通过 JSON 提供给导播，保持模块解耦。
+                    "--game-state-file",
+                    str(GAME_STATE_PATH),
+                    # 默认主队上半场向画面右侧进攻；现场相反时改为 left。
+                    "--home-first-half-attack",
+                    "right",
+                    # 左右篮筐在矫正画面中的归一化位置，现场可继续微调。
+                    "--left-basket-x-ratio",
+                    "0.18",
+                    "--right-basket-x-ratio",
+                    "0.82",
                     # 板载 LCD 本地 OpenCV 预览缩放比例。
                     # 仅影响本地窗口，不改变 RTSP 的 1280x720 输出。
                     "--display-scale",

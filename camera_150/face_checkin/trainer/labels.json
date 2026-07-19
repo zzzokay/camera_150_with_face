@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-07-19T17:40:31",
+  "face_size": [
+    160,
+    160
+  ],
+  "labels": {
+    "0": {
+      "person_id": "001",
+      "name": "player_001",
+      "folder": "001__player_001",
+      "sample_count": "40"
+    }
+  }
+}

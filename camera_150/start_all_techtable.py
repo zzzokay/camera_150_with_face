@@ -169,6 +169,14 @@ RUNTIME_DIR = PROJECT_DIR / "runtime"
 LOG_DIR = RUNTIME_DIR / "logs"
 PID_FILE = RUNTIME_DIR / "techtable_processes.json"
 LAUNCHER_PID_FILE = RUNTIME_DIR / "start_all_techtable.pid"
+
+# 当前场次的临时检录数据标记。
+# stop_all_techtable.py 根据它删除本场“已检录”数据，但不会删除人脸样本和模型。
+ACTIVE_CHECKIN_FILE = RUNTIME_DIR / "active_checkin_session.json"
+
+# 启动时 ffprobe 验证 RTSP 音视频轨道后保存的结果。
+RTSP_PROBE_FILE = RUNTIME_DIR / "rtsp_probe.json"
+
 STREAM_DIR = Path.home() / "stream_server"
 
 STATUS_UNSELECTED = "未选择"
@@ -710,6 +718,138 @@ class ProcessManager:
         self._write_pid_file()
         return process
 
+    def wait_for_rtsp_audio(
+        self,
+        url: str,
+        timeout: float = 18.0,
+    ) -> Dict[str, Any]:
+        """
+        使用 ffprobe 验证 RTSP 真正包含视频轨和音频轨。
+
+        OpenCV VideoCapture 只会读取视频，因此“预览连接成功”不能证明音频存在。
+        这里要求：
+            - 至少一条 video stream；
+            - 至少一条 AAC audio stream；
+            - 音频采样率为 48000 Hz；
+            - 音频通道数为 2。
+
+        验证结果写入 runtime/rtsp_probe.json，便于排查。
+        """
+        ffprobe = shutil.which("ffprobe")
+        if not ffprobe:
+            raise RuntimeError(
+                "找不到 ffprobe，无法确认 RTSP 音频是否存在。"
+                "请确认 ffmpeg/ffprobe 已正确安装。"
+            )
+
+        command = [
+            ffprobe,
+            "-v", "error",
+            "-rtsp_transport", "tcp",
+            "-show_entries",
+            "stream=index,codec_type,codec_name,sample_rate,channels",
+            "-of", "json",
+            url,
+        ]
+
+        deadline = time.monotonic() + max(1.0, float(timeout))
+        last_detail = "RTSP 尚未就绪"
+
+        while time.monotonic() < deadline:
+            try:
+                result = subprocess.run(
+                    command,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    check=False,
+                    timeout=4.0,
+                )
+            except subprocess.TimeoutExpired:
+                last_detail = "ffprobe 单次检测超时"
+                time.sleep(0.5)
+                continue
+            except Exception as exc:
+                last_detail = f"ffprobe 执行失败：{exc}"
+                time.sleep(0.5)
+                continue
+
+            if result.returncode != 0:
+                last_detail = result.stderr.strip() or f"ffprobe returncode={result.returncode}"
+                time.sleep(0.5)
+                continue
+
+            try:
+                payload = json.loads(result.stdout or "{}")
+            except Exception as exc:
+                last_detail = f"ffprobe JSON 解析失败：{exc}"
+                time.sleep(0.5)
+                continue
+
+            streams = payload.get("streams", []) or []
+            video_streams = [
+                stream for stream in streams
+                if str(stream.get("codec_type", "")).lower() == "video"
+            ]
+            audio_streams = [
+                stream for stream in streams
+                if str(stream.get("codec_type", "")).lower() == "audio"
+            ]
+
+            if not video_streams:
+                last_detail = f"RTSP 中没有视频轨：{streams}"
+                time.sleep(0.5)
+                continue
+
+            if not audio_streams:
+                last_detail = f"RTSP 中没有音频轨：{streams}"
+                time.sleep(0.5)
+                continue
+
+            audio = audio_streams[0]
+            codec = str(audio.get("codec_name", "")).lower()
+            sample_rate_text = str(audio.get("sample_rate", "")).strip()
+            channels_text = str(audio.get("channels", "")).strip()
+
+            if codec != "aac":
+                raise RuntimeError(
+                    f"RTSP 已发现音频轨，但编码不是 AAC：{audio}"
+                )
+
+            if sample_rate_text and int(sample_rate_text) != 48000:
+                raise RuntimeError(
+                    f"RTSP 音频采样率不是 48000 Hz：{audio}"
+                )
+
+            if channels_text and int(channels_text) != 2:
+                raise RuntimeError(
+                    f"RTSP 音频不是双声道：{audio}"
+                )
+
+            verified = {
+                "verified_at": datetime.now().isoformat(timespec="seconds"),
+                "url": url,
+                "video": video_streams[0],
+                "audio": audio,
+                "all_streams": streams,
+            }
+            atomic_write_json(RTSP_PROBE_FILE, verified)
+            print(
+                "[RTSP 验证] 正常："
+                f"video={video_streams[0].get('codec_name')}，"
+                f"audio={codec}/{sample_rate_text or '?'}Hz/"
+                f"{channels_text or '?'}ch"
+            )
+            return verified
+
+        raise RuntimeError(
+            "RTSP 音视频验收失败。\n"
+            "要求：H.264 视频 + AAC 48000 Hz 双声道。\n"
+            f"最后一次检测结果：{last_detail}\n"
+            f"请查看：{LOG_DIR / 'director.log'} 和 "
+            "camera_movement_modified/stream_logs/*.ffmpeg.log"
+        )
+
     def start_all(self) -> None:
         mediamtx_binary = STREAM_DIR / "mediamtx"
         mediamtx_config = STREAM_DIR / "mediamtx_rk3588.yml"
@@ -807,7 +947,13 @@ class ProcessManager:
             self._start_one("mediamtx", *commands["mediamtx"], env)
             time.sleep(1.2)
             self._start_one("director", *commands["director"], env)
-            time.sleep(2.0)
+
+            # 必须先确认 RTSP 中既有视频也有 AAC 音频，才能进入正式技术台。
+            self.wait_for_rtsp_audio(
+                "rtsp://127.0.0.1:8554/director",
+                timeout=18.0,
+            )
+
             self._start_one("techtable", *commands["techtable"], env)
         except Exception:
             self.stop_all()
@@ -851,7 +997,9 @@ class ProcessManager:
                 except Exception:
                     pass
 
-        deadline = time.time() + 3.0
+        # 导播进程收到 SIGTERM 后需要停止 FFmpeg、释放摄像头和 NAU8822。
+        # 3 秒可能导致过早 SIGKILL，因此延长到 8 秒。
+        deadline = time.time() + 8.0
         while time.time() < deadline:
             remaining = []
             for record in records.values():
@@ -921,18 +1069,14 @@ class WorkflowWindow(QMainWindow):
         self.stack = QStackedWidget()
         self.setCentralWidget(self.stack)
 
+        # 启动器只显示“人员选择”和“人脸检录”两页。
+        # 检录完成后直接启动原技术台窗口，不再显示启动器自己的进程管理页。
         self.selection_page = self._build_selection_page()
         self.checkin_page = self._build_checkin_page()
-        self.director_page = self._build_director_page()
 
         self.stack.addWidget(self.selection_page)
         self.stack.addWidget(self.checkin_page)
-        self.stack.addWidget(self.director_page)
         self.stack.setCurrentWidget(self.selection_page)
-
-        self.process_timer = QTimer(self)
-        self.process_timer.timeout.connect(self.refresh_process_status)
-        self.process_timer.start(1000)
 
         self.refresh_selection_table()
         self.refresh_environment_hint()
@@ -1545,6 +1689,32 @@ class WorkflowWindow(QMainWindow):
     def save_session(self) -> None:
         if self.session_path is None:
             return
+
+        # 保存“当前活动场次”标记，停止脚本据此清除本场临时检录结果。
+        # 这里只删除签到结果，不会删除 face_checkin/dataset、trainer 或映射关系。
+        current_csv_path = (
+            FACE_WORK_DIR
+            / "records"
+            / f"checkin_{datetime.now().strftime('%Y%m%d')}.csv"
+        )
+        active = read_json(ACTIVE_CHECKIN_FILE, {})
+        csv_paths = {
+            str(path)
+            for path in (active.get("csv_paths", []) or [])
+            if str(path).strip()
+        }
+        csv_paths.add(str(current_csv_path))
+
+        atomic_write_json(
+            ACTIVE_CHECKIN_FILE,
+            {
+                "match_id": self.match_id,
+                "session_path": str(self.session_path),
+                "csv_paths": sorted(csv_paths),
+                "updated_at": datetime.now().isoformat(timespec="seconds"),
+            },
+        )
+
         selected = self.selected_rows()
         atomic_write_json(
             self.session_path,
@@ -1600,15 +1770,22 @@ class WorkflowWindow(QMainWindow):
                 return
             self.process_manager.stop_all()
 
-        self.stack.setCurrentWidget(self.director_page)
+        # 不进入启动器自己的第三页；继续在检录页显示启动进度。
+        # 服务启动完成后会隐藏本窗口，由原 rk_techtable_panel.py 接管 LCD。
+        self.enter_director_button.setEnabled(False)
+        self.checkin_status_label.setText(
+            "状态：正在启动 MediaMTX、带音频 RTSP 导播和技术台……"
+        )
         QApplication.processEvents()
         self.start_director_services()
 
     def start_director_services(self) -> None:
-        self.director_video.setText("正在启动 MediaMTX、RKNN 导播和技术台……")
+        self.checkin_status_label.setText(
+            "状态：正在启动并验证 H.264 + AAC RTSP 流……"
+        )
         QApplication.processEvents()
 
-        # 后台线程启动进程，避免 time.sleep 阻塞 UI
+        # 后台线程启动进程并执行 ffprobe 验收，避免阻塞 UI。
         self.startup_thread = StartupThread(self.process_manager, self)
         self.startup_thread.finished.connect(self._on_startup_finished)
         self.startup_thread.error.connect(self._on_startup_error)
@@ -1616,12 +1793,20 @@ class WorkflowWindow(QMainWindow):
 
     def _on_startup_finished(self) -> None:
         self.director_started = True
-        self.start_preview_thread()
-        self.refresh_process_status()
+        self.checkin_status_label.setText(
+            "状态：RTSP 音视频验证通过，技术台已启动。"
+        )
+
+        # 技术台是正式比赛界面；启动器隐藏但保持运行，
+        # 之后由 stop_all_techtable.py 统一停止全部进程。
+        self.hide()
 
     def _on_startup_error(self, message: str) -> None:
+        self.enter_director_button.setEnabled(True)
+        self.checkin_status_label.setText(
+            "状态：导播启动失败，请查看 runtime/logs。"
+        )
         QMessageBox.critical(self, "导播启动失败", message)
-        self.director_video.setText("导播启动失败，请查看 runtime/logs")
 
     def start_preview_thread(self) -> None:
         if self.preview_thread is not None:
@@ -1738,6 +1923,8 @@ def main() -> int:
     print(f"[OpenCV] path              : {cv2.__file__}")
 
     app = QApplication(sys.argv)
+    # 检录窗口隐藏后仍需保留启动器进程，直到 stop_all_techtable.py 结束它。
+    app.setQuitOnLastWindowClosed(False)
     app.setStyle("Fusion")
     window = WorkflowWindow()
     window.show()

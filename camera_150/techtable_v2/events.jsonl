@@ -25,3 +25,5 @@
 {"type": "score", "team": "home", "value": 1, "selected_player": null, "period": 1, "clock": "10:00", "created_at_ms": 1784466054966}
 {"type": "score", "team": "home", "value": 1, "selected_player": null, "period": 1, "clock": "08:41", "created_at_ms": 1784466166754}
 {"type": "clock", "running": false, "period": 1, "clock": "08:34", "created_at_ms": 1784466172937}
+{"type": "score", "team": "home", "value": 1, "selected_player": null, "period": 1, "clock": "08:34", "created_at_ms": 1784472444319}
+{"type": "score", "team": "home", "value": 2, "selected_player": null, "period": 1, "clock": "08:34", "created_at_ms": 1784472445096}

@@ -2,7 +2,7 @@
   "version": 2,
   "home_name": "主队",
   "away_name": "客队",
-  "home_score": 5,
+  "home_score": 8,
   "away_score": 1,
   "home_fouls": 0,
   "away_fouls": 0,
@@ -53,6 +53,6 @@
       }
     ]
   },
-  "last_event": "比赛时间暂停",
-  "updated_at_ms": 1784466270369
+  "last_event": "主队 +2",
+  "updated_at_ms": 1784472445097
 }

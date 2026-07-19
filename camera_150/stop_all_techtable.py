@@ -22,6 +22,7 @@ stop_all_techtable.py
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import os
 import shutil
@@ -36,6 +37,8 @@ PROJECT_DIR = Path(__file__).resolve().parent
 RUNTIME_DIR = PROJECT_DIR / "runtime"
 PID_FILE = RUNTIME_DIR / "techtable_processes.json"
 LAUNCHER_PID_FILE = RUNTIME_DIR / "start_all_techtable.pid"
+ACTIVE_CHECKIN_FILE = RUNTIME_DIR / "active_checkin_session.json"
+RTSP_PROBE_FILE = RUNTIME_DIR / "rtsp_probe.json"
 
 STOP_ORDER = ["techtable", "director", "mediamtx"]
 
@@ -44,6 +47,9 @@ STOP_ORDER = ["techtable", "director", "mediamtx"]
 FALLBACK_PATTERNS = [
     ("技术台", "techtable_v2/rk_techtable_panel.py"),
     ("RKNN 导播推流", "single_rknn_director_view720_network_stream.py"),
+    # FFmpeg 在导播脚本内部使用 start_new_session=True，属于独立进程组；
+    # 导播异常退出时必须额外兜底，避免继续占用 hw:1,0 和 RTSP 发布端。
+    ("FFmpeg 音视频推流", r"ffmpeg.*rtsp://127\.0\.0\.1:8554/director"),
     ("MediaMTX", "mediamtx_rk3588.yml"),
     ("旧版独立人脸识别", "face_checkin_lbph.*--mode[ =]recognize"),
     ("检录与导播工作流 UI", "start_all_techtable.py"),
@@ -175,7 +181,10 @@ def stop_from_pid_file() -> Set[int]:
         if pid <= 0:
             continue
         handled.add(pid)
-        terminate_pids([pid], name)
+        # 导播退出时还要停止内部 FFmpeg、释放摄像头和 NAU8822，
+        # 因此给予更长的优雅退出时间。
+        timeout = 8.0 if name == "director" else 3.0
+        terminate_pids([pid], name, timeout=timeout)
 
     return handled
 
@@ -227,6 +236,96 @@ def cleanup_pid_files() -> None:
             print(f"[WARN] 无法删除 {path}: {exc}")
 
 
+
+def cleanup_transient_checkin_data() -> None:
+    """
+    删除当前场次的临时检录结果。
+
+    会删除：
+        - checkin_session_<match_id>.json；
+        - 当天 CSV 中 match_id 等于当前场次的签到行；
+        - runtime/active_checkin_session.json；
+        - runtime/rtsp_probe.json。
+
+    不会删除：
+        - face_checkin/dataset；
+        - face_checkin/trainer；
+        - labels.json / lbph_model.yml；
+        - roster_face_mapping.json；
+        - 球员名单。
+    """
+    marker = read_json(ACTIVE_CHECKIN_FILE, {})
+    match_id = str(marker.get("match_id", "")).strip()
+
+    session_text = str(marker.get("session_path", "")).strip()
+    if session_text:
+        session_path = Path(session_text)
+        try:
+            session_path.unlink()
+            print(f"[CLEAN] 已删除本场检录会话：{session_path}")
+        except FileNotFoundError:
+            pass
+        except Exception as exc:
+            print(f"[WARN] 无法删除检录会话 {session_path}: {exc}")
+
+    for csv_text in marker.get("csv_paths", []) or []:
+        csv_text = str(csv_text).strip()
+        if not csv_text or not match_id:
+            continue
+
+        csv_path = Path(csv_text)
+        if not csv_path.is_file():
+            continue
+
+        try:
+            with csv_path.open(
+                "r",
+                encoding="utf-8-sig",
+                newline="",
+            ) as file:
+                reader = csv.DictReader(file)
+                fieldnames = list(reader.fieldnames or [])
+                rows = [
+                    row for row in reader
+                    if str(row.get("match_id", "")).strip() != match_id
+                ]
+
+            if not fieldnames:
+                csv_path.unlink()
+                print(f"[CLEAN] 已删除无效检录 CSV：{csv_path}")
+                continue
+
+            if not rows:
+                csv_path.unlink()
+                print(f"[CLEAN] 已删除本场检录 CSV：{csv_path}")
+                continue
+
+            temp_path = csv_path.with_suffix(csv_path.suffix + ".tmp")
+            with temp_path.open(
+                "w",
+                encoding="utf-8-sig",
+                newline="",
+            ) as file:
+                writer = csv.DictWriter(file, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerows(rows)
+            temp_path.replace(csv_path)
+            print(
+                f"[CLEAN] 已从 {csv_path.name} 删除场次 {match_id} 的检录行"
+            )
+
+        except Exception as exc:
+            print(f"[WARN] 清理检录 CSV {csv_path} 失败：{exc}")
+
+    for path in (ACTIVE_CHECKIN_FILE, RTSP_PROBE_FILE):
+        try:
+            path.unlink()
+        except FileNotFoundError:
+            pass
+        except Exception as exc:
+            print(f"[WARN] 无法删除 {path}: {exc}")
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="停止篮球检录、导播、RTSP 和技术台进程")
     parser.add_argument(
@@ -252,6 +351,7 @@ def main() -> int:
     if not args.no_fallback:
         fallback_stop(handled)
 
+    cleanup_transient_checkin_data()
     cleanup_pid_files()
     show_port_status()
 

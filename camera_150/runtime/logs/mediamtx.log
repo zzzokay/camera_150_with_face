@@ -294,3 +294,994 @@
 2026/07/19 21:04:41 INF [RTSP] [conn 127.0.0.1:49310] closed: terminated
 2026/07/19 21:04:41 INF [RTSP] [session fa8f09f4] destroyed: terminated
 2026/07/19 21:04:41 INF waiting for running hooks
+2026/07/19 22:46:54 INF MediaMTX v1.19.2, linux, arm64
+2026/07/19 22:46:54 INF configuration loaded from /home/elf/stream_server/mediamtx_rk3588.yml
+2026/07/19 22:46:54 INF [RTSP] started with listeners on :8554 (TCP/RTSP), :8000 (UDP/RTP), :8001 (UDP/RTCP)
+2026/07/19 22:46:54 INF [RTMP] started with listener on :1935 (TCP/RTMP)
+2026/07/19 22:46:54 INF [HLS] started with listener on :8888 (TCP/HTTP)
+2026/07/19 22:46:54 INF [WebRTC] started with listeners on :8889 (TCP/HTTP), :8189 (UDP/ICE)
+2026/07/19 22:46:54 INF [SRT] started with listener on :8890 (UDP/SRT)
+2026/07/19 22:46:54 INF [MoQ] started with listeners on :8892 (TCP/HTTP2), :8892 (UDP/HTTP3)
+2026/07/19 22:46:56 INF [RTSP] [conn 127.0.0.1:47444] opened
+2026/07/19 22:46:56 INF [RTSP] [conn 127.0.0.1:47444] closed: no stream is available on path 'director'
+2026/07/19 22:46:57 INF [RTSP] [conn 127.0.0.1:47446] opened
+2026/07/19 22:46:57 INF [RTSP] [conn 127.0.0.1:47446] closed: no stream is available on path 'director'
+2026/07/19 22:46:57 INF [RTSP] [conn 127.0.0.1:47462] opened
+2026/07/19 22:46:57 INF [RTSP] [conn 127.0.0.1:47462] closed: no stream is available on path 'director'
+2026/07/19 22:46:58 INF [RTSP] [conn 127.0.0.1:47476] opened
+2026/07/19 22:46:58 INF [RTSP] [conn 127.0.0.1:47476] closed: no stream is available on path 'director'
+2026/07/19 22:46:58 INF [RTSP] [conn 127.0.0.1:47488] opened
+2026/07/19 22:46:58 INF [RTSP] [conn 127.0.0.1:47488] closed: EOF
+2026/07/19 22:46:58 INF [RTSP] [conn 127.0.0.1:47490] opened
+2026/07/19 22:46:58 INF [RTSP] [session 8f43eb63] created by 127.0.0.1:47490
+2026/07/19 22:46:58 INF [path director] stream is available and online, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 22:46:58 INF [RTSP] [session 8f43eb63] is publishing to path 'director'
+2026/07/19 22:46:58 INF [path director] RTP packets are too big (1460 > 1440), remuxing them into smaller ones
+2026/07/19 22:46:58 INF [RTSP] [conn 127.0.0.1:47504] opened
+2026/07/19 22:46:58 INF [RTSP] [session 03ae4ffd] created by 127.0.0.1:47504
+2026/07/19 22:46:58 INF [RTSP] [session 03ae4ffd] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 22:47:00 INF [RTSP] [conn 127.0.0.1:47510] opened
+2026/07/19 22:47:00 INF [RTSP] [conn 127.0.0.1:47510] closed: EOF
+2026/07/19 22:47:00 INF [RTSP] [session 03ae4ffd] destroyed: torn down by 127.0.0.1:47504
+2026/07/19 22:47:00 INF [RTSP] [conn 127.0.0.1:47504] closed: EOF
+2026/07/19 22:47:01 INF [RTSP] [conn 127.0.0.1:47526] opened
+2026/07/19 22:47:01 INF [RTSP] [session ec05c039] created by 127.0.0.1:47526
+2026/07/19 22:47:01 INF [RTSP] [session ec05c039] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 22:47:02 INF [RTSP] [conn 127.0.0.1:47536] opened
+2026/07/19 22:47:02 INF [RTSP] [conn 127.0.0.1:47536] closed: EOF
+2026/07/19 22:47:04 INF [RTSP] [conn 127.0.0.1:47282] opened
+2026/07/19 22:47:04 INF [RTSP] [conn 127.0.0.1:47282] closed: EOF
+2026/07/19 22:47:06 INF [RTSP] [conn 127.0.0.1:47284] opened
+2026/07/19 22:47:06 INF [RTSP] [conn 127.0.0.1:47284] closed: EOF
+2026/07/19 22:47:08 INF [RTSP] [conn 127.0.0.1:47294] opened
+2026/07/19 22:47:08 INF [RTSP] [conn 127.0.0.1:47294] closed: EOF
+2026/07/19 22:47:10 INF [RTSP] [conn 127.0.0.1:47296] opened
+2026/07/19 22:47:10 INF [RTSP] [conn 127.0.0.1:47296] closed: EOF
+2026/07/19 22:47:12 INF [RTSP] [conn 127.0.0.1:47298] opened
+2026/07/19 22:47:12 INF [RTSP] [conn 127.0.0.1:47298] closed: EOF
+2026/07/19 22:47:14 INF [RTSP] [conn 127.0.0.1:59488] opened
+2026/07/19 22:47:14 INF [RTSP] [conn 127.0.0.1:59488] closed: EOF
+2026/07/19 22:47:16 INF [RTSP] [conn 127.0.0.1:59498] opened
+2026/07/19 22:47:16 INF [RTSP] [conn 127.0.0.1:59498] closed: EOF
+2026/07/19 22:47:18 INF [RTSP] [conn 127.0.0.1:59508] opened
+2026/07/19 22:47:18 INF [RTSP] [conn 127.0.0.1:59508] closed: EOF
+2026/07/19 22:47:20 INF [RTSP] [conn 127.0.0.1:59510] opened
+2026/07/19 22:47:20 INF [RTSP] [conn 127.0.0.1:59510] closed: EOF
+2026/07/19 22:47:22 INF [RTSP] [conn 127.0.0.1:59516] opened
+2026/07/19 22:47:22 INF [RTSP] [conn 127.0.0.1:59516] closed: EOF
+2026/07/19 22:47:24 INF [RTSP] [conn 127.0.0.1:56500] opened
+2026/07/19 22:47:24 INF [RTSP] [conn 127.0.0.1:56500] closed: EOF
+2026/07/19 22:47:26 INF [RTSP] [conn 127.0.0.1:56516] opened
+2026/07/19 22:47:26 INF [RTSP] [conn 127.0.0.1:56516] closed: EOF
+2026/07/19 22:47:28 INF [RTSP] [conn 127.0.0.1:56528] opened
+2026/07/19 22:47:28 INF [RTSP] [conn 127.0.0.1:56528] closed: EOF
+2026/07/19 22:47:30 INF [RTSP] [conn 127.0.0.1:56534] opened
+2026/07/19 22:47:30 INF [RTSP] [conn 127.0.0.1:56534] closed: EOF
+2026/07/19 22:47:32 INF [RTSP] [conn 127.0.0.1:56538] opened
+2026/07/19 22:47:32 INF [RTSP] [conn 127.0.0.1:56538] closed: EOF
+2026/07/19 22:47:34 INF [RTSP] [conn 127.0.0.1:39700] opened
+2026/07/19 22:47:34 INF [RTSP] [conn 127.0.0.1:39700] closed: EOF
+2026/07/19 22:47:36 INF [RTSP] [conn 127.0.0.1:39706] opened
+2026/07/19 22:47:36 INF [RTSP] [conn 127.0.0.1:39706] closed: EOF
+2026/07/19 22:47:38 INF [RTSP] [conn 127.0.0.1:39708] opened
+2026/07/19 22:47:38 INF [RTSP] [conn 127.0.0.1:39708] closed: EOF
+2026/07/19 22:47:40 INF [RTSP] [conn 127.0.0.1:39712] opened
+2026/07/19 22:47:40 INF [RTSP] [conn 127.0.0.1:39712] closed: EOF
+2026/07/19 22:47:42 INF [RTSP] [conn 127.0.0.1:39722] opened
+2026/07/19 22:47:42 INF [RTSP] [conn 127.0.0.1:39722] closed: EOF
+2026/07/19 22:47:44 INF [RTSP] [conn 127.0.0.1:48078] opened
+2026/07/19 22:47:44 INF [RTSP] [conn 127.0.0.1:48078] closed: EOF
+2026/07/19 22:47:46 INF [RTSP] [conn 127.0.0.1:48088] opened
+2026/07/19 22:47:46 INF [RTSP] [conn 127.0.0.1:48088] closed: EOF
+2026/07/19 22:47:48 INF [RTSP] [conn 127.0.0.1:48104] opened
+2026/07/19 22:47:48 INF [RTSP] [conn 127.0.0.1:48104] closed: EOF
+2026/07/19 22:47:50 INF [RTSP] [conn 127.0.0.1:48110] opened
+2026/07/19 22:47:50 INF [RTSP] [conn 127.0.0.1:48110] closed: EOF
+2026/07/19 22:47:52 INF [RTSP] [conn 127.0.0.1:48114] opened
+2026/07/19 22:47:52 INF [RTSP] [conn 127.0.0.1:48114] closed: EOF
+2026/07/19 22:47:54 INF [RTSP] [conn 127.0.0.1:52528] opened
+2026/07/19 22:47:54 INF [RTSP] [conn 127.0.0.1:52528] closed: EOF
+2026/07/19 22:47:56 INF [RTSP] [conn 127.0.0.1:52532] opened
+2026/07/19 22:47:56 INF [RTSP] [conn 127.0.0.1:52532] closed: EOF
+2026/07/19 22:47:58 INF [RTSP] [conn 127.0.0.1:52546] opened
+2026/07/19 22:47:58 INF [RTSP] [conn 127.0.0.1:52546] closed: EOF
+2026/07/19 22:48:00 INF [RTSP] [conn 127.0.0.1:52548] opened
+2026/07/19 22:48:00 INF [RTSP] [conn 127.0.0.1:52548] closed: EOF
+2026/07/19 22:48:02 INF [RTSP] [conn 127.0.0.1:52564] opened
+2026/07/19 22:48:02 INF [RTSP] [conn 127.0.0.1:52564] closed: EOF
+2026/07/19 22:48:04 INF [RTSP] [conn 127.0.0.1:47420] opened
+2026/07/19 22:48:04 INF [RTSP] [conn 127.0.0.1:47420] closed: EOF
+2026/07/19 22:48:06 INF [RTSP] [conn 127.0.0.1:47428] opened
+2026/07/19 22:48:06 INF [RTSP] [conn 127.0.0.1:47428] closed: EOF
+2026/07/19 22:48:08 INF [RTSP] [conn 127.0.0.1:47442] opened
+2026/07/19 22:48:08 INF [RTSP] [conn 127.0.0.1:47442] closed: EOF
+2026/07/19 22:48:08 INF [RTSP] [conn 192.168.137.1:64588] opened
+2026/07/19 22:48:08 INF [RTSP] [session 78992457] created by 192.168.137.1:64588
+2026/07/19 22:48:08 INF [RTSP] [session 78992457] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 22:48:10 INF [RTSP] [conn 127.0.0.1:47446] opened
+2026/07/19 22:48:10 INF [RTSP] [conn 127.0.0.1:47446] closed: EOF
+2026/07/19 22:48:12 INF [RTSP] [conn 127.0.0.1:47462] opened
+2026/07/19 22:48:12 INF [RTSP] [conn 127.0.0.1:47462] closed: EOF
+2026/07/19 22:48:14 INF [RTSP] [conn 127.0.0.1:56290] opened
+2026/07/19 22:48:14 INF [RTSP] [conn 127.0.0.1:56290] closed: EOF
+2026/07/19 22:48:16 INF [RTSP] [conn 127.0.0.1:56306] opened
+2026/07/19 22:48:16 INF [RTSP] [conn 127.0.0.1:56306] closed: EOF
+2026/07/19 22:48:18 INF [RTSP] [conn 127.0.0.1:56318] opened
+2026/07/19 22:48:18 INF [RTSP] [conn 127.0.0.1:56318] closed: EOF
+2026/07/19 22:48:20 INF [RTSP] [conn 127.0.0.1:56324] opened
+2026/07/19 22:48:20 INF [RTSP] [conn 127.0.0.1:56324] closed: EOF
+2026/07/19 22:48:22 INF [RTSP] [conn 127.0.0.1:56334] opened
+2026/07/19 22:48:22 INF [RTSP] [conn 127.0.0.1:56334] closed: EOF
+2026/07/19 22:48:24 INF [RTSP] [conn 127.0.0.1:41600] opened
+2026/07/19 22:48:24 INF [RTSP] [conn 127.0.0.1:41600] closed: EOF
+2026/07/19 22:48:26 INF [RTSP] [conn 127.0.0.1:41602] opened
+2026/07/19 22:48:26 INF [RTSP] [conn 127.0.0.1:41602] closed: EOF
+2026/07/19 22:48:28 INF [RTSP] [conn 127.0.0.1:41612] opened
+2026/07/19 22:48:28 INF [RTSP] [conn 127.0.0.1:41612] closed: EOF
+2026/07/19 22:48:30 INF [RTSP] [conn 127.0.0.1:41628] opened
+2026/07/19 22:48:30 INF [RTSP] [conn 127.0.0.1:41628] closed: EOF
+2026/07/19 22:48:32 INF [RTSP] [conn 127.0.0.1:41630] opened
+2026/07/19 22:48:32 INF [RTSP] [conn 127.0.0.1:41630] closed: EOF
+2026/07/19 22:48:34 INF [RTSP] [session 78992457] destroyed: torn down by 192.168.137.1:64588
+2026/07/19 22:48:34 INF [RTSP] [conn 192.168.137.1:64588] closed: EOF
+2026/07/19 22:48:34 INF [RTSP] [conn 127.0.0.1:41658] opened
+2026/07/19 22:48:34 INF [RTSP] [conn 127.0.0.1:41658] closed: EOF
+2026/07/19 22:48:36 INF [RTSP] [conn 127.0.0.1:41672] opened
+2026/07/19 22:48:36 INF [RTSP] [conn 127.0.0.1:41672] closed: EOF
+2026/07/19 22:48:38 INF [RTSP] [conn 127.0.0.1:41686] opened
+2026/07/19 22:48:38 INF [RTSP] [conn 127.0.0.1:41686] closed: EOF
+2026/07/19 22:48:40 INF [RTSP] [conn 127.0.0.1:41690] opened
+2026/07/19 22:48:40 INF [RTSP] [conn 127.0.0.1:41690] closed: EOF
+2026/07/19 22:48:42 INF [RTSP] [conn 127.0.0.1:41692] opened
+2026/07/19 22:48:42 INF [RTSP] [conn 127.0.0.1:41692] closed: EOF
+2026/07/19 22:48:44 INF [RTSP] [conn 127.0.0.1:55688] opened
+2026/07/19 22:48:44 INF [RTSP] [conn 127.0.0.1:55688] closed: EOF
+2026/07/19 22:48:46 INF [RTSP] [conn 127.0.0.1:55700] opened
+2026/07/19 22:48:46 INF [RTSP] [conn 127.0.0.1:55700] closed: EOF
+2026/07/19 22:48:48 INF [RTSP] [conn 127.0.0.1:55716] opened
+2026/07/19 22:48:48 INF [RTSP] [conn 127.0.0.1:55716] closed: EOF
+2026/07/19 22:48:50 INF [RTSP] [conn 127.0.0.1:55726] opened
+2026/07/19 22:48:50 INF [RTSP] [conn 127.0.0.1:55726] closed: EOF
+2026/07/19 22:48:52 INF [RTSP] [conn 127.0.0.1:55732] opened
+2026/07/19 22:48:52 INF [RTSP] [conn 127.0.0.1:55732] closed: EOF
+2026/07/19 22:48:53 INF [RTSP] [conn 127.0.0.1:59598] opened
+2026/07/19 22:48:53 INF [RTSP] [session 3ae7b8e5] created by 127.0.0.1:59598
+2026/07/19 22:48:53 INF [RTSP] [session 3ae7b8e5] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 22:48:54 INF [RTSP] [conn 127.0.0.1:59608] opened
+2026/07/19 22:48:54 INF [RTSP] [conn 127.0.0.1:59608] closed: EOF
+2026/07/19 22:48:54 INF [RTSP] [session 3ae7b8e5] destroyed: torn down by 127.0.0.1:59598
+2026/07/19 22:48:54 INF [RTSP] [conn 127.0.0.1:59598] closed: read tcp 127.0.0.1:8554->127.0.0.1:59598: read: connection reset by peer
+2026/07/19 22:48:56 INF [RTSP] [conn 127.0.0.1:59624] opened
+2026/07/19 22:48:56 INF [RTSP] [conn 127.0.0.1:59624] closed: EOF
+2026/07/19 22:48:58 INF [RTSP] [conn 127.0.0.1:59630] opened
+2026/07/19 22:48:58 INF [RTSP] [conn 127.0.0.1:59630] closed: EOF
+2026/07/19 22:49:00 INF [RTSP] [conn 127.0.0.1:59632] opened
+2026/07/19 22:49:00 INF [RTSP] [conn 127.0.0.1:59632] closed: EOF
+2026/07/19 22:49:02 INF [RTSP] [conn 127.0.0.1:59644] opened
+2026/07/19 22:49:02 INF [RTSP] [conn 127.0.0.1:59644] closed: EOF
+2026/07/19 22:49:04 INF [RTSP] [conn 127.0.0.1:48300] opened
+2026/07/19 22:49:04 INF [RTSP] [conn 127.0.0.1:48300] closed: EOF
+2026/07/19 22:49:06 INF [RTSP] [conn 127.0.0.1:48308] opened
+2026/07/19 22:49:06 INF [RTSP] [conn 127.0.0.1:48308] closed: EOF
+2026/07/19 22:49:08 INF [RTSP] [conn 127.0.0.1:48310] opened
+2026/07/19 22:49:08 INF [RTSP] [conn 127.0.0.1:48310] closed: EOF
+2026/07/19 22:49:10 INF [RTSP] [conn 127.0.0.1:48318] opened
+2026/07/19 22:49:10 INF [RTSP] [conn 127.0.0.1:48318] closed: EOF
+2026/07/19 22:49:12 INF [RTSP] [conn 127.0.0.1:48322] opened
+2026/07/19 22:49:12 INF [RTSP] [conn 127.0.0.1:48322] closed: EOF
+2026/07/19 22:49:14 INF [RTSP] [conn 127.0.0.1:46636] opened
+2026/07/19 22:49:14 INF [RTSP] [conn 127.0.0.1:46636] closed: EOF
+2026/07/19 22:49:16 INF [RTSP] [conn 127.0.0.1:46642] opened
+2026/07/19 22:49:16 INF [RTSP] [conn 127.0.0.1:46642] closed: EOF
+2026/07/19 22:49:18 INF [RTSP] [conn 127.0.0.1:46650] opened
+2026/07/19 22:49:18 INF [RTSP] [conn 127.0.0.1:46650] closed: EOF
+2026/07/19 22:49:20 INF [RTSP] [conn 127.0.0.1:46662] opened
+2026/07/19 22:49:20 INF [RTSP] [conn 127.0.0.1:46662] closed: EOF
+2026/07/19 22:49:22 INF [RTSP] [conn 127.0.0.1:46674] opened
+2026/07/19 22:49:22 INF [RTSP] [conn 127.0.0.1:46674] closed: EOF
+2026/07/19 22:49:24 INF [RTSP] [conn 127.0.0.1:58214] opened
+2026/07/19 22:49:24 INF [RTSP] [conn 127.0.0.1:58214] closed: EOF
+2026/07/19 22:49:26 INF [RTSP] [conn 127.0.0.1:58222] opened
+2026/07/19 22:49:26 INF [RTSP] [conn 127.0.0.1:58222] closed: EOF
+2026/07/19 22:49:28 INF [RTSP] [conn 127.0.0.1:58230] opened
+2026/07/19 22:49:28 INF [RTSP] [conn 127.0.0.1:58230] closed: EOF
+2026/07/19 22:49:30 INF [RTSP] [conn 127.0.0.1:58238] opened
+2026/07/19 22:49:30 INF [RTSP] [conn 127.0.0.1:58238] closed: EOF
+2026/07/19 22:49:32 INF [RTSP] [conn 127.0.0.1:58242] opened
+2026/07/19 22:49:32 INF [RTSP] [conn 127.0.0.1:58242] closed: EOF
+2026/07/19 22:49:34 INF [RTSP] [conn 127.0.0.1:59982] opened
+2026/07/19 22:49:34 INF [RTSP] [conn 127.0.0.1:59982] closed: EOF
+2026/07/19 22:49:36 INF [RTSP] [conn 127.0.0.1:59988] opened
+2026/07/19 22:49:36 INF [RTSP] [conn 127.0.0.1:59988] closed: EOF
+2026/07/19 22:49:38 INF [RTSP] [conn 127.0.0.1:59994] opened
+2026/07/19 22:49:38 INF [RTSP] [conn 127.0.0.1:59994] closed: EOF
+2026/07/19 22:49:40 INF [RTSP] [conn 127.0.0.1:60010] opened
+2026/07/19 22:49:40 INF [RTSP] [conn 127.0.0.1:60010] closed: EOF
+2026/07/19 22:49:42 INF [RTSP] [conn 127.0.0.1:60014] opened
+2026/07/19 22:49:42 INF [RTSP] [conn 127.0.0.1:60014] closed: EOF
+2026/07/19 22:49:44 INF [RTSP] [conn 127.0.0.1:59876] opened
+2026/07/19 22:49:44 INF [RTSP] [conn 127.0.0.1:59876] closed: EOF
+2026/07/19 22:49:46 INF [RTSP] [conn 127.0.0.1:59890] opened
+2026/07/19 22:49:46 INF [RTSP] [conn 127.0.0.1:59890] closed: EOF
+2026/07/19 22:49:48 INF [RTSP] [conn 127.0.0.1:59900] opened
+2026/07/19 22:49:48 INF [RTSP] [conn 127.0.0.1:59900] closed: EOF
+2026/07/19 22:49:50 INF [RTSP] [conn 127.0.0.1:59914] opened
+2026/07/19 22:49:50 INF [RTSP] [conn 127.0.0.1:59914] closed: EOF
+2026/07/19 22:49:52 INF [RTSP] [conn 127.0.0.1:59922] opened
+2026/07/19 22:49:52 INF [RTSP] [conn 127.0.0.1:59922] closed: EOF
+2026/07/19 22:49:54 INF [RTSP] [conn 127.0.0.1:43472] opened
+2026/07/19 22:49:54 INF [RTSP] [conn 127.0.0.1:43472] closed: EOF
+2026/07/19 22:49:56 INF [RTSP] [conn 127.0.0.1:43474] opened
+2026/07/19 22:49:56 INF [RTSP] [conn 127.0.0.1:43474] closed: EOF
+2026/07/19 22:49:58 INF [RTSP] [conn 127.0.0.1:43488] opened
+2026/07/19 22:49:58 INF [RTSP] [conn 127.0.0.1:43488] closed: EOF
+2026/07/19 22:50:00 INF [RTSP] [conn 127.0.0.1:43502] opened
+2026/07/19 22:50:00 INF [RTSP] [conn 127.0.0.1:43502] closed: EOF
+2026/07/19 22:50:02 INF [RTSP] [conn 127.0.0.1:43510] opened
+2026/07/19 22:50:02 INF [RTSP] [conn 127.0.0.1:43510] closed: EOF
+2026/07/19 22:50:04 INF [RTSP] [conn 127.0.0.1:53196] opened
+2026/07/19 22:50:04 INF [RTSP] [conn 127.0.0.1:53196] closed: EOF
+2026/07/19 22:50:06 INF [RTSP] [conn 127.0.0.1:53206] opened
+2026/07/19 22:50:06 INF [RTSP] [conn 127.0.0.1:53206] closed: EOF
+2026/07/19 22:50:08 INF [RTSP] [conn 127.0.0.1:53216] opened
+2026/07/19 22:50:08 INF [RTSP] [conn 127.0.0.1:53216] closed: EOF
+2026/07/19 22:50:10 INF [RTSP] [conn 127.0.0.1:53230] opened
+2026/07/19 22:50:10 INF [RTSP] [conn 127.0.0.1:53230] closed: EOF
+2026/07/19 22:50:11 INF [RTSP] [conn 127.0.0.1:47526] closed: read tcp 127.0.0.1:8554->127.0.0.1:47526: read: connection reset by peer
+2026/07/19 22:50:11 INF [RTSP] [session ec05c039] destroyed: not in use
+2026/07/19 22:50:12 INF [RTSP] [conn 127.0.0.1:53232] opened
+2026/07/19 22:50:12 INF [RTSP] [conn 127.0.0.1:53232] closed: EOF
+2026/07/19 22:50:14 INF [RTSP] [conn 127.0.0.1:47490] closed: EOF
+2026/07/19 22:50:14 INF [RTSP] [session 8f43eb63] destroyed: torn down by 127.0.0.1:47490
+2026/07/19 22:50:14 INF [RTSP] [conn 127.0.0.1:37792] opened
+2026/07/19 22:50:14 INF [RTSP] [conn 127.0.0.1:37792] closed: EOF
+2026/07/19 22:50:15 INF [RTSP] [conn 127.0.0.1:37806] opened
+2026/07/19 22:50:15 INF [RTSP] [session ecc858d1] created by 127.0.0.1:37806
+2026/07/19 22:50:15 INF [path director] stream is available and online, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 22:50:15 INF [RTSP] [session ecc858d1] is publishing to path 'director'
+2026/07/19 22:50:22 INF shutting down gracefully
+2026/07/19 22:50:22 INF [SRT] closing
+2026/07/19 22:50:22 INF [MoQ] closing
+2026/07/19 22:50:22 INF [WebRTC] closing
+2026/07/19 22:50:22 INF [HLS] closing
+2026/07/19 22:50:22 INF [RTMP] closing
+2026/07/19 22:50:22 INF [RTSP] closing
+2026/07/19 22:50:22 INF [RTSP] [conn 127.0.0.1:37806] closed: terminated
+2026/07/19 22:50:22 INF [RTSP] [session ecc858d1] destroyed: terminated
+2026/07/19 22:50:22 INF waiting for running hooks
+2026/07/19 23:37:44 INF MediaMTX v1.19.2, linux, arm64
+2026/07/19 23:37:44 INF configuration loaded from /home/elf/stream_server/mediamtx_rk3588.yml
+2026/07/19 23:37:44 INF [RTSP] started with listeners on :8554 (TCP/RTSP), :8000 (UDP/RTP), :8001 (UDP/RTCP)
+2026/07/19 23:37:44 INF [RTMP] started with listener on :1935 (TCP/RTMP)
+2026/07/19 23:37:44 INF [HLS] started with listener on :8888 (TCP/HTTP)
+2026/07/19 23:37:44 INF [WebRTC] started with listeners on :8889 (TCP/HTTP), :8189 (UDP/ICE)
+2026/07/19 23:37:44 INF [SRT] started with listener on :8890 (UDP/SRT)
+2026/07/19 23:37:44 INF [MoQ] started with listeners on :8892 (TCP/HTTP2), :8892 (UDP/HTTP3)
+2026/07/19 23:37:46 INF [RTSP] [conn 127.0.0.1:50742] opened
+2026/07/19 23:37:46 INF [RTSP] [conn 127.0.0.1:50742] closed: no stream is available on path 'director'
+2026/07/19 23:37:47 INF [RTSP] [conn 127.0.0.1:50756] opened
+2026/07/19 23:37:47 INF [RTSP] [conn 127.0.0.1:50756] closed: no stream is available on path 'director'
+2026/07/19 23:37:47 INF [RTSP] [conn 127.0.0.1:50760] opened
+2026/07/19 23:37:47 INF [RTSP] [conn 127.0.0.1:50760] closed: no stream is available on path 'director'
+2026/07/19 23:37:48 INF [RTSP] [conn 127.0.0.1:50774] opened
+2026/07/19 23:37:48 INF [RTSP] [conn 127.0.0.1:50774] closed: no stream is available on path 'director'
+2026/07/19 23:37:48 INF [RTSP] [conn 127.0.0.1:50784] opened
+2026/07/19 23:37:48 INF [RTSP] [conn 127.0.0.1:50784] closed: EOF
+2026/07/19 23:37:49 INF [RTSP] [conn 127.0.0.1:50786] opened
+2026/07/19 23:37:49 INF [RTSP] [conn 127.0.0.1:50786] closed: no stream is available on path 'director'
+2026/07/19 23:37:49 INF [RTSP] [conn 127.0.0.1:50792] opened
+2026/07/19 23:37:49 INF [RTSP] [session 7cb20d6b] created by 127.0.0.1:50792
+2026/07/19 23:37:49 INF [path director] stream is available and online, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 23:37:49 INF [RTSP] [session 7cb20d6b] is publishing to path 'director'
+2026/07/19 23:37:49 INF [path director] RTP packets are too big (1460 > 1440), remuxing them into smaller ones
+2026/07/19 23:37:49 INF [RTSP] [conn 127.0.0.1:50794] opened
+2026/07/19 23:37:49 INF [RTSP] [session 223e2c16] created by 127.0.0.1:50794
+2026/07/19 23:37:49 INF [RTSP] [session 223e2c16] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 23:37:50 INF [RTSP] [conn 127.0.0.1:50804] opened
+2026/07/19 23:37:50 INF [RTSP] [conn 127.0.0.1:50804] closed: EOF
+2026/07/19 23:37:51 INF [RTSP] [session 223e2c16] destroyed: torn down by 127.0.0.1:50794
+2026/07/19 23:37:51 INF [RTSP] [conn 127.0.0.1:50794] closed: read tcp 127.0.0.1:8554->127.0.0.1:50794: read: connection reset by peer
+2026/07/19 23:37:52 INF [RTSP] [conn 127.0.0.1:50806] opened
+2026/07/19 23:37:52 INF [RTSP] [session 29d1030b] created by 127.0.0.1:50806
+2026/07/19 23:37:52 INF [RTSP] [session 29d1030b] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 23:37:52 INF [RTSP] [conn 127.0.0.1:40844] opened
+2026/07/19 23:37:52 INF [RTSP] [conn 127.0.0.1:40844] closed: EOF
+2026/07/19 23:37:54 INF [RTSP] [conn 127.0.0.1:40848] opened
+2026/07/19 23:37:54 INF [RTSP] [conn 127.0.0.1:40848] closed: EOF
+2026/07/19 23:37:56 INF [RTSP] [conn 127.0.0.1:40864] opened
+2026/07/19 23:37:56 INF [RTSP] [conn 127.0.0.1:40864] closed: EOF
+2026/07/19 23:37:58 INF [RTSP] [conn 127.0.0.1:40868] opened
+2026/07/19 23:37:58 INF [RTSP] [conn 127.0.0.1:40868] closed: EOF
+2026/07/19 23:38:00 INF [RTSP] [conn 127.0.0.1:40874] opened
+2026/07/19 23:38:00 INF [RTSP] [conn 127.0.0.1:40874] closed: EOF
+2026/07/19 23:38:02 INF [RTSP] [conn 127.0.0.1:43306] opened
+2026/07/19 23:38:02 INF [RTSP] [conn 127.0.0.1:43306] closed: EOF
+2026/07/19 23:38:04 INF [RTSP] [conn 127.0.0.1:43316] opened
+2026/07/19 23:38:04 INF [RTSP] [conn 127.0.0.1:43316] closed: EOF
+2026/07/19 23:38:06 INF [RTSP] [conn 127.0.0.1:43326] opened
+2026/07/19 23:38:06 INF [RTSP] [conn 127.0.0.1:43326] closed: EOF
+2026/07/19 23:38:08 INF [RTSP] [conn 127.0.0.1:43336] opened
+2026/07/19 23:38:08 INF [RTSP] [conn 127.0.0.1:43336] closed: EOF
+2026/07/19 23:38:10 INF [RTSP] [conn 127.0.0.1:43338] opened
+2026/07/19 23:38:10 INF [RTSP] [conn 127.0.0.1:43338] closed: EOF
+2026/07/19 23:38:12 INF [RTSP] [conn 127.0.0.1:44086] opened
+2026/07/19 23:38:12 INF [RTSP] [conn 127.0.0.1:44086] closed: EOF
+2026/07/19 23:38:14 INF [RTSP] [conn 127.0.0.1:44092] opened
+2026/07/19 23:38:14 INF [RTSP] [conn 127.0.0.1:44092] closed: EOF
+2026/07/19 23:38:16 INF [RTSP] [conn 127.0.0.1:44108] opened
+2026/07/19 23:38:16 INF [RTSP] [conn 127.0.0.1:44108] closed: EOF
+2026/07/19 23:38:18 INF [RTSP] [conn 127.0.0.1:44110] opened
+2026/07/19 23:38:18 INF [RTSP] [conn 127.0.0.1:44110] closed: EOF
+2026/07/19 23:38:20 INF [RTSP] [conn 127.0.0.1:44124] opened
+2026/07/19 23:38:20 INF [RTSP] [conn 127.0.0.1:44124] closed: EOF
+2026/07/19 23:38:22 INF [RTSP] [conn 127.0.0.1:33520] opened
+2026/07/19 23:38:22 INF [RTSP] [conn 127.0.0.1:33520] closed: EOF
+2026/07/19 23:38:24 INF [RTSP] [conn 127.0.0.1:33524] opened
+2026/07/19 23:38:24 INF [RTSP] [conn 127.0.0.1:33524] closed: EOF
+2026/07/19 23:38:26 INF [RTSP] [conn 127.0.0.1:33536] opened
+2026/07/19 23:38:26 INF [RTSP] [conn 127.0.0.1:33536] closed: EOF
+2026/07/19 23:38:28 INF [RTSP] [conn 127.0.0.1:33548] opened
+2026/07/19 23:38:28 INF [RTSP] [conn 127.0.0.1:33548] closed: EOF
+2026/07/19 23:38:30 INF [RTSP] [conn 127.0.0.1:33564] opened
+2026/07/19 23:38:30 INF [RTSP] [conn 127.0.0.1:33564] closed: EOF
+2026/07/19 23:38:32 INF [RTSP] [conn 127.0.0.1:57296] opened
+2026/07/19 23:38:32 INF [RTSP] [conn 127.0.0.1:57296] closed: EOF
+2026/07/19 23:38:34 INF [RTSP] [conn 127.0.0.1:57302] opened
+2026/07/19 23:38:34 INF [RTSP] [conn 127.0.0.1:57302] closed: EOF
+2026/07/19 23:38:36 INF [RTSP] [conn 127.0.0.1:57316] opened
+2026/07/19 23:38:36 INF [RTSP] [conn 127.0.0.1:57316] closed: EOF
+2026/07/19 23:38:38 INF [RTSP] [conn 127.0.0.1:57318] opened
+2026/07/19 23:38:38 INF [RTSP] [conn 127.0.0.1:57318] closed: EOF
+2026/07/19 23:38:40 INF [RTSP] [conn 127.0.0.1:57328] opened
+2026/07/19 23:38:40 INF [RTSP] [conn 127.0.0.1:57328] closed: EOF
+2026/07/19 23:38:42 INF [RTSP] [conn 127.0.0.1:45212] opened
+2026/07/19 23:38:42 INF [RTSP] [conn 127.0.0.1:45212] closed: EOF
+2026/07/19 23:38:44 INF [RTSP] [conn 127.0.0.1:45228] opened
+2026/07/19 23:38:44 INF [RTSP] [conn 127.0.0.1:45228] closed: EOF
+2026/07/19 23:38:46 INF [RTSP] [conn 127.0.0.1:45240] opened
+2026/07/19 23:38:46 INF [RTSP] [conn 127.0.0.1:45240] closed: EOF
+2026/07/19 23:38:48 INF [RTSP] [conn 127.0.0.1:45256] opened
+2026/07/19 23:38:48 INF [RTSP] [conn 127.0.0.1:45256] closed: EOF
+2026/07/19 23:38:50 INF [RTSP] [conn 127.0.0.1:45264] opened
+2026/07/19 23:38:50 INF [RTSP] [conn 127.0.0.1:45264] closed: EOF
+2026/07/19 23:38:52 INF [RTSP] [conn 127.0.0.1:40660] opened
+2026/07/19 23:38:52 INF [RTSP] [conn 127.0.0.1:40660] closed: EOF
+2026/07/19 23:38:54 INF [RTSP] [conn 127.0.0.1:40676] opened
+2026/07/19 23:38:54 INF [RTSP] [conn 127.0.0.1:40676] closed: EOF
+2026/07/19 23:38:56 INF [RTSP] [conn 127.0.0.1:40688] opened
+2026/07/19 23:38:56 INF [RTSP] [conn 127.0.0.1:40688] closed: EOF
+2026/07/19 23:38:58 INF [RTSP] [conn 127.0.0.1:40690] opened
+2026/07/19 23:38:58 INF [RTSP] [conn 127.0.0.1:40690] closed: EOF
+2026/07/19 23:39:00 INF [RTSP] [conn 127.0.0.1:40698] opened
+2026/07/19 23:39:00 INF [RTSP] [conn 127.0.0.1:40698] closed: EOF
+2026/07/19 23:39:02 INF [RTSP] [conn 127.0.0.1:40934] opened
+2026/07/19 23:39:02 INF [RTSP] [conn 127.0.0.1:40934] closed: EOF
+2026/07/19 23:39:04 INF [RTSP] [conn 127.0.0.1:40950] opened
+2026/07/19 23:39:04 INF [RTSP] [conn 127.0.0.1:40950] closed: EOF
+2026/07/19 23:39:06 INF [RTSP] [conn 127.0.0.1:40964] opened
+2026/07/19 23:39:06 INF [RTSP] [conn 127.0.0.1:40964] closed: EOF
+2026/07/19 23:39:08 INF [RTSP] [conn 127.0.0.1:40976] opened
+2026/07/19 23:39:08 INF [RTSP] [conn 127.0.0.1:40976] closed: EOF
+2026/07/19 23:39:10 INF [RTSP] [conn 127.0.0.1:40982] opened
+2026/07/19 23:39:10 INF [RTSP] [conn 127.0.0.1:40982] closed: EOF
+2026/07/19 23:39:12 INF [RTSP] [conn 127.0.0.1:35734] opened
+2026/07/19 23:39:12 INF [RTSP] [conn 127.0.0.1:35734] closed: EOF
+2026/07/19 23:39:14 INF [RTSP] [conn 127.0.0.1:35748] opened
+2026/07/19 23:39:14 INF [RTSP] [conn 127.0.0.1:35748] closed: EOF
+2026/07/19 23:39:16 INF [RTSP] [conn 127.0.0.1:35760] opened
+2026/07/19 23:39:16 INF [RTSP] [conn 127.0.0.1:35760] closed: EOF
+2026/07/19 23:39:18 INF [RTSP] [conn 127.0.0.1:35766] opened
+2026/07/19 23:39:18 INF [RTSP] [conn 127.0.0.1:35766] closed: EOF
+2026/07/19 23:39:20 INF [RTSP] [conn 127.0.0.1:35780] opened
+2026/07/19 23:39:20 INF [RTSP] [conn 127.0.0.1:35780] closed: EOF
+2026/07/19 23:39:22 INF [RTSP] [conn 127.0.0.1:52660] opened
+2026/07/19 23:39:22 INF [RTSP] [conn 127.0.0.1:52660] closed: EOF
+2026/07/19 23:39:24 INF [RTSP] [conn 127.0.0.1:52668] opened
+2026/07/19 23:39:24 INF [RTSP] [conn 127.0.0.1:52668] closed: EOF
+2026/07/19 23:39:26 INF [RTSP] [conn 127.0.0.1:52682] opened
+2026/07/19 23:39:26 INF [RTSP] [conn 127.0.0.1:52682] closed: EOF
+2026/07/19 23:39:28 INF [RTSP] [conn 127.0.0.1:52696] opened
+2026/07/19 23:39:28 INF [RTSP] [conn 127.0.0.1:52696] closed: EOF
+2026/07/19 23:39:30 INF [RTSP] [conn 127.0.0.1:52700] opened
+2026/07/19 23:39:30 INF [RTSP] [conn 127.0.0.1:52700] closed: EOF
+2026/07/19 23:39:32 INF [RTSP] [conn 127.0.0.1:45282] opened
+2026/07/19 23:39:32 INF [RTSP] [conn 127.0.0.1:45282] closed: EOF
+2026/07/19 23:39:34 INF [RTSP] [conn 127.0.0.1:45292] opened
+2026/07/19 23:39:34 INF [RTSP] [conn 127.0.0.1:45292] closed: EOF
+2026/07/19 23:39:36 INF [RTSP] [conn 127.0.0.1:45300] opened
+2026/07/19 23:39:36 INF [RTSP] [conn 127.0.0.1:45300] closed: EOF
+2026/07/19 23:39:38 INF [RTSP] [conn 127.0.0.1:45308] opened
+2026/07/19 23:39:38 INF [RTSP] [conn 127.0.0.1:45308] closed: EOF
+2026/07/19 23:39:40 INF [RTSP] [conn 127.0.0.1:45324] opened
+2026/07/19 23:39:40 INF [RTSP] [conn 127.0.0.1:45324] closed: EOF
+2026/07/19 23:39:42 INF [RTSP] [conn 127.0.0.1:42494] opened
+2026/07/19 23:39:42 INF [RTSP] [conn 127.0.0.1:42494] closed: EOF
+2026/07/19 23:39:44 INF [RTSP] [conn 127.0.0.1:42498] opened
+2026/07/19 23:39:44 INF [RTSP] [conn 127.0.0.1:42498] closed: EOF
+2026/07/19 23:39:46 INF [RTSP] [conn 127.0.0.1:42510] opened
+2026/07/19 23:39:46 INF [RTSP] [conn 127.0.0.1:42510] closed: EOF
+2026/07/19 23:39:48 INF [RTSP] [conn 127.0.0.1:42516] opened
+2026/07/19 23:39:48 INF [RTSP] [conn 127.0.0.1:42516] closed: EOF
+2026/07/19 23:39:50 INF [RTSP] [conn 127.0.0.1:42520] opened
+2026/07/19 23:39:50 INF [RTSP] [conn 127.0.0.1:42520] closed: EOF
+2026/07/19 23:39:52 INF [RTSP] [conn 127.0.0.1:55734] opened
+2026/07/19 23:39:52 INF [RTSP] [conn 127.0.0.1:55734] closed: EOF
+2026/07/19 23:39:54 INF [RTSP] [conn 127.0.0.1:55736] opened
+2026/07/19 23:39:54 INF [RTSP] [conn 127.0.0.1:55736] closed: EOF
+2026/07/19 23:39:56 INF [RTSP] [conn 127.0.0.1:55746] opened
+2026/07/19 23:39:56 INF [RTSP] [conn 127.0.0.1:55746] closed: EOF
+2026/07/19 23:39:58 INF [RTSP] [conn 127.0.0.1:55762] opened
+2026/07/19 23:39:58 INF [RTSP] [conn 127.0.0.1:55762] closed: EOF
+2026/07/19 23:40:00 INF [RTSP] [conn 127.0.0.1:55770] opened
+2026/07/19 23:40:00 INF [RTSP] [conn 127.0.0.1:55770] closed: EOF
+2026/07/19 23:40:02 INF [RTSP] [conn 127.0.0.1:37378] opened
+2026/07/19 23:40:02 INF [RTSP] [conn 127.0.0.1:37378] closed: EOF
+2026/07/19 23:40:04 INF [RTSP] [conn 127.0.0.1:37380] opened
+2026/07/19 23:40:04 INF [RTSP] [conn 127.0.0.1:37380] closed: EOF
+2026/07/19 23:40:06 INF [RTSP] [conn 127.0.0.1:37392] opened
+2026/07/19 23:40:06 INF [RTSP] [conn 127.0.0.1:37392] closed: EOF
+2026/07/19 23:40:08 INF [RTSP] [conn 127.0.0.1:37404] opened
+2026/07/19 23:40:08 INF [RTSP] [conn 127.0.0.1:37404] closed: EOF
+2026/07/19 23:40:10 INF [RTSP] [conn 127.0.0.1:37414] opened
+2026/07/19 23:40:10 INF [RTSP] [conn 127.0.0.1:37414] closed: EOF
+2026/07/19 23:40:12 INF [RTSP] [conn 127.0.0.1:53604] opened
+2026/07/19 23:40:12 INF [RTSP] [conn 127.0.0.1:53604] closed: EOF
+2026/07/19 23:40:14 INF [RTSP] [conn 127.0.0.1:53614] opened
+2026/07/19 23:40:14 INF [RTSP] [conn 127.0.0.1:53614] closed: EOF
+2026/07/19 23:40:16 INF [RTSP] [conn 127.0.0.1:53622] opened
+2026/07/19 23:40:16 INF [RTSP] [conn 127.0.0.1:53622] closed: EOF
+2026/07/19 23:40:18 INF [RTSP] [conn 127.0.0.1:53634] opened
+2026/07/19 23:40:18 INF [RTSP] [conn 127.0.0.1:53634] closed: EOF
+2026/07/19 23:40:20 INF [RTSP] [conn 127.0.0.1:53646] opened
+2026/07/19 23:40:20 INF [RTSP] [conn 127.0.0.1:53646] closed: EOF
+2026/07/19 23:40:22 INF [RTSP] [conn 127.0.0.1:54962] opened
+2026/07/19 23:40:22 INF [RTSP] [conn 127.0.0.1:54962] closed: EOF
+2026/07/19 23:40:24 INF [RTSP] [conn 127.0.0.1:54976] opened
+2026/07/19 23:40:24 INF [RTSP] [conn 127.0.0.1:54976] closed: EOF
+2026/07/19 23:40:26 INF [RTSP] [conn 127.0.0.1:54992] opened
+2026/07/19 23:40:26 INF [RTSP] [conn 127.0.0.1:54992] closed: EOF
+2026/07/19 23:40:28 INF [RTSP] [conn 127.0.0.1:55006] opened
+2026/07/19 23:40:28 INF [RTSP] [conn 127.0.0.1:55006] closed: EOF
+2026/07/19 23:40:30 INF [RTSP] [conn 127.0.0.1:55008] opened
+2026/07/19 23:40:30 INF [RTSP] [conn 127.0.0.1:55008] closed: EOF
+2026/07/19 23:40:32 INF [RTSP] [conn 127.0.0.1:54836] opened
+2026/07/19 23:40:32 INF [RTSP] [conn 127.0.0.1:54836] closed: EOF
+2026/07/19 23:40:34 INF [RTSP] [conn 127.0.0.1:54846] opened
+2026/07/19 23:40:34 INF [RTSP] [conn 127.0.0.1:54846] closed: EOF
+2026/07/19 23:40:36 INF [RTSP] [conn 127.0.0.1:54858] opened
+2026/07/19 23:40:36 INF [RTSP] [conn 127.0.0.1:54858] closed: EOF
+2026/07/19 23:40:38 INF [RTSP] [conn 127.0.0.1:54862] opened
+2026/07/19 23:40:38 INF [RTSP] [conn 127.0.0.1:54862] closed: EOF
+2026/07/19 23:40:40 INF [RTSP] [conn 127.0.0.1:54870] opened
+2026/07/19 23:40:40 INF [RTSP] [conn 127.0.0.1:54870] closed: EOF
+2026/07/19 23:40:42 INF [RTSP] [conn 127.0.0.1:33314] opened
+2026/07/19 23:40:42 INF [RTSP] [conn 127.0.0.1:33314] closed: EOF
+2026/07/19 23:40:44 INF [RTSP] [conn 127.0.0.1:33322] opened
+2026/07/19 23:40:44 INF [RTSP] [conn 127.0.0.1:33322] closed: EOF
+2026/07/19 23:40:46 INF [RTSP] [conn 127.0.0.1:33336] opened
+2026/07/19 23:40:46 INF [RTSP] [conn 127.0.0.1:33336] closed: EOF
+2026/07/19 23:40:48 INF [RTSP] [conn 127.0.0.1:33350] opened
+2026/07/19 23:40:48 INF [RTSP] [conn 127.0.0.1:33350] closed: EOF
+2026/07/19 23:40:50 INF [RTSP] [conn 127.0.0.1:33364] opened
+2026/07/19 23:40:50 INF [RTSP] [conn 127.0.0.1:33364] closed: EOF
+2026/07/19 23:40:52 INF [RTSP] [conn 127.0.0.1:33458] opened
+2026/07/19 23:40:52 INF [RTSP] [conn 127.0.0.1:33458] closed: EOF
+2026/07/19 23:40:54 INF [RTSP] [conn 127.0.0.1:33470] opened
+2026/07/19 23:40:54 INF [RTSP] [conn 127.0.0.1:33470] closed: EOF
+2026/07/19 23:40:56 INF [RTSP] [conn 127.0.0.1:33484] opened
+2026/07/19 23:40:56 INF [RTSP] [conn 127.0.0.1:33484] closed: EOF
+2026/07/19 23:40:58 INF [RTSP] [conn 127.0.0.1:33500] opened
+2026/07/19 23:40:58 INF [RTSP] [conn 127.0.0.1:33500] closed: EOF
+2026/07/19 23:41:00 INF [RTSP] [conn 127.0.0.1:33508] opened
+2026/07/19 23:41:00 INF [RTSP] [conn 127.0.0.1:33508] closed: EOF
+2026/07/19 23:41:02 INF [RTSP] [conn 127.0.0.1:56422] opened
+2026/07/19 23:41:02 INF [RTSP] [conn 127.0.0.1:56422] closed: EOF
+2026/07/19 23:41:04 INF [RTSP] [conn 127.0.0.1:56426] opened
+2026/07/19 23:41:04 INF [RTSP] [conn 127.0.0.1:56426] closed: EOF
+2026/07/19 23:41:06 INF [RTSP] [conn 127.0.0.1:56428] opened
+2026/07/19 23:41:06 INF [RTSP] [conn 127.0.0.1:56428] closed: EOF
+2026/07/19 23:41:08 INF [RTSP] [conn 127.0.0.1:56430] opened
+2026/07/19 23:41:08 INF [RTSP] [conn 127.0.0.1:56430] closed: EOF
+2026/07/19 23:41:10 INF [RTSP] [conn 127.0.0.1:56438] opened
+2026/07/19 23:41:10 INF [RTSP] [conn 127.0.0.1:56438] closed: EOF
+2026/07/19 23:41:12 INF [RTSP] [conn 127.0.0.1:50612] opened
+2026/07/19 23:41:12 INF [RTSP] [conn 127.0.0.1:50612] closed: EOF
+2026/07/19 23:41:14 INF [RTSP] [conn 127.0.0.1:50622] opened
+2026/07/19 23:41:14 INF [RTSP] [conn 127.0.0.1:50622] closed: EOF
+2026/07/19 23:41:16 INF [RTSP] [conn 127.0.0.1:50626] opened
+2026/07/19 23:41:16 INF [RTSP] [conn 127.0.0.1:50626] closed: EOF
+2026/07/19 23:41:18 INF [RTSP] [conn 127.0.0.1:50628] opened
+2026/07/19 23:41:18 INF [RTSP] [conn 127.0.0.1:50628] closed: EOF
+2026/07/19 23:41:20 INF [RTSP] [conn 127.0.0.1:50636] opened
+2026/07/19 23:41:20 INF [RTSP] [conn 127.0.0.1:50636] closed: EOF
+2026/07/19 23:41:22 INF [RTSP] [conn 127.0.0.1:53854] opened
+2026/07/19 23:41:22 INF [RTSP] [conn 127.0.0.1:53854] closed: EOF
+2026/07/19 23:41:24 INF [RTSP] [conn 127.0.0.1:53858] opened
+2026/07/19 23:41:24 INF [RTSP] [conn 127.0.0.1:53858] closed: EOF
+2026/07/19 23:41:26 INF [RTSP] [conn 127.0.0.1:53868] opened
+2026/07/19 23:41:26 INF [RTSP] [conn 127.0.0.1:53868] closed: EOF
+2026/07/19 23:41:28 INF [RTSP] [conn 127.0.0.1:53878] opened
+2026/07/19 23:41:28 INF [RTSP] [conn 127.0.0.1:53878] closed: EOF
+2026/07/19 23:41:30 INF [RTSP] [conn 127.0.0.1:53894] opened
+2026/07/19 23:41:30 INF [RTSP] [conn 127.0.0.1:53894] closed: EOF
+2026/07/19 23:41:32 INF [RTSP] [conn 127.0.0.1:52772] opened
+2026/07/19 23:41:32 INF [RTSP] [conn 127.0.0.1:52772] closed: EOF
+2026/07/19 23:41:34 INF [RTSP] [conn 127.0.0.1:52782] opened
+2026/07/19 23:41:34 INF [RTSP] [conn 127.0.0.1:52782] closed: EOF
+2026/07/19 23:41:36 INF [RTSP] [conn 127.0.0.1:52792] opened
+2026/07/19 23:41:36 INF [RTSP] [conn 127.0.0.1:52792] closed: EOF
+2026/07/19 23:41:38 INF [RTSP] [conn 127.0.0.1:52806] opened
+2026/07/19 23:41:38 INF [RTSP] [conn 127.0.0.1:52806] closed: EOF
+2026/07/19 23:41:40 INF [RTSP] [conn 127.0.0.1:52818] opened
+2026/07/19 23:41:40 INF [RTSP] [conn 127.0.0.1:52818] closed: EOF
+2026/07/19 23:41:42 INF [RTSP] [conn 127.0.0.1:57660] opened
+2026/07/19 23:41:42 INF [RTSP] [conn 127.0.0.1:57660] closed: EOF
+2026/07/19 23:41:44 INF [RTSP] [conn 127.0.0.1:57670] opened
+2026/07/19 23:41:44 INF [RTSP] [conn 127.0.0.1:57670] closed: EOF
+2026/07/19 23:41:46 INF [RTSP] [conn 127.0.0.1:57680] opened
+2026/07/19 23:41:46 INF [RTSP] [conn 127.0.0.1:57680] closed: EOF
+2026/07/19 23:41:48 INF [RTSP] [conn 127.0.0.1:57692] opened
+2026/07/19 23:41:48 INF [RTSP] [conn 127.0.0.1:57692] closed: EOF
+2026/07/19 23:41:50 INF [RTSP] [conn 127.0.0.1:57696] opened
+2026/07/19 23:41:50 INF [RTSP] [conn 127.0.0.1:57696] closed: EOF
+2026/07/19 23:41:52 INF [RTSP] [conn 127.0.0.1:47202] opened
+2026/07/19 23:41:52 INF [RTSP] [conn 127.0.0.1:47202] closed: EOF
+2026/07/19 23:41:54 INF [RTSP] [conn 127.0.0.1:47204] opened
+2026/07/19 23:41:54 INF [RTSP] [conn 127.0.0.1:47204] closed: EOF
+2026/07/19 23:41:56 INF [RTSP] [conn 127.0.0.1:47218] opened
+2026/07/19 23:41:56 INF [RTSP] [conn 127.0.0.1:47218] closed: EOF
+2026/07/19 23:41:58 INF [RTSP] [conn 127.0.0.1:47234] opened
+2026/07/19 23:41:58 INF [RTSP] [conn 127.0.0.1:47234] closed: EOF
+2026/07/19 23:42:00 INF [RTSP] [conn 127.0.0.1:47236] opened
+2026/07/19 23:42:00 INF [RTSP] [conn 127.0.0.1:47236] closed: EOF
+2026/07/19 23:42:02 INF [RTSP] [conn 127.0.0.1:33644] opened
+2026/07/19 23:42:02 INF [RTSP] [conn 127.0.0.1:33644] closed: EOF
+2026/07/19 23:42:04 INF [RTSP] [conn 127.0.0.1:33648] opened
+2026/07/19 23:42:04 INF [RTSP] [conn 127.0.0.1:33648] closed: EOF
+2026/07/19 23:42:06 INF [RTSP] [conn 127.0.0.1:33650] opened
+2026/07/19 23:42:06 INF [RTSP] [conn 127.0.0.1:33650] closed: EOF
+2026/07/19 23:42:08 INF [RTSP] [conn 127.0.0.1:33654] opened
+2026/07/19 23:42:08 INF [RTSP] [conn 127.0.0.1:33654] closed: EOF
+2026/07/19 23:42:10 INF [RTSP] [conn 127.0.0.1:33660] opened
+2026/07/19 23:42:10 INF [RTSP] [conn 127.0.0.1:33660] closed: EOF
+2026/07/19 23:42:12 INF [RTSP] [conn 127.0.0.1:58502] opened
+2026/07/19 23:42:12 INF [RTSP] [conn 127.0.0.1:58502] closed: EOF
+2026/07/19 23:42:14 INF [RTSP] [conn 127.0.0.1:58518] opened
+2026/07/19 23:42:14 INF [RTSP] [conn 127.0.0.1:58518] closed: EOF
+2026/07/19 23:42:16 INF [RTSP] [conn 127.0.0.1:58532] opened
+2026/07/19 23:42:16 INF [RTSP] [conn 127.0.0.1:58532] closed: EOF
+2026/07/19 23:42:18 INF [RTSP] [conn 127.0.0.1:58536] opened
+2026/07/19 23:42:18 INF [RTSP] [conn 127.0.0.1:58536] closed: EOF
+2026/07/19 23:42:20 INF [RTSP] [conn 127.0.0.1:58544] opened
+2026/07/19 23:42:20 INF [RTSP] [conn 127.0.0.1:58544] closed: EOF
+2026/07/19 23:42:22 INF [RTSP] [conn 127.0.0.1:50764] opened
+2026/07/19 23:42:22 INF [RTSP] [conn 127.0.0.1:50764] closed: EOF
+2026/07/19 23:42:24 INF [RTSP] [conn 127.0.0.1:50768] opened
+2026/07/19 23:42:24 INF [RTSP] [conn 127.0.0.1:50768] closed: EOF
+2026/07/19 23:42:26 INF [RTSP] [conn 127.0.0.1:50780] opened
+2026/07/19 23:42:26 INF [RTSP] [conn 127.0.0.1:50780] closed: EOF
+2026/07/19 23:42:28 INF [RTSP] [conn 127.0.0.1:50788] opened
+2026/07/19 23:42:28 INF [RTSP] [conn 127.0.0.1:50788] closed: EOF
+2026/07/19 23:42:30 INF [RTSP] [conn 127.0.0.1:50802] opened
+2026/07/19 23:42:30 INF [RTSP] [conn 127.0.0.1:50802] closed: EOF
+2026/07/19 23:42:32 INF [RTSP] [conn 127.0.0.1:46646] opened
+2026/07/19 23:42:32 INF [RTSP] [conn 127.0.0.1:46646] closed: EOF
+2026/07/19 23:42:34 INF [RTSP] [conn 127.0.0.1:46656] opened
+2026/07/19 23:42:34 INF [RTSP] [conn 127.0.0.1:46656] closed: EOF
+2026/07/19 23:42:36 INF [RTSP] [conn 127.0.0.1:46662] opened
+2026/07/19 23:42:36 INF [RTSP] [conn 127.0.0.1:46662] closed: EOF
+2026/07/19 23:42:38 INF [RTSP] [conn 127.0.0.1:46674] opened
+2026/07/19 23:42:38 INF [RTSP] [conn 127.0.0.1:46674] closed: EOF
+2026/07/19 23:42:40 INF [RTSP] [conn 127.0.0.1:46678] opened
+2026/07/19 23:42:40 INF [RTSP] [conn 127.0.0.1:46678] closed: EOF
+2026/07/19 23:42:42 INF [RTSP] [conn 127.0.0.1:42168] opened
+2026/07/19 23:42:42 INF [RTSP] [conn 127.0.0.1:42168] closed: EOF
+2026/07/19 23:42:44 INF [RTSP] [conn 127.0.0.1:42174] opened
+2026/07/19 23:42:44 INF [RTSP] [conn 127.0.0.1:42174] closed: EOF
+2026/07/19 23:42:46 INF [RTSP] [conn 127.0.0.1:42176] opened
+2026/07/19 23:42:46 INF [RTSP] [conn 127.0.0.1:42176] closed: EOF
+2026/07/19 23:42:48 INF [RTSP] [conn 127.0.0.1:42178] opened
+2026/07/19 23:42:48 INF [RTSP] [conn 127.0.0.1:42178] closed: EOF
+2026/07/19 23:42:50 INF [RTSP] [conn 127.0.0.1:42180] opened
+2026/07/19 23:42:50 INF [RTSP] [conn 127.0.0.1:42180] closed: EOF
+2026/07/19 23:42:52 INF [RTSP] [conn 127.0.0.1:39080] opened
+2026/07/19 23:42:52 INF [RTSP] [conn 127.0.0.1:39080] closed: EOF
+2026/07/19 23:42:54 INF [RTSP] [conn 127.0.0.1:39090] opened
+2026/07/19 23:42:54 INF [RTSP] [conn 127.0.0.1:39090] closed: EOF
+2026/07/19 23:42:56 INF [RTSP] [conn 127.0.0.1:39092] opened
+2026/07/19 23:42:56 INF [RTSP] [conn 127.0.0.1:39092] closed: EOF
+2026/07/19 23:42:58 INF [RTSP] [conn 127.0.0.1:39100] opened
+2026/07/19 23:42:58 INF [RTSP] [conn 127.0.0.1:39100] closed: EOF
+2026/07/19 23:43:00 INF [RTSP] [conn 127.0.0.1:39110] opened
+2026/07/19 23:43:00 INF [RTSP] [conn 127.0.0.1:39110] closed: EOF
+2026/07/19 23:43:02 INF [RTSP] [conn 127.0.0.1:53792] opened
+2026/07/19 23:43:02 INF [RTSP] [conn 127.0.0.1:53792] closed: EOF
+2026/07/19 23:43:04 INF [RTSP] [conn 127.0.0.1:53808] opened
+2026/07/19 23:43:04 INF [RTSP] [conn 127.0.0.1:53808] closed: EOF
+2026/07/19 23:43:06 INF [RTSP] [conn 127.0.0.1:53822] opened
+2026/07/19 23:43:06 INF [RTSP] [conn 127.0.0.1:53822] closed: EOF
+2026/07/19 23:43:08 INF [RTSP] [conn 127.0.0.1:53828] opened
+2026/07/19 23:43:08 INF [RTSP] [conn 127.0.0.1:53828] closed: EOF
+2026/07/19 23:43:10 INF [RTSP] [conn 127.0.0.1:53844] opened
+2026/07/19 23:43:10 INF [RTSP] [conn 127.0.0.1:53844] closed: EOF
+2026/07/19 23:43:12 INF [RTSP] [conn 127.0.0.1:37614] opened
+2026/07/19 23:43:12 INF [RTSP] [conn 127.0.0.1:37614] closed: EOF
+2026/07/19 23:43:14 INF [RTSP] [conn 127.0.0.1:37626] opened
+2026/07/19 23:43:14 INF [RTSP] [conn 127.0.0.1:37626] closed: EOF
+2026/07/19 23:43:16 INF [RTSP] [conn 127.0.0.1:37634] opened
+2026/07/19 23:43:16 INF [RTSP] [conn 127.0.0.1:37634] closed: EOF
+2026/07/19 23:43:18 INF [RTSP] [conn 127.0.0.1:37644] opened
+2026/07/19 23:43:18 INF [RTSP] [conn 127.0.0.1:37644] closed: EOF
+2026/07/19 23:43:20 INF [RTSP] [conn 127.0.0.1:37646] opened
+2026/07/19 23:43:20 INF [RTSP] [conn 127.0.0.1:37646] closed: EOF
+2026/07/19 23:43:22 INF [RTSP] [conn 127.0.0.1:37110] opened
+2026/07/19 23:43:22 INF [RTSP] [conn 127.0.0.1:37110] closed: EOF
+2026/07/19 23:43:24 INF [RTSP] [conn 127.0.0.1:37114] opened
+2026/07/19 23:43:24 INF [RTSP] [conn 127.0.0.1:37114] closed: EOF
+2026/07/19 23:43:26 INF [RTSP] [conn 127.0.0.1:37118] opened
+2026/07/19 23:43:26 INF [RTSP] [conn 127.0.0.1:37118] closed: EOF
+2026/07/19 23:43:28 INF [RTSP] [conn 127.0.0.1:37132] opened
+2026/07/19 23:43:28 INF [RTSP] [conn 127.0.0.1:37132] closed: EOF
+2026/07/19 23:43:30 INF [RTSP] [conn 127.0.0.1:37146] opened
+2026/07/19 23:43:30 INF [RTSP] [conn 127.0.0.1:37146] closed: EOF
+2026/07/19 23:43:32 INF [RTSP] [conn 127.0.0.1:43924] opened
+2026/07/19 23:43:32 INF [RTSP] [conn 127.0.0.1:43924] closed: EOF
+2026/07/19 23:43:34 INF [RTSP] [conn 127.0.0.1:43926] opened
+2026/07/19 23:43:34 INF [RTSP] [conn 127.0.0.1:43926] closed: EOF
+2026/07/19 23:43:36 INF [RTSP] [conn 127.0.0.1:43940] opened
+2026/07/19 23:43:36 INF [RTSP] [conn 127.0.0.1:43940] closed: EOF
+2026/07/19 23:43:38 INF [RTSP] [conn 127.0.0.1:43942] opened
+2026/07/19 23:43:38 INF [RTSP] [conn 127.0.0.1:43942] closed: EOF
+2026/07/19 23:43:40 INF [RTSP] [conn 127.0.0.1:43948] opened
+2026/07/19 23:43:40 INF [RTSP] [conn 127.0.0.1:43948] closed: EOF
+2026/07/19 23:43:42 INF [RTSP] [conn 127.0.0.1:43298] opened
+2026/07/19 23:43:42 INF [RTSP] [conn 127.0.0.1:43298] closed: EOF
+2026/07/19 23:43:44 INF [RTSP] [conn 127.0.0.1:43300] opened
+2026/07/19 23:43:44 INF [RTSP] [conn 127.0.0.1:43300] closed: EOF
+2026/07/19 23:43:46 INF [RTSP] [conn 127.0.0.1:43312] opened
+2026/07/19 23:43:46 INF [RTSP] [conn 127.0.0.1:43312] closed: EOF
+2026/07/19 23:43:48 INF [RTSP] [conn 127.0.0.1:43316] opened
+2026/07/19 23:43:48 INF [RTSP] [conn 127.0.0.1:43316] closed: EOF
+2026/07/19 23:43:50 INF [RTSP] [conn 127.0.0.1:43328] opened
+2026/07/19 23:43:50 INF [RTSP] [conn 127.0.0.1:43328] closed: EOF
+2026/07/19 23:43:52 INF [RTSP] [conn 127.0.0.1:55360] opened
+2026/07/19 23:43:52 INF [RTSP] [conn 127.0.0.1:55360] closed: EOF
+2026/07/19 23:43:54 INF [RTSP] [conn 127.0.0.1:55368] opened
+2026/07/19 23:43:54 INF [RTSP] [conn 127.0.0.1:55368] closed: EOF
+2026/07/19 23:43:56 INF [RTSP] [conn 127.0.0.1:55376] opened
+2026/07/19 23:43:56 INF [RTSP] [conn 127.0.0.1:55376] closed: EOF
+2026/07/19 23:43:58 INF [RTSP] [conn 127.0.0.1:55384] opened
+2026/07/19 23:43:58 INF [RTSP] [conn 127.0.0.1:55384] closed: EOF
+2026/07/19 23:44:00 INF [RTSP] [conn 127.0.0.1:55390] opened
+2026/07/19 23:44:00 INF [RTSP] [conn 127.0.0.1:55390] closed: EOF
+2026/07/19 23:44:02 INF [RTSP] [conn 127.0.0.1:47108] opened
+2026/07/19 23:44:02 INF [RTSP] [conn 127.0.0.1:47108] closed: EOF
+2026/07/19 23:44:04 INF [RTSP] [conn 127.0.0.1:47120] opened
+2026/07/19 23:44:04 INF [RTSP] [conn 127.0.0.1:47120] closed: EOF
+2026/07/19 23:44:06 INF [RTSP] [conn 127.0.0.1:47134] opened
+2026/07/19 23:44:06 INF [RTSP] [conn 127.0.0.1:47134] closed: EOF
+2026/07/19 23:44:08 INF [RTSP] [conn 127.0.0.1:47142] opened
+2026/07/19 23:44:08 INF [RTSP] [conn 127.0.0.1:47142] closed: EOF
+2026/07/19 23:44:10 INF [RTSP] [conn 127.0.0.1:47150] opened
+2026/07/19 23:44:10 INF [RTSP] [conn 127.0.0.1:47150] closed: EOF
+2026/07/19 23:44:12 INF [RTSP] [conn 127.0.0.1:42990] opened
+2026/07/19 23:44:12 INF [RTSP] [conn 127.0.0.1:42990] closed: EOF
+2026/07/19 23:44:14 INF [RTSP] [conn 127.0.0.1:42994] opened
+2026/07/19 23:44:14 INF [RTSP] [conn 127.0.0.1:42994] closed: EOF
+2026/07/19 23:44:16 INF [RTSP] [conn 127.0.0.1:43008] opened
+2026/07/19 23:44:16 INF [RTSP] [conn 127.0.0.1:43008] closed: EOF
+2026/07/19 23:44:18 INF [RTSP] [conn 127.0.0.1:43012] opened
+2026/07/19 23:44:18 INF [RTSP] [conn 127.0.0.1:43012] closed: EOF
+2026/07/19 23:44:20 INF [RTSP] [conn 127.0.0.1:43016] opened
+2026/07/19 23:44:20 INF [RTSP] [conn 127.0.0.1:43016] closed: EOF
+2026/07/19 23:44:23 INF [RTSP] [conn 127.0.0.1:48142] opened
+2026/07/19 23:44:23 INF [RTSP] [conn 127.0.0.1:48142] closed: EOF
+2026/07/19 23:44:25 INF [RTSP] [conn 127.0.0.1:48144] opened
+2026/07/19 23:44:25 INF [RTSP] [conn 127.0.0.1:48144] closed: EOF
+2026/07/19 23:44:27 INF [RTSP] [conn 127.0.0.1:48158] opened
+2026/07/19 23:44:27 INF [RTSP] [conn 127.0.0.1:48158] closed: EOF
+2026/07/19 23:44:29 INF [RTSP] [conn 127.0.0.1:48166] opened
+2026/07/19 23:44:29 INF [RTSP] [conn 127.0.0.1:48166] closed: EOF
+2026/07/19 23:44:31 INF [RTSP] [conn 127.0.0.1:48170] opened
+2026/07/19 23:44:31 INF [RTSP] [conn 127.0.0.1:48170] closed: EOF
+2026/07/19 23:44:33 INF [RTSP] [conn 127.0.0.1:47516] opened
+2026/07/19 23:44:33 INF [RTSP] [conn 127.0.0.1:47516] closed: EOF
+2026/07/19 23:44:35 INF [RTSP] [conn 127.0.0.1:47518] opened
+2026/07/19 23:44:35 INF [RTSP] [conn 127.0.0.1:47518] closed: EOF
+2026/07/19 23:44:37 INF [RTSP] [conn 127.0.0.1:47530] opened
+2026/07/19 23:44:37 INF [RTSP] [conn 127.0.0.1:47530] closed: EOF
+2026/07/19 23:44:39 INF [RTSP] [conn 127.0.0.1:47538] opened
+2026/07/19 23:44:39 INF [RTSP] [conn 127.0.0.1:47538] closed: EOF
+2026/07/19 23:44:41 INF [RTSP] [conn 127.0.0.1:47548] opened
+2026/07/19 23:44:41 INF [RTSP] [conn 127.0.0.1:47548] closed: EOF
+2026/07/19 23:44:43 INF [RTSP] [conn 127.0.0.1:42188] opened
+2026/07/19 23:44:43 INF [RTSP] [conn 127.0.0.1:42188] closed: EOF
+2026/07/19 23:44:45 INF [RTSP] [conn 127.0.0.1:42194] opened
+2026/07/19 23:44:45 INF [RTSP] [conn 127.0.0.1:42194] closed: EOF
+2026/07/19 23:44:47 INF [RTSP] [conn 127.0.0.1:42208] opened
+2026/07/19 23:44:47 INF [RTSP] [conn 127.0.0.1:42208] closed: EOF
+2026/07/19 23:44:49 INF [RTSP] [conn 127.0.0.1:42218] opened
+2026/07/19 23:44:49 INF [RTSP] [conn 127.0.0.1:42218] closed: EOF
+2026/07/19 23:44:51 INF [RTSP] [conn 127.0.0.1:42234] opened
+2026/07/19 23:44:51 INF [RTSP] [conn 127.0.0.1:42234] closed: EOF
+2026/07/19 23:44:53 INF [RTSP] [conn 127.0.0.1:33296] opened
+2026/07/19 23:44:53 INF [RTSP] [conn 127.0.0.1:33296] closed: EOF
+2026/07/19 23:44:55 INF [RTSP] [conn 127.0.0.1:33298] opened
+2026/07/19 23:44:55 INF [RTSP] [conn 127.0.0.1:33298] closed: EOF
+2026/07/19 23:44:57 INF [RTSP] [conn 127.0.0.1:33312] opened
+2026/07/19 23:44:57 INF [RTSP] [conn 127.0.0.1:33312] closed: EOF
+2026/07/19 23:44:59 INF [RTSP] [conn 127.0.0.1:33328] opened
+2026/07/19 23:44:59 INF [RTSP] [conn 127.0.0.1:33328] closed: EOF
+2026/07/19 23:45:01 INF [RTSP] [conn 127.0.0.1:33344] opened
+2026/07/19 23:45:01 INF [RTSP] [conn 127.0.0.1:33344] closed: EOF
+2026/07/19 23:45:03 INF [RTSP] [conn 127.0.0.1:54574] opened
+2026/07/19 23:45:03 INF [RTSP] [conn 127.0.0.1:54574] closed: EOF
+2026/07/19 23:45:05 INF [RTSP] [conn 127.0.0.1:54584] opened
+2026/07/19 23:45:05 INF [RTSP] [conn 127.0.0.1:54584] closed: EOF
+2026/07/19 23:45:07 INF [RTSP] [conn 127.0.0.1:54590] opened
+2026/07/19 23:45:07 INF [RTSP] [conn 127.0.0.1:54590] closed: EOF
+2026/07/19 23:45:09 INF [RTSP] [conn 127.0.0.1:54602] opened
+2026/07/19 23:45:09 INF [RTSP] [conn 127.0.0.1:54602] closed: EOF
+2026/07/19 23:45:11 INF [RTSP] [conn 127.0.0.1:54604] opened
+2026/07/19 23:45:11 INF [RTSP] [conn 127.0.0.1:54604] closed: EOF
+2026/07/19 23:45:13 INF [RTSP] [conn 127.0.0.1:39884] opened
+2026/07/19 23:45:13 INF [RTSP] [conn 127.0.0.1:39884] closed: EOF
+2026/07/19 23:45:15 INF [RTSP] [conn 127.0.0.1:39886] opened
+2026/07/19 23:45:15 INF [RTSP] [conn 127.0.0.1:39886] closed: EOF
+2026/07/19 23:45:17 INF [RTSP] [conn 127.0.0.1:39894] opened
+2026/07/19 23:45:17 INF [RTSP] [conn 127.0.0.1:39894] closed: EOF
+2026/07/19 23:45:19 INF [RTSP] [conn 127.0.0.1:39896] opened
+2026/07/19 23:45:19 INF [RTSP] [conn 127.0.0.1:39896] closed: EOF
+2026/07/19 23:45:21 INF [RTSP] [conn 127.0.0.1:39904] opened
+2026/07/19 23:45:21 INF [RTSP] [conn 127.0.0.1:39904] closed: EOF
+2026/07/19 23:45:23 INF [RTSP] [conn 127.0.0.1:60834] opened
+2026/07/19 23:45:23 INF [RTSP] [conn 127.0.0.1:60834] closed: EOF
+2026/07/19 23:45:25 INF [RTSP] [conn 127.0.0.1:60840] opened
+2026/07/19 23:45:25 INF [RTSP] [conn 127.0.0.1:60840] closed: EOF
+2026/07/19 23:45:27 INF [RTSP] [conn 127.0.0.1:60842] opened
+2026/07/19 23:45:27 INF [RTSP] [conn 127.0.0.1:60842] closed: EOF
+2026/07/19 23:45:29 INF [RTSP] [conn 127.0.0.1:60856] opened
+2026/07/19 23:45:29 INF [RTSP] [conn 127.0.0.1:60856] closed: EOF
+2026/07/19 23:45:31 INF [RTSP] [conn 127.0.0.1:60862] opened
+2026/07/19 23:45:31 INF [RTSP] [conn 127.0.0.1:60862] closed: EOF
+2026/07/19 23:45:33 INF [RTSP] [conn 127.0.0.1:35974] opened
+2026/07/19 23:45:33 INF [RTSP] [conn 127.0.0.1:35974] closed: EOF
+2026/07/19 23:45:35 INF [RTSP] [conn 127.0.0.1:35982] opened
+2026/07/19 23:45:35 INF [RTSP] [conn 127.0.0.1:35982] closed: EOF
+2026/07/19 23:45:37 INF [RTSP] [conn 127.0.0.1:35996] opened
+2026/07/19 23:45:37 INF [RTSP] [conn 127.0.0.1:35996] closed: EOF
+2026/07/19 23:45:39 INF [RTSP] [conn 127.0.0.1:36008] opened
+2026/07/19 23:45:39 INF [RTSP] [conn 127.0.0.1:36008] closed: EOF
+2026/07/19 23:45:41 INF [RTSP] [conn 127.0.0.1:36018] opened
+2026/07/19 23:45:41 INF [RTSP] [conn 127.0.0.1:36018] closed: EOF
+2026/07/19 23:45:43 INF [RTSP] [conn 127.0.0.1:45284] opened
+2026/07/19 23:45:43 INF [RTSP] [conn 127.0.0.1:45284] closed: EOF
+2026/07/19 23:45:45 INF [RTSP] [conn 127.0.0.1:45294] opened
+2026/07/19 23:45:45 INF [RTSP] [conn 127.0.0.1:45294] closed: EOF
+2026/07/19 23:45:47 INF [RTSP] [conn 127.0.0.1:45306] opened
+2026/07/19 23:45:47 INF [RTSP] [conn 127.0.0.1:45306] closed: EOF
+2026/07/19 23:45:49 INF [RTSP] [conn 127.0.0.1:45308] opened
+2026/07/19 23:45:49 INF [RTSP] [conn 127.0.0.1:45308] closed: EOF
+2026/07/19 23:45:51 INF [RTSP] [conn 127.0.0.1:45310] opened
+2026/07/19 23:45:51 INF [RTSP] [conn 127.0.0.1:45310] closed: EOF
+2026/07/19 23:45:53 INF [RTSP] [conn 127.0.0.1:40256] opened
+2026/07/19 23:45:53 INF [RTSP] [conn 127.0.0.1:40256] closed: EOF
+2026/07/19 23:45:55 INF [RTSP] [conn 127.0.0.1:40264] opened
+2026/07/19 23:45:55 INF [RTSP] [conn 127.0.0.1:40264] closed: EOF
+2026/07/19 23:45:57 INF [RTSP] [conn 127.0.0.1:40278] opened
+2026/07/19 23:45:57 INF [RTSP] [conn 127.0.0.1:40278] closed: EOF
+2026/07/19 23:45:59 INF [RTSP] [conn 127.0.0.1:40294] opened
+2026/07/19 23:45:59 INF [RTSP] [conn 127.0.0.1:40294] closed: EOF
+2026/07/19 23:46:01 INF [RTSP] [conn 127.0.0.1:40304] opened
+2026/07/19 23:46:01 INF [RTSP] [conn 127.0.0.1:40304] closed: EOF
+2026/07/19 23:46:03 INF [RTSP] [conn 127.0.0.1:57388] opened
+2026/07/19 23:46:03 INF [RTSP] [conn 127.0.0.1:57388] closed: EOF
+2026/07/19 23:46:05 INF [RTSP] [conn 127.0.0.1:57392] opened
+2026/07/19 23:46:05 INF [RTSP] [conn 127.0.0.1:57392] closed: EOF
+2026/07/19 23:46:07 INF [RTSP] [conn 127.0.0.1:57396] opened
+2026/07/19 23:46:07 INF [RTSP] [conn 127.0.0.1:57396] closed: EOF
+2026/07/19 23:46:09 INF [RTSP] [conn 127.0.0.1:57412] opened
+2026/07/19 23:46:09 INF [RTSP] [conn 127.0.0.1:57412] closed: EOF
+2026/07/19 23:46:11 INF [RTSP] [conn 127.0.0.1:57424] opened
+2026/07/19 23:46:11 INF [RTSP] [conn 127.0.0.1:57424] closed: EOF
+2026/07/19 23:46:13 INF [RTSP] [conn 127.0.0.1:45216] opened
+2026/07/19 23:46:13 INF [RTSP] [conn 127.0.0.1:45216] closed: EOF
+2026/07/19 23:46:15 INF [RTSP] [conn 127.0.0.1:45224] opened
+2026/07/19 23:46:15 INF [RTSP] [conn 127.0.0.1:45224] closed: EOF
+2026/07/19 23:46:17 INF [RTSP] [conn 127.0.0.1:45240] opened
+2026/07/19 23:46:17 INF [RTSP] [conn 127.0.0.1:45240] closed: EOF
+2026/07/19 23:46:19 INF [RTSP] [conn 127.0.0.1:45244] opened
+2026/07/19 23:46:19 INF [RTSP] [conn 127.0.0.1:45244] closed: EOF
+2026/07/19 23:46:21 INF [RTSP] [conn 127.0.0.1:45256] opened
+2026/07/19 23:46:21 INF [RTSP] [conn 127.0.0.1:45256] closed: EOF
+2026/07/19 23:46:23 INF [RTSP] [conn 127.0.0.1:60198] opened
+2026/07/19 23:46:23 INF [RTSP] [conn 127.0.0.1:60198] closed: EOF
+2026/07/19 23:46:25 INF [RTSP] [conn 127.0.0.1:60206] opened
+2026/07/19 23:46:25 INF [RTSP] [conn 127.0.0.1:60206] closed: EOF
+2026/07/19 23:46:27 INF [RTSP] [conn 127.0.0.1:60212] opened
+2026/07/19 23:46:27 INF [RTSP] [conn 127.0.0.1:60212] closed: EOF
+2026/07/19 23:46:29 INF [RTSP] [conn 127.0.0.1:60226] opened
+2026/07/19 23:46:29 INF [RTSP] [conn 127.0.0.1:60226] closed: EOF
+2026/07/19 23:46:31 INF [RTSP] [conn 127.0.0.1:60240] opened
+2026/07/19 23:46:31 INF [RTSP] [conn 127.0.0.1:60240] closed: EOF
+2026/07/19 23:46:33 INF [RTSP] [conn 127.0.0.1:51776] opened
+2026/07/19 23:46:33 INF [RTSP] [conn 127.0.0.1:51776] closed: EOF
+2026/07/19 23:46:35 INF [RTSP] [conn 127.0.0.1:51790] opened
+2026/07/19 23:46:35 INF [RTSP] [conn 127.0.0.1:51790] closed: EOF
+2026/07/19 23:46:37 INF [RTSP] [conn 127.0.0.1:51804] opened
+2026/07/19 23:46:37 INF [RTSP] [conn 127.0.0.1:51804] closed: EOF
+2026/07/19 23:46:39 INF [RTSP] [conn 127.0.0.1:51818] opened
+2026/07/19 23:46:39 INF [RTSP] [conn 127.0.0.1:51818] closed: EOF
+2026/07/19 23:46:41 INF [RTSP] [conn 127.0.0.1:51820] opened
+2026/07/19 23:46:41 INF [RTSP] [conn 127.0.0.1:51820] closed: EOF
+2026/07/19 23:46:43 INF [RTSP] [conn 127.0.0.1:54440] opened
+2026/07/19 23:46:43 INF [RTSP] [conn 127.0.0.1:54440] closed: EOF
+2026/07/19 23:46:45 INF [RTSP] [conn 127.0.0.1:54452] opened
+2026/07/19 23:46:45 INF [RTSP] [conn 127.0.0.1:54452] closed: EOF
+2026/07/19 23:46:47 INF [RTSP] [conn 127.0.0.1:54454] opened
+2026/07/19 23:46:47 INF [RTSP] [conn 127.0.0.1:54454] closed: EOF
+2026/07/19 23:46:49 INF [RTSP] [conn 127.0.0.1:54468] opened
+2026/07/19 23:46:49 INF [RTSP] [conn 127.0.0.1:54468] closed: EOF
+2026/07/19 23:46:51 INF [RTSP] [conn 127.0.0.1:54470] opened
+2026/07/19 23:46:51 INF [RTSP] [conn 127.0.0.1:54470] closed: EOF
+2026/07/19 23:46:53 INF [RTSP] [conn 127.0.0.1:60448] opened
+2026/07/19 23:46:53 INF [RTSP] [conn 127.0.0.1:60448] closed: EOF
+2026/07/19 23:46:55 INF [RTSP] [conn 127.0.0.1:60456] opened
+2026/07/19 23:46:55 INF [RTSP] [conn 127.0.0.1:60456] closed: EOF
+2026/07/19 23:46:57 INF [RTSP] [conn 127.0.0.1:60466] opened
+2026/07/19 23:46:57 INF [RTSP] [conn 127.0.0.1:60466] closed: EOF
+2026/07/19 23:46:59 INF [RTSP] [conn 127.0.0.1:60470] opened
+2026/07/19 23:46:59 INF [RTSP] [conn 127.0.0.1:60470] closed: EOF
+2026/07/19 23:47:01 INF [RTSP] [conn 127.0.0.1:60478] opened
+2026/07/19 23:47:01 INF [RTSP] [conn 127.0.0.1:60478] closed: EOF
+2026/07/19 23:47:03 INF [RTSP] [conn 127.0.0.1:59070] opened
+2026/07/19 23:47:03 INF [RTSP] [conn 127.0.0.1:59070] closed: EOF
+2026/07/19 23:47:05 INF [RTSP] [conn 127.0.0.1:59084] opened
+2026/07/19 23:47:05 INF [RTSP] [conn 127.0.0.1:59084] closed: EOF
+2026/07/19 23:47:07 INF [RTSP] [conn 127.0.0.1:59100] opened
+2026/07/19 23:47:07 INF [RTSP] [conn 127.0.0.1:59100] closed: EOF
+2026/07/19 23:47:09 INF [RTSP] [conn 127.0.0.1:59112] opened
+2026/07/19 23:47:09 INF [RTSP] [conn 127.0.0.1:59112] closed: EOF
+2026/07/19 23:47:11 INF [RTSP] [conn 127.0.0.1:59128] opened
+2026/07/19 23:47:11 INF [RTSP] [conn 127.0.0.1:59128] closed: EOF
+2026/07/19 23:47:13 INF [RTSP] [conn 127.0.0.1:58908] opened
+2026/07/19 23:47:13 INF [RTSP] [conn 127.0.0.1:58908] closed: EOF
+2026/07/19 23:47:15 INF [RTSP] [conn 127.0.0.1:58918] opened
+2026/07/19 23:47:15 INF [RTSP] [conn 127.0.0.1:58918] closed: EOF
+2026/07/19 23:47:17 INF [RTSP] [conn 127.0.0.1:58920] opened
+2026/07/19 23:47:17 INF [RTSP] [conn 127.0.0.1:58920] closed: EOF
+2026/07/19 23:47:19 INF [RTSP] [conn 127.0.0.1:58930] opened
+2026/07/19 23:47:19 INF [RTSP] [conn 127.0.0.1:58930] closed: EOF
+2026/07/19 23:47:21 INF [RTSP] [conn 127.0.0.1:58946] opened
+2026/07/19 23:47:21 INF [RTSP] [conn 127.0.0.1:58946] closed: EOF
+2026/07/19 23:47:23 INF [RTSP] [conn 127.0.0.1:36478] opened
+2026/07/19 23:47:23 INF [RTSP] [conn 127.0.0.1:36478] closed: EOF
+2026/07/19 23:47:25 INF [RTSP] [conn 127.0.0.1:36488] opened
+2026/07/19 23:47:25 INF [RTSP] [conn 127.0.0.1:36488] closed: EOF
+2026/07/19 23:47:27 INF [RTSP] [conn 127.0.0.1:36496] opened
+2026/07/19 23:47:27 INF [RTSP] [conn 127.0.0.1:36496] closed: EOF
+2026/07/19 23:47:29 INF [RTSP] [conn 127.0.0.1:36512] opened
+2026/07/19 23:47:29 INF [RTSP] [conn 127.0.0.1:36512] closed: EOF
+2026/07/19 23:47:31 INF [RTSP] [conn 127.0.0.1:36514] opened
+2026/07/19 23:47:31 INF [RTSP] [conn 127.0.0.1:36514] closed: EOF
+2026/07/19 23:47:33 INF [RTSP] [conn 127.0.0.1:47524] opened
+2026/07/19 23:47:33 INF [RTSP] [conn 127.0.0.1:47524] closed: EOF
+2026/07/19 23:47:35 INF [RTSP] [conn 127.0.0.1:47526] opened
+2026/07/19 23:47:35 INF [RTSP] [conn 127.0.0.1:47526] closed: EOF
+2026/07/19 23:47:37 INF [RTSP] [conn 127.0.0.1:47542] opened
+2026/07/19 23:47:37 INF [RTSP] [conn 127.0.0.1:47542] closed: EOF
+2026/07/19 23:47:39 INF [RTSP] [conn 127.0.0.1:47548] opened
+2026/07/19 23:47:39 INF [RTSP] [conn 127.0.0.1:47548] closed: EOF
+2026/07/19 23:47:41 INF [RTSP] [conn 127.0.0.1:47558] opened
+2026/07/19 23:47:41 INF [RTSP] [conn 127.0.0.1:47558] closed: EOF
+2026/07/19 23:47:43 INF [RTSP] [conn 127.0.0.1:34220] opened
+2026/07/19 23:47:43 INF [RTSP] [conn 127.0.0.1:34220] closed: EOF
+2026/07/19 23:47:45 INF [RTSP] [conn 127.0.0.1:34232] opened
+2026/07/19 23:47:45 INF [RTSP] [conn 127.0.0.1:34232] closed: EOF
+2026/07/19 23:47:47 INF [RTSP] [conn 127.0.0.1:34234] opened
+2026/07/19 23:47:47 INF [RTSP] [conn 127.0.0.1:34234] closed: EOF
+2026/07/19 23:47:49 INF [RTSP] [conn 127.0.0.1:34236] opened
+2026/07/19 23:47:49 INF [RTSP] [conn 127.0.0.1:34236] closed: EOF
+2026/07/19 23:47:51 INF [RTSP] [conn 127.0.0.1:34252] opened
+2026/07/19 23:47:51 INF [RTSP] [conn 127.0.0.1:34252] closed: EOF
+2026/07/19 23:47:53 INF [RTSP] [conn 127.0.0.1:44554] opened
+2026/07/19 23:47:53 INF [RTSP] [conn 127.0.0.1:44554] closed: EOF
+2026/07/19 23:47:55 INF [RTSP] [conn 127.0.0.1:44562] opened
+2026/07/19 23:47:55 INF [RTSP] [conn 127.0.0.1:44562] closed: EOF
+2026/07/19 23:47:57 INF [RTSP] [conn 127.0.0.1:44574] opened
+2026/07/19 23:47:57 INF [RTSP] [conn 127.0.0.1:44574] closed: EOF
+2026/07/19 23:47:59 INF [RTSP] [conn 127.0.0.1:44588] opened
+2026/07/19 23:47:59 INF [RTSP] [conn 127.0.0.1:44588] closed: EOF
+2026/07/19 23:47:59 INF [RTSP] [conn 192.168.137.1:54822] opened
+2026/07/19 23:47:59 INF [RTSP] [session 6178a9a0] created by 192.168.137.1:54822
+2026/07/19 23:47:59 INF [RTSP] [session 6178a9a0] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 23:47:59 INF [RTSP] [conn 192.168.137.1:54824] opened
+2026/07/19 23:47:59 INF [RTSP] [session 0292f82f] created by 192.168.137.1:54824
+2026/07/19 23:47:59 INF [RTSP] [session 0292f82f] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 23:48:01 INF [RTSP] [conn 127.0.0.1:44600] opened
+2026/07/19 23:48:01 INF [RTSP] [conn 127.0.0.1:44600] closed: EOF
+2026/07/19 23:48:01 INF [RTSP] [session 0292f82f] destroyed: torn down by 192.168.137.1:54824
+2026/07/19 23:48:01 INF [RTSP] [conn 192.168.137.1:54824] closed: EOF
+2026/07/19 23:48:01 INF [RTSP] [conn 192.168.137.1:54829] opened
+2026/07/19 23:48:01 INF [RTSP] [session 4e7d7468] created by 192.168.137.1:54829
+2026/07/19 23:48:01 INF [RTSP] [session 4e7d7468] is reading from path 'director', with TCP, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 23:48:03 INF [RTSP] [conn 127.0.0.1:49212] opened
+2026/07/19 23:48:03 INF [RTSP] [conn 127.0.0.1:49212] closed: EOF
+2026/07/19 23:48:05 INF [RTSP] [conn 127.0.0.1:49218] opened
+2026/07/19 23:48:05 INF [RTSP] [conn 127.0.0.1:49218] closed: EOF
+2026/07/19 23:48:07 INF [RTSP] [conn 127.0.0.1:49220] opened
+2026/07/19 23:48:07 INF [RTSP] [conn 127.0.0.1:49220] closed: EOF
+2026/07/19 23:48:09 INF [RTSP] [conn 127.0.0.1:49224] opened
+2026/07/19 23:48:09 INF [RTSP] [conn 127.0.0.1:49224] closed: EOF
+2026/07/19 23:48:11 INF [RTSP] [conn 127.0.0.1:49236] opened
+2026/07/19 23:48:11 INF [RTSP] [conn 127.0.0.1:49236] closed: EOF
+2026/07/19 23:48:13 INF [RTSP] [conn 127.0.0.1:42746] opened
+2026/07/19 23:48:13 INF [RTSP] [conn 127.0.0.1:42746] closed: EOF
+2026/07/19 23:48:15 INF [RTSP] [conn 127.0.0.1:42754] opened
+2026/07/19 23:48:15 INF [RTSP] [conn 127.0.0.1:42754] closed: EOF
+2026/07/19 23:48:17 INF [RTSP] [conn 127.0.0.1:42770] opened
+2026/07/19 23:48:17 INF [RTSP] [conn 127.0.0.1:42770] closed: EOF
+2026/07/19 23:48:19 INF [RTSP] [conn 127.0.0.1:42780] opened
+2026/07/19 23:48:19 INF [RTSP] [conn 127.0.0.1:42780] closed: EOF
+2026/07/19 23:48:21 INF [RTSP] [conn 127.0.0.1:42796] opened
+2026/07/19 23:48:21 INF [RTSP] [conn 127.0.0.1:42796] closed: EOF
+2026/07/19 23:48:23 INF [RTSP] [conn 127.0.0.1:45422] opened
+2026/07/19 23:48:23 INF [RTSP] [conn 127.0.0.1:45422] closed: EOF
+2026/07/19 23:48:25 INF [RTSP] [conn 127.0.0.1:45424] opened
+2026/07/19 23:48:25 INF [RTSP] [conn 127.0.0.1:45424] closed: EOF
+2026/07/19 23:48:27 INF [RTSP] [conn 127.0.0.1:45432] opened
+2026/07/19 23:48:27 INF [RTSP] [conn 127.0.0.1:45432] closed: EOF
+2026/07/19 23:48:29 INF [RTSP] [conn 127.0.0.1:45442] opened
+2026/07/19 23:48:29 INF [RTSP] [conn 127.0.0.1:45442] closed: EOF
+2026/07/19 23:48:30 INF [RTSP] [session 6178a9a0] destroyed: torn down by 192.168.137.1:54822
+2026/07/19 23:48:30 INF [RTSP] [conn 192.168.137.1:54822] closed: EOF
+2026/07/19 23:48:30 INF [RTSP] [conn 192.168.137.1:54829] closed: read tcp 192.168.137.231:8554->192.168.137.1:54829: read: connection reset by peer
+2026/07/19 23:48:30 INF [RTSP] [session 4e7d7468] destroyed: not in use
+2026/07/19 23:48:31 INF [RTSP] [conn 127.0.0.1:45444] opened
+2026/07/19 23:48:31 INF [RTSP] [conn 127.0.0.1:45444] closed: EOF
+2026/07/19 23:48:33 INF [RTSP] [conn 127.0.0.1:60394] opened
+2026/07/19 23:48:33 INF [RTSP] [conn 127.0.0.1:60394] closed: EOF
+2026/07/19 23:48:35 INF [RTSP] [conn 127.0.0.1:60400] opened
+2026/07/19 23:48:35 INF [RTSP] [conn 127.0.0.1:60400] closed: EOF
+2026/07/19 23:48:37 INF [RTSP] [conn 127.0.0.1:60404] opened
+2026/07/19 23:48:37 INF [RTSP] [conn 127.0.0.1:60404] closed: EOF
+2026/07/19 23:48:39 INF [RTSP] [conn 127.0.0.1:60416] opened
+2026/07/19 23:48:39 INF [RTSP] [conn 127.0.0.1:60416] closed: EOF
+2026/07/19 23:48:41 INF [RTSP] [conn 127.0.0.1:60418] opened
+2026/07/19 23:48:41 INF [RTSP] [conn 127.0.0.1:60418] closed: EOF
+2026/07/19 23:48:43 INF [RTSP] [conn 127.0.0.1:35168] opened
+2026/07/19 23:48:43 INF [RTSP] [conn 127.0.0.1:35168] closed: EOF
+2026/07/19 23:48:45 INF [RTSP] [conn 127.0.0.1:35170] opened
+2026/07/19 23:48:45 INF [RTSP] [conn 127.0.0.1:35170] closed: EOF
+2026/07/19 23:48:47 INF [RTSP] [conn 127.0.0.1:35174] opened
+2026/07/19 23:48:47 INF [RTSP] [conn 127.0.0.1:35174] closed: EOF
+2026/07/19 23:48:49 INF [RTSP] [conn 127.0.0.1:35184] opened
+2026/07/19 23:48:49 INF [RTSP] [conn 127.0.0.1:35184] closed: EOF
+2026/07/19 23:48:51 INF [RTSP] [conn 127.0.0.1:35200] opened
+2026/07/19 23:48:51 INF [RTSP] [conn 127.0.0.1:35200] closed: EOF
+2026/07/19 23:48:53 INF [RTSP] [conn 127.0.0.1:51142] opened
+2026/07/19 23:48:53 INF [RTSP] [conn 127.0.0.1:51142] closed: EOF
+2026/07/19 23:48:55 INF [RTSP] [conn 127.0.0.1:51154] opened
+2026/07/19 23:48:55 INF [RTSP] [conn 127.0.0.1:51154] closed: EOF
+2026/07/19 23:48:55 INF [RTSP] [conn 127.0.0.1:50806] closed: read tcp 127.0.0.1:8554->127.0.0.1:50806: read: connection reset by peer
+2026/07/19 23:48:55 INF [RTSP] [session 29d1030b] destroyed: not in use
+2026/07/19 23:48:57 INF [RTSP] [conn 127.0.0.1:51166] opened
+2026/07/19 23:48:57 INF [RTSP] [conn 127.0.0.1:51166] closed: EOF
+2026/07/19 23:48:58 INF [RTSP] [conn 127.0.0.1:50792] closed: EOF
+2026/07/19 23:48:58 INF [RTSP] [session 7cb20d6b] destroyed: torn down by 127.0.0.1:50792
+2026/07/19 23:48:59 INF [RTSP] [conn 127.0.0.1:51180] opened
+2026/07/19 23:48:59 INF [RTSP] [conn 127.0.0.1:51180] closed: EOF
+2026/07/19 23:48:59 INF [RTSP] [conn 127.0.0.1:51194] opened
+2026/07/19 23:48:59 INF [RTSP] [session baa2fc85] created by 127.0.0.1:51194
+2026/07/19 23:48:59 INF [path director] stream is available and online, 2 tracks (H264, MPEG-4 Audio)
+2026/07/19 23:48:59 INF [RTSP] [session baa2fc85] is publishing to path 'director'
+2026/07/19 23:49:06 INF shutting down gracefully
+2026/07/19 23:49:06 INF [SRT] closing
+2026/07/19 23:49:06 INF [MoQ] closing
+2026/07/19 23:49:06 INF [WebRTC] closing
+2026/07/19 23:49:06 INF [HLS] closing
+2026/07/19 23:49:06 INF [RTMP] closing
+2026/07/19 23:49:06 INF [RTSP] closing
+2026/07/19 23:49:06 INF [RTSP] [conn 127.0.0.1:51194] closed: terminated
+2026/07/19 23:49:06 INF [RTSP] [session baa2fc85] destroyed: terminated
+2026/07/19 23:49:06 INF waiting for running hooks

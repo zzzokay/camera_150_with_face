@@ -1,101 +1,354 @@
 #!/usr/bin/env python3
+
 # -*- coding: utf-8 -*-
+
 """
-face_checkin_lbph.py
-====================
+face_checkin_lbph_stable.py
+===========================
 
-单目摄像头篮球赛事检录模块：人脸采集、训练、识别与签到记录。
+单目摄像头篮球赛事人脸检录模块。
 
-适用工程：
-    2026_embeddedSystem_camera_150
-    RK3588 / Linux / USB UVC 摄像头 / OpenCV
+本脚本用于完成参赛人员的人脸信息登记、识别模型训练、实时身份识别
+以及检录结果记录，可作为篮球赛事自动转播系统中的赛前检录模块。
 
-本脚本为什么先选用 Haar + LBPH？
----------------------------------
-1. Haar Cascade 用于“人脸检测”：
-   找出画面中人脸的位置，得到矩形框。
 
-2. LBPH（Local Binary Patterns Histograms）用于“人脸识别”：
-   把检测到的人脸与已经登记的人脸样本进行比较，从而判断是谁。
+主要功能：
+1. 采集参赛人员的人脸样本；
+2. 对采集画面进行单目畸变矫正；
+3. 对人脸样本进行清晰度、亮度和稳定性检查；
+4. 使用 LBPH 算法训练本地人脸识别模型；
+5. 实时识别已经登记的参赛人员；
+6. 使用连续多帧确认方式降低单帧误识别；
+7. 自动生成当天的 CSV 检录记录；
+8. 同一人员当天默认只记录一次。
 
-3. 这套方法结构简单，适合第一次学习完整的人脸识别流程：
-   摄像头采集 -> 人脸检测 -> 样本保存 -> 模型训练 -> 实时预测 -> 检录记录。
+## 目录结构
 
-4. 它不是最终高精度方案：
-   对光照、角度、遮挡和远距离人脸比较敏感。项目后续可以将 Haar/LBPH
-   替换为 RetinaFace/SCRFD + ArcFace，并转换为 RKNN 在 RK3588 NPU 上运行。
-
-目录结构
---------
-脚本默认在工程根目录创建：
+脚本默认在工程根目录下创建 face_checkin 目录：
 
 face_checkin/
-├── dataset/                       # 每位人员的人脸样本
-│   ├── 001__zhangsan/
+├── dataset/                           # 已登记人员的人脸样本
+│   ├── 001__player_001/
 │   │   ├── 0001.jpg
+│   │   ├── 0002.jpg
 │   │   └── ...
-│   └── 002__lisi/
-├── trainer/
-│   ├── lbph_model.yml             # LBPH 模型
-│   └── labels.json                # 数字标签与人员信息的映射
-└── records/
-    └── checkin_20260719.csv        # 当天检录记录
+│   └── 002__player_002/
+│       ├── 0001.jpg
+│       └── ...
+│
+├── trainer/                           # 训练结果
+│   ├── lbph_model.yml                 # LBPH 人脸识别模型
+│   └── labels.json                    # 模型标签与人员信息映射
+│
+└── records/                           # 检录记录
+└── checkin_20260719.csv            # 当天检录结果
 
-典型运行方法
-------------
-一、安装依赖
+人员样本目录采用以下命名格式：
 
-    # cv2.face 位于 OpenCV contrib 扩展中。
-    python3 -m pip install opencv-contrib-python numpy
+```
+人员编号__人员姓名
+```
 
-    # 检查 cv2.face 是否可用：
-    python3 -c "import cv2; print(hasattr(cv2, 'face'))"
+例如：
 
-二、采集一名球员的人脸
+```
+001__player_001
+002__player_002
+```
 
-    python3 face_checkin_lbph.py \
-      --mode enroll \
-      --person-id 001 \
-      --name player_001 \
-      --device /dev/video41 \
-      --calib-file camera_usb3_calib.npz
+其中：
 
-    采集时：
-        - 保证画面中只有一张主要人脸；
-        - 缓慢进行轻微左右转头和抬头低头；
-        - 按 q 或 Esc 可提前退出；
-        - 达到 --samples 指定数量后自动结束。
+```
+人员编号用于保证每位人员身份唯一；
+人员姓名用于显示和写入检录记录。
+```
 
-三、训练识别模型
+## 运行环境说明
 
-    python3 face_checkin_lbph.py \
-      --mode train
+原篮球导播工程依赖现有 OpenCV、RKNNLite、Qt 和其他系统组件。
 
-四、实时识别并检录
+为避免重新安装 OpenCV 后破坏现有导播环境，建议为人脸检录模块单独创建
+Python 虚拟环境。
 
-    python3 face_checkin_lbph.py \
-      --mode recognize \
-      --device /dev/video41 \
-      --calib-file camera_usb3_calib.npz
+一、创建人脸识别虚拟环境
 
-    当同一个身份连续识别达到 --stable-hits 次时，写入当天 CSV。
-    同一人员当天默认只登记一次。
+```
+cd /home/elf/work/camera_150
 
-五、一条命令训练后立即识别
+python3 -m venv --system-site-packages face_env
+```
 
-    python3 face_checkin_lbph.py \
-      --mode train-recognize \
-      --device /dev/video41 \
-      --calib-file camera_usb3_calib.npz
+二、只在人脸识别环境中安装 OpenCV contrib
 
-重要说明
---------
-1. LBPH 的 confidence 数值越小，表示与训练样本越相似。
-2. --recognition-threshold 越小，判断越严格；越大，越容易误认。
-3. 建议从 60~75 范围测试，默认值为 68。
-4. 为保护个人信息，人脸样本和签到记录均保存在本机，不上传网络。
-5. 实际赛事使用前，应取得被采集人员同意，并限制数据访问权限。
+```
+./face_env/bin/python -m pip install --upgrade pip
+
+./face_env/bin/python -m pip install \
+  --ignore-installed \
+  --no-deps \
+  opencv-contrib-python==4.10.0.84
+```
+
+cv2.face 位于 OpenCV contrib 扩展模块中，因此普通的 opencv-python
+不一定包含 LBPHFaceRecognizer。
+
+三、检查 LBPH 是否可用
+
+```
+./face_env/bin/python - <<'PY'
+import cv2
+
+print("OpenCV version:", cv2.__version__)
+print("OpenCV path:", cv2.__file__)
+print("has cv2.face:", hasattr(cv2, "face"))
+
+if hasattr(cv2, "face"):
+    print([name for name in dir(cv2.face) if "LBPH" in name])
+PY
+```
+
+正常情况下，应能看到：
+
+```
+LBPHFaceRecognizer
+LBPHFaceRecognizer_create
+```
+
+## 典型运行方法
+
+一、采集一名球员的人脸
+
+推荐使用稳定采集和手动确认模式：
+
+```
+cd /home/elf/work/camera_150
+
+./face_env/bin/python face_checkin_lbph_stable.py \
+  --mode enroll \
+  --person-id 001 \
+  --name player_001 \
+  --device /dev/video41 \
+  --calib-file camera_usb3_calib.npz \
+  --samples 30 \
+  --manual-capture \
+  --min-face-size 180 \
+  --enroll-min-neighbors 10 \
+  --enroll-stable-frames 8 \
+  --min-sharpness 100 \
+  --min-eyes 1
+```
+
+采集时建议：
+
+```
+- 画面中只保留一名待登记人员；
+- 人脸放在画面中央的引导区域内；
+- 保持正面或轻微左右转头；
+- 避免快速晃动；
+- 避免强烈逆光；
+- 确认画面清晰后按 c 保存；
+- 按 q 或 Esc 提前退出；
+- 达到 --samples 指定数量后自动结束。
+```
+
+推荐每位人员采集 25～35 张高质量样本。
+
+样本可以包含：
+
+```
+- 正脸；
+- 轻微向左；
+- 轻微向右；
+- 轻微抬头；
+- 轻微低头；
+- 少量不同表情。
+```
+
+不建议采集大角度侧脸，因为当前使用的是正面 Haar 人脸检测模型。
+
+二、训练人脸识别模型
+
+采集完所有人员后执行：
+
+```
+./face_env/bin/python face_checkin_lbph_stable.py \
+  --mode train
+```
+
+训练完成后会生成：
+
+```
+face_checkin/trainer/lbph_model.yml
+face_checkin/trainer/labels.json
+```
+
+每次新增人员、删除错误样本或重新采集样本后，都需要重新执行训练。
+
+三、实时识别并检录
+
+```
+./face_env/bin/python face_checkin_lbph_stable.py \
+  --mode recognize \
+  --device /dev/video41 \
+  --calib-file camera_usb3_calib.npz
+```
+
+识别过程中：
+
+```
+1. Haar Cascade 检测人脸；
+2. LBPH 判断当前人员身份；
+3. 同一身份连续识别达到 --stable-hits 次；
+4. 将人员编号、姓名、时间和匹配距离写入当天 CSV；
+5. 同一人员当天不会重复写入。
+```
+
+四、训练完成后立即进入识别
+
+```
+./face_env/bin/python face_checkin_lbph_stable.py \
+  --mode train-recognize \
+  --device /dev/video41 \
+  --calib-file camera_usb3_calib.npz
+```
+
+## 常用参数
+
+1. 人脸识别阈值
+
+   --recognition-threshold 68
+
+LBPH 的匹配距离越小，表示越相似。
+
+```
+阈值减小：
+    判断更加严格，误识别减少，但可能出现更多 UNKNOWN。
+
+阈值增大：
+    更容易识别成功，但误识别概率也会增加。
+```
+
+建议先在 55～75 范围内测试。
+
+2. 连续确认帧数
+
+   --stable-hits 5
+
+表示同一个身份需要连续识别 5 帧，才正式写入检录记录。
+
+增大该参数可以降低偶发误识别，但会增加确认时间。
+
+3. 最小人脸尺寸
+
+   --min-face-size 180
+
+用于忽略画面中尺寸过小的人脸。
+
+人脸太小会导致五官纹理不足，不适合进行可靠识别。
+
+4. Haar 检测严格程度
+
+   --enroll-min-neighbors 10
+
+数值越大，人脸检测越严格，误检越少，但也可能增加漏检。
+
+5. 人脸稳定帧数
+
+   --enroll-stable-frames 8
+
+表示人脸框需要连续稳定 8 帧，才允许保存。
+
+6. 清晰度阈值
+
+   --min-sharpness 100
+
+清晰度不足时，脚本不会保存当前人脸。
+
+如果画面肉眼清晰但始终提示模糊，可以适当降低到：
+
+```
+--min-sharpness 60
+```
+
+7. 眼睛验证
+
+```
+--min-eyes 1
+```
+
+表示人脸区域中至少需要检测到一只眼睛。
+
+眼睛验证可以明显减少非人脸区域被错误保存。
+
+戴眼镜或轻微侧脸时，如果一直无法通过，可以临时设置：
+
+```
+--min-eyes 0
+```
+
+关闭眼睛验证后，建议必须配合：
+
+```
+--manual-capture
+```
+
+8. 禁用单目畸变矫正
+
+```
+--no-undistort
+```
+
+只有在校准文件不存在，或者摄像头分辨率与标定分辨率不一致时使用。
+
+## 重要说明
+
+1. 人脸样本质量比样本数量更加重要。
+
+   30 张清晰、正确、角度有变化的人脸样本，通常比 100 张包含误检、
+   模糊或重复画面的样本效果更好。
+
+2. 训练前应人工检查 dataset 目录。
+
+   确保所有 JPG 文件都是真实人脸，不包含：
+
+   ```
+   - 墙面；
+   - 衣服图案；
+   - 其他人员；
+   - 严重模糊画面；
+   - 五官被大量裁切的画面。
+   ```
+
+3. 当前脚本中的中文姓名会正常写入 labels.json 和 CSV。
+
+   但 cv2.putText 默认不支持中文，因此实时画面中的中文姓名可能无法正确显示。
+   如需正确显示中文，可后续使用 Pillow 或 Qt 绘制文字。
+
+4. 人脸样本、识别模型和检录记录均保存在本地，不会主动上传网络。
+
+5. 实际赛事使用前，应取得被采集人员的明确同意，并限制人脸数据目录的
+   访问权限。
+
+6. 检录脚本与篮球导播脚本默认使用同一个摄像头节点：
+
+   ```
+   /dev/video41
+   ```
+
+   两个程序不建议同时打开同一个摄像头。
+
+   当前推荐流程为：
+
+   ```
+   完成人脸检录
+       ↓
+   退出人脸检录程序
+       ↓
+   启动篮球赛事自动导播程序
+   ```
+
 """
+
 
 from __future__ import annotations
 

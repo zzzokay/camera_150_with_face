@@ -1,0 +1,27 @@
+{
+  "match_id": "20260719_210004",
+  "updated_at": "2026-07-19T21:00:21",
+  "home_name": "主队",
+  "away_name": "客队",
+  "players": [
+    {
+      "key": "home|7|詹嘉裕",
+      "team": "home",
+      "team_name": "主队",
+      "number": "7",
+      "name": "詹嘉裕",
+      "explicit_face_id": "",
+      "face_id": "001",
+      "selected": true,
+      "status": "已检录",
+      "confidence": 67.74254938891357,
+      "checkin_time": "21:00:15"
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "checked_in": 1,
+    "absent": 0,
+    "pending": 0
+  }
+}

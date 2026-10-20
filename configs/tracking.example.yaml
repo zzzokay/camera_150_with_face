@@ -1,0 +1,10 @@
+# 文件作用：G2 人物 ByteTrack 参数；单位和阈值须与检测策略一起调整并同片段复验。
+schema_version: g2_tracker_config_v1
+track_high_thresh: 0.35  # 与 person.confidence 一致；优先匹配的框。
+track_low_thresh: 0.10   # 只用于续接已有轨迹；不能独立开启轨迹。
+new_track_thresh: 0.35
+track_buffer: 30        # Ultralytics 的 30 FPS 等效帧数，约 1 秒；按源 FPS 换算。
+match_thresh: 0.8       # 关联代价上限，越大越宽松，不是 IoU 下限。
+fuse_score: true
+gap_reset_seconds: 0.5  # 大时间间隔不跨段续接；短间隔按名义 FPS 推进空观测。
+scene_cut_threshold: 0.65  # HSV 直方图距离启发式；闪光/缓慢转场仍可能误判/漏判。

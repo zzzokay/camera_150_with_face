@@ -1,5 +1,5 @@
 """
-文件作用：G0/G1 视频 -> 真实 YOLO -> 原规则 -> 视频及可选 G1 检测审计总入口。
+文件作用：G0/G1/G2 视频 -> 一次真实 YOLO -> 可选 ByteTrack -> 原规则 -> 视频/QC 总入口。
 输入：RunConfig；输出：唯一目录内的视频、summary.json、run.log 和可选 detections.jsonl。
 依赖：各 Windows 组件；RKNN、音频、Qt、RTSP 不进入默认离线流程。
 调用关系：run_windows.py -> main -> run_pipeline -> sources/preprocess/detect/director/outputs。
@@ -22,7 +22,7 @@ from .detector import YoloDetector, validate_weights
 from .detection_policy import load_detection_policy
 from .detection_records import DetectionRecords
 from .director_adapter import LegacyDirector
-from .outputs import SavedVideo, draw_overview, draw_detection_overview, verify_video
+from .outputs import SavedVideo, draw_overview, draw_detection_overview, draw_tracking_overview, verify_video
 from .preprocessing import FramePreprocessor
 from .sources import VideoSource
 
@@ -31,14 +31,17 @@ def run_pipeline(config: RunConfig) -> Path:
     """从指定源时间执行真实管线并返回运行目录；起点越界或失败时保留失败报告并抛异常。"""
     # 先检查本地权重，不向 Ultralytics 传入不存在的文件名，防止自动下载。
     validate_weights(config.weights)
+    g2 = config.tracking_config is not None
+    if g2 and config.detect_interval != 1:
+        raise ValueError('G2 ByteTrack 要求 detect_interval=1，禁止复用检测作新观测')
     g1 = config.detection_policy is not None or config.export_detections
-    prefix = "g1" if g1 else "g0"
+    prefix = "g2" if g2 else ("g1" if g1 else "g0")
     run_dir = config.output_dir / (prefix + datetime.now().strftime("_%Y%m%d_%H%M%S_") + uuid.uuid4().hex[:8])
     run_dir.mkdir(parents=True, exist_ok=False)
     handler = logging.FileHandler(run_dir / "run.log", encoding="utf-8")
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
     logging.getLogger().addHandler(handler)
-    report = {"schema_version": "g1_run_v1" if g1 else "g0_run_v1", "status": "RUNNING", "config": config.serializable(),
+    report = {"schema_version": "g2_run_v1" if g2 else ("g1_run_v1" if g1 else "g0_run_v1"), "status": "RUNNING", "config": config.serializable(),
               "command_argv": sys.argv, "processed_frames": 0, "inference_calls": 0,
               "true_person_observations": 0, "frames_reusing_detections": 0,
               "first_detection": None, "outputs": [], "stop_reason": None}
@@ -46,6 +49,15 @@ def run_pipeline(config: RunConfig) -> Path:
     inference_ms = []
     try:
         policy = load_detection_policy(config.detection_policy, config.confidence, config.person_aliases)
+        tracking_policy = None
+        if g2:
+            from .tracker import PersonByteTracker, SmoothTracksBaseline, load_tracker_config
+            from .tracking_records import TrackingRecords
+            tracking_policy = load_tracker_config(config.tracking_config)
+            if policy.ball.enabled:
+                raise ValueError('本轮 G2 仅验人物跟踪，篮球按用户要求暂缓；请保持 ball.enabled=false')
+            if abs(policy.person.confidence - tracking_policy.track_high_thresh) > 1e-8:
+                raise ValueError('person.confidence 必须与 track_high_thresh 一致，避免两阶段门槛歧义')
         report["detection_policy"] = policy.serializable()
         preprocessor = FramePreprocessor(config.undistort, config.calib_file)
         logging.info("输出目录：%s", run_dir)
@@ -71,7 +83,8 @@ def run_pipeline(config: RunConfig) -> Path:
                                  "first_timestamp_sec": packet.timestamp_sec}
             logging.info("片段起点：源帧 %d，源时间 %.6f 秒；跳过 %d 帧",
                          packet.source_frame_idx, packet.timestamp_sec, packet.source_frame_idx)
-            detector = YoloDetector(config.weights, config.device, config.imgsz, config.iou, policy)
+            detector = YoloDetector(config.weights, config.device, config.imgsz, config.iou, policy,
+                                    person_tracking_confidence=tracking_policy.track_low_thresh if g2 else None)
             report["model"] = {"path": str(detector.weights), "sha256": detector.sha256,
                                 "names": detector.names, "person_class_ids": detector.person_ids,
                                 "device": config.device, "canonical_class_ids": detector.class_ids}
@@ -85,12 +98,29 @@ def run_pipeline(config: RunConfig) -> Path:
             }
             director = LegacyDirector(config.view_width, config.view_height, config.smooth,
                                        config.max_match_dist, config.max_missing, config.game_state)
+            tracker = PersonByteTracker(tracking_policy, source.fps) if g2 else None
+            baseline = SmoothTracksBaseline(config.smooth, config.max_match_dist, config.max_missing) if g2 else None
+            tracking_stats = {'matched_observations': 0, 'high_matches': 0, 'low_matches': 0,
+                              'frames_without_confirmed_track': 0, 'baseline_observations': 0}
+            seen_ids, baseline_ids = set(), set()
+            if g2:
+                report['tracker'] = tracker.metadata()
+                report['baseline'] = {'implementation': 'original SmoothTracks', 'smooth': config.smooth,
+                                      'max_match_dist_px': config.max_match_dist, 'max_missing_frames': config.max_missing,
+                                      'input_confidence': policy.person.confidence}
+                report['model']['yolo_inference_confidence'] = detector.confidence
+                logging.info('G2 ByteTrack：高/低阈值 %.2f/%.2f，名义 FPS %.6f，单次推理供两个独立对照',
+                             tracking_policy.track_high_thresh, tracking_policy.track_low_thresh, source.fps)
             suffix = ".mp4" if config.codec == "mp4v" else ".avi"
             program = stack.enter_context(SavedVideo(run_dir / ("director" + suffix), source.fps,
                                                        (config.view_width, config.view_height), config.codec))
             overview = stack.enter_context(SavedVideo(run_dir / ("overview" + suffix), source.fps,
                                                         (w, h), config.codec)) if config.debug_video else None
+            comparison_size = (w, h // 4 * 2)
+            comparison = stack.enter_context(SavedVideo(run_dir / ('tracking_comparison' + suffix), source.fps,
+                                                        comparison_size, config.codec)) if g2 and config.debug_video else None
             records = stack.enter_context(DetectionRecords(run_dir / "detections.jsonl")) if config.export_detections else None
+            tracking_records = stack.enter_context(TrackingRecords(run_dir)) if g2 else None
             last_detections = []
             last_detect_idx = packet.source_frame_idx
             first_crop = None
@@ -130,13 +160,39 @@ def run_pipeline(config: RunConfig) -> Path:
                 if records:
                     records.write(packet, preprocessor.coord_system, observed, current_detections,
                                   detector.last_rejections, policy.ball.enabled, last_detect_idx)
-                view, crop, smoothed, info = director.process(frame, current_detections)
+                byte_tracks = baseline_tracks = None
+                if g2:
+                    byte_tracks = tracker.update(detector.last_tracking_detections, packet.source_frame_idx,
+                                                 packet.timestamp_sec, (w, h), frame)
+                    if tracker.last_info['reset_reason']:
+                        baseline.reset()
+                        director = LegacyDirector(config.view_width, config.view_height, config.smooth,
+                                                  config.max_match_dist, config.max_missing, config.game_state)
+                    baseline_tracks = baseline.update(current_detections, tracker.segment_id)
+                    tracking_records.write(packet, byte_tracks, baseline_tracks, tracker.last_info)
+                    tracking_stats['matched_observations'] += len(byte_tracks)
+                    tracking_stats['high_matches'] += sum(t.association_stage == 'high' for t in byte_tracks)
+                    tracking_stats['low_matches'] += sum(t.association_stage == 'low' for t in byte_tracks)
+                    tracking_stats['frames_without_confirmed_track'] += int(not byte_tracks)
+                    tracking_stats['baseline_observations'] += len(baseline_tracks)
+                    seen_ids.update((t.segment_id, t.track_id) for t in byte_tracks)
+                    baseline_ids.update((t.segment_id, t.track_id) for t in baseline_tracks)
+                view, crop, smoothed, info = director.process(frame, current_detections, tracked_persons=byte_tracks)
                 first_crop = crop if first_crop is None else first_crop
                 changed_crop_frames += int(crop != first_crop)
                 program.write(view)
                 debug = None
                 if overview or config.preview:
-                    if g1:
+                    if g2:
+                        debug = draw_tracking_overview(frame, byte_tracks, crop, packet.source_frame_idx,
+                                                       packet.timestamp_sec, policy, info=tracker.last_info)
+                        if comparison:
+                            old_debug = draw_tracking_overview(frame, baseline_tracks, crop, packet.source_frame_idx,
+                                                               packet.timestamp_sec, policy, title='SmoothTracks baseline',
+                                                               info=tracker.last_info)
+                            panel_size = (w // 2, comparison_size[1])
+                            comparison.write(cv2.hconcat([cv2.resize(old_debug, panel_size), cv2.resize(debug, panel_size)]))
+                    elif g1:
                         debug = draw_detection_overview(frame, current_detections, detector.last_rejections, crop,
                                                        packet.source_frame_idx, observed,
                                                        packet.source_frame_idx - last_detect_idx, policy)
@@ -171,8 +227,14 @@ def run_pipeline(config: RunConfig) -> Path:
             if records:
                 report["detection_records"] = {"path": str(records.path), "rows": records.count,
                                                  "schema_version": "g1_detections_v1"}
+            if g2:
+                tracking_stats.update(unique_segment_track_ids=len(seen_ids), baseline_unique_segment_track_ids=len(baseline_ids),
+                                      qc_frames=tracking_records.frame_count, csv_rows=tracking_records.byte_rows,
+                                      baseline_csv_rows=tracking_records.baseline_rows)
+                report['tracking_summary'] = tracking_stats
+                report['tracker'] = tracker.metadata()
         # 资源已关闭：用真正解码检查保存成功，而不是只判断文件存在。
-        for writer in (program, overview):
+        for writer in (program, overview, comparison):
             if writer:
                 report["outputs"].append(verify_video(writer.path, writer.count, writer.size))
         report["status"] = "COMPLETED"

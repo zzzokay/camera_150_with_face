@@ -1,9 +1,10 @@
-# 文件作用：G0 的 Windows Python 3.11 依赖；先按交接文档安装 CPU 或 CUDA torch。
+# 文件作用：G0/G1/G2 的 Windows Python 3.11 依赖；先按交接文档安装 CPU 或 CUDA torch。
 # CPU 已实测；CUDA 仅提供安装说明，未测试。
 torch==2.9.1
 torchvision==0.24.1
 numpy==2.2.6
 opencv-python==4.12.0.88
 ultralytics==8.3.225
+lap==0.5.12
 PyYAML==6.0.3
 pytest==8.4.2

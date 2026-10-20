@@ -115,3 +115,25 @@ def draw_detection_overview(frame, detections, rejections, crop, frame_idx, obse
     cv2.putText(out, f"frame={frame_idx} {status} | person candidates, not identities", (12, 28), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 255, 255), 2)
     cv2.putText(out, "ball: DISABLED" if not policy.ball.enabled else "ball: real observations only", (12, 55), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 255, 255), 2)
     return out
+
+
+def draw_tracking_overview(frame, tracks, crop, frame_idx, timestamp_sec, policy, title='ByteTrack', info=None):
+    """G2 画当前匹配观测的 ID/滤波状态框；不画失踪预测，蓝线 ROI，青线导播裁切。"""
+    out = frame.copy()
+    h, w = out.shape[:2]
+    if policy.person.roi_polygon:
+        points = np.asarray([(round(x * (w - 1)), round(y * (h - 1))) for x, y in policy.person.roi_polygon], dtype=np.int32)
+        cv2.polylines(out, [points], True, (255, 130, 0), 2)
+    colors = [(60, 230, 60), (0, 230, 255), (255, 190, 60), (255, 90, 190), (80, 150, 255)]
+    for t in tracks:
+        x1, y1, x2, y2 = (int(round(v)) for v in t.bbox_xyxy)
+        color = colors[t.track_id % len(colors)]
+        cv2.rectangle(out, (x1, y1), (x2, y2), color, 2)
+        cv2.putText(out, f'P{t.track_id} {t.detection.confidence:.2f} {t.association_stage[0].upper()}',
+                    (x1, max(70, y1 - 5)), cv2.FONT_HERSHEY_SIMPLEX, .52, color, 2)
+    x1, y1, x2, y2 = crop
+    cv2.rectangle(out, (x1, y1), (x2 - 1, y2 - 1), (255, 255, 0), 2)
+    cv2.putText(out, f'{title} | source={frame_idx} t={timestamp_sec:.3f}s | temporary person IDs', (12, 28), cv2.FONT_HERSHEY_SIMPLEX, .65, (0, 255, 255), 2)
+    segment = info.get('segment_id', 1) if info else 1
+    cv2.putText(out, f'segment={segment} matched={len(tracks)} | ball: DISABLED | state boxes are filtered estimates', (12, 55), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 255, 255), 2)
+    return out

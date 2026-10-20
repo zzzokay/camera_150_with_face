@@ -1,5 +1,5 @@
 """
-文件作用：用用户指定的真实 YOLO 权重和篮球录像执行 G0 自动化集成测试。
+文件作用：用用户指定的真实 YOLO 权重和篮球录像执行 G0/G1/G2 自动化集成测试。
 输入：G0_TEST_WEIGHTS / G0_TEST_VIDEO 环境变量；输出：pytest 临时目录的真实视频/报告。
 依赖：Ultralytics、完整 Windows 管线；缺文件时明确 skip，不用假检测代替。
 运行：设置环境变量后 python -m pytest tests/test_real_model.py -q。
@@ -59,3 +59,28 @@ def test_actual_g1_person_policy_and_disabled_ball_records(tmp_path):
     assert all(not r["detections"] for r in rows if not r["inference_performed"])
     assert report["detection_summary"]["person"]["accepted"] == sum(len(r["detections"]) for r in rows)
     assert report["detection_summary"]["ball"]["frames_without_detections"] is None
+
+
+def test_actual_g2_bytetrack_video_csv_and_legacy_comparison(tmp_path):
+    """真实 YOLO 每帧推理，保存可解码 ID 对照、有效 CSV；不把此短测当 ID 精度评估。"""
+    weights, video = os.environ.get('G0_TEST_WEIGHTS'), os.environ.get('G0_TEST_VIDEO')
+    if not weights or not video:
+        pytest.skip('未设置真实模型和视频')
+    root = Path(__file__).resolve().parents[1]
+    config = RunConfig(source=Path(video), weights=Path(weights), output_dir=tmp_path,
+                       undistort='already', max_frames=8, detect_interval=1,
+                       view_width=640, view_height=360, tracking_config=root / 'configs/tracking.example.yaml',
+                       export_detections=True)
+    run_dir = run_pipeline(config)
+    report = json.loads((run_dir / 'summary.json').read_text(encoding='utf-8'))
+    rows = [json.loads(line) for line in (run_dir / 'tracking_audit.jsonl').read_text(encoding='utf-8').splitlines()]
+    assert report['schema_version'] == 'g2_run_v1'
+    assert report['processed_frames'] == report['inference_calls'] == len(rows) == 8
+    assert report['frames_reusing_detections'] == 0
+    assert len(report['outputs']) == 3 and all(o['decoded_frames'] == 8 for o in report['outputs'])
+    assert report['tracking_summary']['matched_observations'] > 0
+    assert report['tracking_summary']['csv_rows'] == sum(len(r['bytetrack']) for r in rows)
+    for row in rows:
+        ids = [t['track_id'] for t in row['bytetrack']]
+        assert len(ids) == len(set(ids)) and all(i > 0 for i in ids)
+        assert row['ball_status'] == 'disabled' and row['ball_centers_full_frame_px'] is None

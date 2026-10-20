@@ -1,5 +1,5 @@
 """
-文件作用：Windows 真实 YOLO 推理及 G1 类别筛选，保留 G0 人物检测接口。
+文件作用：Windows 真实 YOLO 推理、G1 类别筛选及可选 G2 低置信人物候选，保留 G0 接口。
 输入：全幅 BGR、DetectionPolicy；输出：真实 Detection 与可解释排除记录。
 依赖：Ultralytics/PyTorch；调用：run -> YoloDetector -> 原人物导播适配器。
 注意：篮球默认关闭，一帧只推理一次；不补球、不调用 model.track。
@@ -7,7 +7,7 @@
 """
 import hashlib
 import math
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 from .contracts import Detection
@@ -38,9 +38,13 @@ class YoloDetector:
     """一次推理筛选 person/可选 ball；last_rejections 保存本次真实候选排除原因。"""
 
     def __init__(self, weights: Path, device: str = "cpu", imgsz: int = 640,
-                 iou: float = 0.7, policy: DetectionPolicy | None = None):
+                 iou: float = 0.7, policy: DetectionPolicy | None = None,
+                 person_tracking_confidence: float | None = None):
         self.weights = validate_weights(weights)
         self.policy = policy or DetectionPolicy()
+        if person_tracking_confidence is not None and not 0 < person_tracking_confidence < self.policy.person.confidence:
+            raise ValueError('跟踪低阈值必须在 (0, person.confidence) 内')
+        self.person_tracking_confidence = person_tracking_confidence
         from ultralytics import YOLO
 
         self.model = YOLO(str(self.weights), task="detect")
@@ -52,6 +56,9 @@ class YoloDetector:
         self.device, self.imgsz = device, imgsz
         self.iou = iou
         self.confidence = min(getattr(self.policy, name).confidence for name in self.class_ids if self.class_ids[name])
+        if person_tracking_confidence is not None:
+            self.confidence = min(self.confidence, person_tracking_confidence)
+        self.last_tracking_detections = []
         self.last_rejections = []
         self.last_candidate_counts = {"person": 0, "ball": 0}
         with self.weights.open("rb") as stream:
@@ -65,6 +72,7 @@ class YoloDetector:
         boxes = results[0].boxes
         self.last_rejections = []
         self.last_candidate_counts = {"person": 0, "ball": 0}
+        self.last_tracking_detections = []
         detections = []
         if boxes is None:
             return detections
@@ -80,6 +88,11 @@ class YoloDetector:
             bbox = (max(0., min(w - 1., x1)), max(0., min(h - 1., y1)),
                     max(0., min(w - 1., x2)), max(0., min(h - 1., y2)))
             detection = Detection(name, int(class_id), confidence, bbox, coord_system)
+            if name == 'person' and self.person_tracking_confidence is not None:
+                # 仍使用同一 ROI/尺寸限制；低置信框只供 ByteTrack 续接，G1 接受阈值保持。
+                low_rule = replace(self.policy.person, confidence=self.person_tracking_confidence)
+                if rejection_reason(detection, low_rule, (w, h)) is None:
+                    self.last_tracking_detections.append(detection)
             reason = rejection_reason(detection, getattr(self.policy, name), (w, h))
             if reason:
                 self.last_rejections.append({**asdict(detection), "reason": reason})

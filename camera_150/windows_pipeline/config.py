@@ -1,5 +1,5 @@
 """
-文件作用：合并 G0/G1 YAML/CLI 配置，校验范围和 Windows 路径。
+文件作用：合并 G0/G1/G2 YAML/CLI 配置，校验范围和 Windows 路径。
 输入：命令行列表和可选 YAML；输出：RunConfig；错误配置抛出 ValueError。
 依赖：pathlib、argparse、PyYAML；调用关系：run.main -> load_config。
 注意：YAML 内相对路径以 YAML 所在目录为基准，CLI 路径以调用者目录为基准。
@@ -15,7 +15,7 @@ import yaml
 
 @dataclass(frozen=True)
 class RunConfig:
-    """G0 参数；宽高为像素，start_seconds 为源时间秒数，max_frames=0 表示读到结尾。"""
+    """G0/G1 参数及可选 G2 跟踪配置；宽高为像素，start_seconds 为秒，max_frames=0 到结尾。"""
 
     source: Path | None = None
     camera: int | None = None
@@ -46,18 +46,19 @@ class RunConfig:
     game_state: Path | None = None
     detection_policy: Path | None = None
     export_detections: bool = False
+    tracking_config: Path | None = None
 
     def serializable(self) -> dict:
         """返回可写入运行报告的配置；路径保持可追溯绝对值。"""
         return {k: str(v) if isinstance(v, Path) else v for k, v in asdict(self).items()}
 
 
-PATH_FIELDS = ("source", "weights", "output_dir", "calib_file", "game_state", "detection_policy")
+PATH_FIELDS = ("source", "weights", "output_dir", "calib_file", "game_state", "detection_policy", "tracking_config")
 
 
 def load_config(argv: Sequence[str] | None = None) -> RunConfig:
     """读取配置并校验；不打开摄像头、不下载或加载模型。"""
-    parser = argparse.ArgumentParser(description="Windows YOLO -> 原规则导播 -> 视频/可选 G1 检测记录")
+    parser = argparse.ArgumentParser(description="Windows YOLO -> 可选 G2 ByteTrack -> 原规则导播 -> 视频/QC")
     parser.add_argument("--config", type=Path)
     for name in PATH_FIELDS:
         parser.add_argument("--" + name.replace("_", "-"), type=Path)
@@ -115,6 +116,8 @@ def validate_config(config: RunConfig) -> None:
         raise ValueError("start_seconds 仅用于视频文件，不用于摄像头")
     if config.weights is None:
         raise ValueError("缺少 --weights：请指定真实 YOLO .pt 权重，不能使用 SAC policy.pth")
+    if config.tracking_config is not None and config.detect_interval != 1:
+        raise ValueError('G2 ByteTrack 要求 detect_interval=1；不能把复用检测当新观测')
     if config.undistort not in ("none", "already", "calibration"):
         raise ValueError("undistort 必须为 none / already / calibration")
     if (config.undistort == "calibration") != (config.calib_file is not None):

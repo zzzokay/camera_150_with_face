@@ -1,5 +1,6 @@
 """
 文件作用：将真实 YOLO 人物观测适配为原 SmoothTracks -> 热点 -> 规则导播输入。
+G2：可传已由 ByteTrack 关联的结果，绕过 SmoothTracks；G0/G1 调用方式保持。
 输入：完整 BGR 帧和本轮/复用观测；输出：裁切视频帧、裁切矩形、平滑框、状态。
 依赖：原通用模块与 rendering；不加载 RKNN，不替换规则，不引入 ByteTrack。
 调用关系：run -> LegacyDirector.process -> 原 analyze/update -> rendering。
@@ -38,8 +39,8 @@ class LegacyDirector:
                                                 state_file=str(game_state) if game_state else "")
         self.state_reader = GameStateReader(self.policy) if game_state else None
 
-    def process(self, frame, detections: list[Detection]):
-        """推进一帧原规则；返回 (导播图, 全幅裁切框, 旧平滑框, 导播状态)。"""
+    def process(self, frame, detections: list[Detection], tracked_persons=None):
+        """推进原规则；G2 传入已关联人物后跳过 SmoothTracks，避免二次关联或再分配 ID。"""
         h, w = frame.shape[:2]
         if self.frame_size is None:
             self.frame_size = w, h
@@ -47,9 +48,16 @@ class LegacyDirector:
         if self.frame_size != (w, h):
             raise ValueError("视频中途分辨率变化，请拆段处理，避免混用导播坐标")
         # 原 RKNN 返回整数 bbox；在边界处做同样整数化，保留旧规则的输入契约。
-        raw = [(d.model_class_id, d.confidence, tuple(int(v) for v in d.bbox_xyxy))
-               for d in detections if d.class_name == "person"]
-        smoothed = self.smoother.update(base.results_to_single_detections(raw))
+        if tracked_persons is None:
+            raw = [(d.model_class_id, d.confidence, tuple(int(v) for v in d.bbox_xyxy))
+                   for d in detections if d.class_name == "person"]
+            smoothed = self.smoother.update(base.results_to_single_detections(raw))
+        else:
+            raw = [(t.detection.model_class_id, t.detection.confidence, tuple(int(v) for v in t.bbox_xyxy))
+                   for t in tracked_persons]
+            smoothed = base.results_to_single_detections(raw)
+            for wide, tracked in zip(smoothed, tracked_persons):
+                wide.track_id = tracked.track_id
         analysis = analyze_single_view_frame(single_detections_to_boxes_info(smoothed),
                                             w, h, self.analysis_state)
         if self.state_reader:

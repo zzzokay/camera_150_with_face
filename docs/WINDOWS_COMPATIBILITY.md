@@ -19,7 +19,7 @@ G1 更新：用户授权人物筛选/检测记录与球接口预留，39 项测�
 | `/dev/video41` / V4L2 | `single_rknn_base.open_camera`, `LatestFrameCamera` | 文件 Path 优先；摄像头 `--camera N --backend dshow/msmf/auto` | 本机 dshow 0/1 号设备均读 3 帧；窗口 API 可见；msmf/长时推理未测 |
 | 最新帧循环可丢/重复帧 | 原 network `run` 每轮 `cam.get_latest()` | 离线顺序读，每源帧处理一次；摄像头同步读 | 文件有源帧号/时间检查；实时低延迟和音画同步未验收 |
 | 单目去畸变 | 原 `load_single_camera_calib`, `prepare_frame_for_calib` | 复用原标定/remap，严格检查 NPZ 尺寸；none/already/calibration 明示 | 合成标定组件通过；真实输入按用户声明已矫正，不二次 remap |
-| 旧距离关联与 ID | 原 `SmoothTracks.update` | 直接复用，不改算法 | 合成序列回归通过；不是 ByteTrack，也不是球员实名 |
+| 旧距离关联与 ID | 原 `SmoothTracks.update` | G0/G1 原样复用；G2 使用独立 ByteTrack，旧算法只做对照/回退 | 53项回归/组件/真实模型测试通过；仍有断轨，不等于实名 |
 | 原一维热点与 Pan/Zoom | `predict1_weighted.analyze_single_view_frame`, `predict1_director.update_overlay_director_state` | 直接调用原规则；支持脚本与包两种导入 | AST 和 180 帧序列对比；原参数未调优，非 2D 热点或 TCN |
 | 绘图模块缺失 | 原 director 顶部引用未随仓库提供的 `predict1_yolo`；旧入口注入绘图兜底 | 此依赖仅在旧调试绘图函数调用时导入；Windows 有真实自己的绘图 | Windows 启动不注入假模块；原绘图调用仍需旧依赖/旧入口提供 |
 | 原 720p 渲染 | 原 record 的 `fit_box_to_output_ratio`、`render_sample_director_view720` | 提取四个纯转换/渲染函数，算法体逐一比对 | 原录制入口未修改；复制范围有测试约束 |
@@ -46,7 +46,8 @@ Windows 和 RKNN 模型可能来自不同权重与后处理，不能仅因规则
 
 | 组件 | 来源 | 许可证/用途 |
 |---|---|---|
-| Ultralytics 8.3.225 | https://github.com/ultralytics/ultralytics | AGPL-3.0（另有商业授权）；执行本地人物检测 |
+| Ultralytics 8.3.225 | https://github.com/ultralytics/ultralytics | AGPL-3.0（另有商业授权）；本地人物检测与 G2 ByteTrack，未复制第三方源码 |
+| lap 0.5.12 | https://pypi.org/project/lap/ / https://github.com/gatagat/lap | BSD-2-Clause；ByteTrack 线性分配，固定 Windows wheel，明确安装到 .venv |
 | PyTorch / TorchVision | https://pytorch.org/ | BSD 类开源许可；CPU 推理 |
 | OpenCV Python | https://github.com/opencv/opencv-python | OpenCV Apache-2.0，wheel 含第三方编码组件许可；读写/图像处理 |
 | NumPy / PyYAML / pytest | https://numpy.org/ / https://pyyaml.org/ / https://pytest.org/ | BSD / MIT / MIT；计算、配置、测试 |
@@ -54,4 +55,5 @@ Windows 和 RKNN 模型可能来自不同权重与后处理，不能仅因规则
 | 原工程 | 用户指定 GitHub 仓库 | 未发现项目级 LICENSE；保留原工程与基线来源 |
 
 外部 FFmpeg 可执行程序并非本地视频模式的必要条件；OpenCV wheel 的视频后端能力由环境检查报告给出。
+G2 仅支持人物 ByteTrack，篮球按用户要求继续关闭；固定库 API、名义 FPS、场景重置与重复帧边界见 [G2_TRACKING_QC.md](G2_TRACKING_QC.md)。旧 RK3588 源文件在 G2 未变，NPU 真机仍未验收。
 安装只在 `.venv` 中执行。原环境所用清华镜像曾返回 403，本轮安装命令显式指定官方 PyPI/CPU wheel 源，不修改全局 pip 配置。准确版本与最终运行结果见验收报告。

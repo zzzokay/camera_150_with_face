@@ -2,6 +2,17 @@
 
 文件作用：记录每次变更原因、影响路径、实际验证、兼容风险和回退方法。代码/配置/验证结论变化后更新，和 STAGE_PROGRESS.md、验收报告保持一致。
 
+## 2026-10-20 — G2 人物 ByteTrack 与 ID 验收
+
+- 原因/授权：G1 ROI 调整交付后用户表示“下一步”，接受调整范围并授权 G2；篮球暂缓持续生效，不进入 G3。
+- 路径：新增 `windows_pipeline/tracker.py`、`tracking_records.py`、G2运行/跟踪示例配置、`tests/test_tracker.py`、G2验收/QC文档；更新 config/detector/director_adapter/run/outputs、真实模型测试、依赖和根目录交接文件。RK3588 文件未改。
+- 行为：同次YOLO .10候选供ByteTrack两阶段续接，.35人物供独立旧关联对照；G2导播绕过旧关联，不重复推理/再分ID。原框/估计框分列，lost不输出假观测；重复帧拒绝、间隔/场景/新视频重置。篮球disabled/false/null，启用会报错。
+- 环境：只向.venv明确安装官方lap==0.5.12，40包锁定，pip check通过；Ultralytics8.3.225 API固定，GPU未测。
+- 验证：最终复核 **53 passed in 7.44s，0失败/跳过**，含拒绝 smooth=0 关闭旧对照编号的参数检查；室内30秒后1818次YOLO，三路视频各完整解码1818帧，QC独立核验；目录 `runs/g2_20261020_175136_fc830eed`，ByteTrack18778条匹配（low2430）、旧17287条。另48帧受控实拍拼接在帧24正确触发段重置。详见 `docs/G2_ACCEPTANCE_REPORT.md`。
+- 质量/风险：局部P463稳定而旧ID100→101→92；快速移动P218→P425仍断裂，场边P792低置信229帧保留。不同ID数274/160不是人数或MOTA/IDF1，未证明整体更好；新导播画面可能改变。固定dt/直方图转场启发式、复杂变帧率/相机/NPU仍有限制。
+- 回退：分支 `g2/bytetrack-person`，代码提交 `5d7eec3`，G1基线 `7f6b9cf`；继续使用g1本地配置、不传tracking_config可回退原关联；完全撤销代码先保存用户修改再 `git revert 5d7eec3`。仅本地提交，不推送、不提交模型/视频/QC产物。
+- 状态：G1调整范围ACCEPTED；人物G2 READY_FOR_REVIEW，篮球真实跟踪暂缓，G3–G7 TODO。
+
 ## 2026-10-20 — G1 室内 ROI 上边界提高
 
 - 原因：用户要求上边界再高一点；只将 `configs/detection.indoor.example.yaml` 上边界两处 0.70 改为 0.66，1080p 约上移 43 像素，下边界 0.97；同步 README/结构/交接/进度/验收/schema。检测与导播源码、篮球关闭状态、RK3588 入口均未改。

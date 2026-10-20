@@ -2,11 +2,11 @@
 
 > 文件作用：项目总览与入口导航。RK3588 原功能说明保留在下方；Windows 变更后同步本节与交接文档。
 
-## Windows G0/G1 入口（2026-10-20）
+## Windows G0/G1/G2 入口（2026-10-20）
 
-当前分支 `g1/person-detection-ball-slot`，G0 提交保留在历史；原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
-Windows 使用本地 YOLO `.pt`，复用原 `SmoothTracks`、热点分析和规则运镜，并保存导播与广角调试视频。
-G0 已获用户授权继续；本次 G1 做人物筛选、检测 JSONL 与篮球关闭接口，篮球实测按用户要求暂缓。ByteTrack、轨迹数据和 TCN 尚未实施。
+当前分支 `g2/bytetrack-person`，G0/G1 提交保留在历史；原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
+Windows 使用本地 YOLO `.pt`；G0/G1 复用原 `SmoothTracks`，G2 使用 ByteTrack。两条路径均复用原热点分析和规则运镜，并保存导播与广角调试视频。
+G0/G1 调整范围已获用户授权继续；G2 接入独立人物 ByteTrack、带 ID 视频和验收 CSV，篮球按要求继续关闭。全套 53 项测试和同片段真实运行通过，跟踪仍有碎片/场边误保留，待用户验收；G3 数据集/重放与 TCN 尚未实施。
 可用 `--start-seconds 30 --max-frames 0` 跳过文件前 30 秒并处理到结尾，保留源帧号/时间；复现与验证结果见新人交接和验收报告。
 室内人物 ROI 上边界已按用户要求从 0.70 提高到 0.66（1080p 约上移 43 像素），同片段真实模型对照已完成；最新产物与筛选限制见 G1 验收报告的“最新补充验收”。
 
@@ -16,6 +16,7 @@ G0 已获用户授权继续；本次 G1 做人物筛选、检测 JSONL 与篮球
 - 当前状态与证据：[STAGE_PROGRESS.md](STAGE_PROGRESS.md)
 - G0 验收：[docs/G0_ACCEPTANCE_REPORT.md](docs/G0_ACCEPTANCE_REPORT.md)
 - G1 当前验收与球接口：[docs/G1_ACCEPTANCE_REPORT.md](docs/G1_ACCEPTANCE_REPORT.md) / [检测记录规范](docs/G1_DETECTION_SCHEMA.md)
+- G2 当前验收：[docs/G2_ACCEPTANCE_REPORT.md](docs/G2_ACCEPTANCE_REPORT.md) / [跟踪接口与 QC](docs/G2_TRACKING_QC.md)
 
 ```powershell
 python .\run_windows.py --help

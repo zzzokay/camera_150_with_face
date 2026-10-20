@@ -4,7 +4,7 @@
 
 ## 当前边界与真实性
 
-G0 和 G1 调整范围已由用户“下一步”授权继续。本轮 G2 做人物 ByteTrack，篮球接口继续关闭；G3–G7 未开始，完整双类别检出能力未验收。当前人物跟踪待用户验收，质量限制见最新报告。
+G0 和 G1 调整范围已由用户“下一步”授权继续。本轮 G2 做人物 ByteTrack，篮球接口继续关闭；G3–G7 未开始，完整双类别检出能力未验收。用户反馈跟踪效果差，G2 当前 IN_PROGRESS / 质量待改进，未验收；先读 [质量复核与整改顺序](docs/G2_QUALITY_REVIEW.md)。53项功能测试不代表关联质量达标。
 原系统用 RK3588 NPU 检测人物，再根据人物分布和热点平滑移动裁切窗口；文件与函数位置见下文。
 Windows 检测使用真实 Ultralytics YOLO。G2 使用 ByteTrack 关联并保留原热点/镜头规则，旧距离关联用于独立对照和 G0/G1 回退。
 首轮实测见 [G0_ACCEPTANCE_REPORT.md](docs/G0_ACCEPTANCE_REPORT.md)，最新人物检测见 [G1_ACCEPTANCE_REPORT.md](docs/G1_ACCEPTANCE_REPORT.md)，不得用组件测试或文件存在替代实际推理成功。
@@ -64,7 +64,7 @@ G1 历史结果：`D:\0basketball\project\runs\g1_20261020_173342_033fabce`。�
 本次相关测试 `.\.venv\Scripts\python.exe -X utf8 -m pytest tests\test_detection_policy.py -q` 为 **11 passed in 1.67s**；完整 1818 次真实推理、两路解码、逐行对照核验通过。初版 39 项是历史全套结果，本次未重跑全部，详见 [验收报告最新补充](docs/G1_ACCEPTANCE_REPORT.md)。恢复旧范围可将策略上边界两处 0.66 改回 0.70。
 
 完整字段/单位/复用帧/球接口接入步骤见 [G1_DETECTION_SCHEMA.md](docs/G1_DETECTION_SCHEMA.md)。下次获准接入真实篮球权重时，可在 G1 检测路径改本地策略 `ball.enabled: true` 并指向含球类别的权重；缺类别会报错，不能仅改开关就认为模型会找球。当前 G2 明确拒绝启用篮球，需另行实现并验收球跟踪。球参数 0.20 等仅是待验证初值。
-本节 G1 JSONL 仍是检测审计，没有轨迹 ID、速度或训练标签；G2 已在独立 QC 中保存关联结果。G1 调整范围已接受，本轮等待 G2 验收，G3 数据规范/重放不提前实施。
+本节 G1 JSONL 仍是检测审计，没有轨迹 ID、速度或训练标签；G2 已在独立 QC 中保存关联结果。G1 调整范围已接受，G2 根据用户质量反馈继续整改，G3 数据规范/重放不提前实施。
 
 ## 从全新 Windows 建立环境
 
@@ -233,4 +233,4 @@ $env:G0_TEST_VIDEO = 'C:\Users\zenghuiting\Desktop\rk_driceter\usb3_undistorted_
 当前产物、测试输出与真实记录见 [G2 验收报告](docs/G2_ACCEPTANCE_REPORT.md)；检测/迁移历史保留在 G1/G0 报告，当前状态见 [STAGE_PROGRESS.md](STAGE_PROGRESS.md)。
 工作基线与修改都在本地 Git，未推送。需要回到原工程时可在另一个独立目录检出原基线，或在干净状态下切回原基线；不要用 hard reset 覆盖自己后续修改。
 新版 RK3588 入口仍使用原参数和 `.rknn`。共享算法回归已覆盖导入/规则逻辑，不等于 RK3588 NPU 真机已验证。
-用户已接受 G1 调整范围并授权 G2；篮球实测暂缓并预留接口。当前等待人物 G2 验收，G3–G7 仍需后续明确批准。
+用户已接受 G1 调整范围并授权 G2；篮球实测暂缓并预留接口。当前人物 G2 质量待改进，整改复测后重新提交验收，G3–G7 仍需后续明确批准。

@@ -2,6 +2,8 @@
 
 文件作用：供新开发者了解真实仓库结构与模块数据流。修改入口、接口、数据位置或依赖后更新；先读本文件，再按 NEWCOMER_HANDOFF.md 运行。这里只列实际检出的内容，建议结构会明确标注未实现。
 
+当前 G2 收到跟踪质量反馈，状态为 IN_PROGRESS / 待改进；[docs/G2_QUALITY_REVIEW.md](docs/G2_QUALITY_REVIEW.md) 记录检测/关联问题、真实抽帧对照和整改顺序。本次未改变正式管线或配置。
+
 ## 来源与工作区
 
 用户指定上游：https://github.com/zzzokay/camera_150_with_face 。基线提交 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`，当前分支 `g2/bytetrack-person`；G0/G1 提交保留在历史中。

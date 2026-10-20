@@ -2,6 +2,12 @@
 
 文件作用：记录每次变更原因、影响路径、实际验证、兼容风险和回退方法。代码/配置/验证结论变化后更新，和 STAGE_PROGRESS.md、验收报告保持一致。
 
+## 2026-10-20 — 统一独立 Python 环境规范
+
+- 原因：按用户给定措辞采用独立 Python 环境，不向系统 Python 安装项目依赖；默认 `.venv`，允许满足依赖要求的其他独立环境；文档/自动化优先显式指定解释器，日常开发允许激活后使用 `python`。
+- 路径：更新 AGENT_DEVELOPMENT_RULES、STAGE1_WINDOWS_TO_TCN_PLAN、README、NEWCOMER_HANDOFF、PROJECT_STRUCTURE、STAGE_PROGRESS 和平台兼容说明；旧 RK3588 系统 Python 描述标注为历史部署事实。
+- 验证/边界：检查文档表述与 Git 差异格式；仅改文档，不安装依赖或修改运行环境，不重跑模型/功能测试。G2 仍待质量整改；需要回退时可撤销本次文档提交。
+
 ## 2026-10-20 — G2 用户质量反馈与诊断
 
 - 原因：用户反馈“跟踪效果很差”；G2改为IN_PROGRESS / 质量待改进，未验收，不进入G3。

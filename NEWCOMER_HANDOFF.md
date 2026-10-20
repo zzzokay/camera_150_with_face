@@ -70,7 +70,8 @@ G1 历史结果：`D:\0basketball\project\runs\g1_20261020_173342_033fabce`。�
 
 安装 Python 3.11（64 位，安装时启用 Python Launcher），安装 Git。以下是在项目根目录执行的 **PowerShell** 命令。
 现有工作目录是 `D:\0basketball\project`；新机器把这行替换为自己的工程目录。
-不需要激活环境，也不需要修改 PowerShell 执行策略；一直显式调用 `.venv` 里的 Python。
+本项目使用独立 Python 环境，不向系统 Python 安装项目依赖。默认采用 `.venv`，也允许其他满足依赖要求的独立环境。文档和自动化命令优先显式指定解释器；日常开发可以激活环境后使用 `python`。
+下面以已实测的 `.venv` 为例；使用其他独立环境时，将解释器路径替换为该环境的 Python。显式指定解释器无需激活环境，也不需要修改 PowerShell 执行策略。
 
 ```powershell
 Set-Location 'D:\0basketball\project'
@@ -80,6 +81,14 @@ py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install --index-url https://pypi.org/simple -r .\requirements-windows.txt
 .\.venv\Scripts\python.exe -m pip check
 .\.venv\Scripts\python.exe -X utf8 .\check_windows_environment.py --model-dir .\best_sac
+```
+
+日常开发也可以先激活，再使用 `python`；先核对输出的解释器路径确实属于所选独立环境：
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+python -c "import sys; print(sys.executable)"
+python -m pip check
 ```
 
 首次安装会下载 CPU PyTorch 等包，约数百 MB。显式源只作用于这些命令，不修改系统 pip 配置。
@@ -221,7 +230,7 @@ $env:G0_TEST_VIDEO = 'C:\Users\zenghuiting\Desktop\rk_driceter\usb3_undistorted_
 | 问题 | 排查顺序与命令 |
 |---|---|
 | 找不到 YOLO / 错把 SAC 当权重 | `Get-ChildItem -LiteralPath '.\best_sac'`；`Test-Path -LiteralPath 'C:\Users\zenghuiting\Desktop\rk_driceter\best.pt'`；核对 `.pt` 和错误日志，不把 `.pth` 改后缀冒充 |
-| 缺包 / Python 用错 | `.\.venv\Scripts\python.exe -m pip check`；运行环境检查脚本，核对 executable 位于 `.venv`，重新按上方命令安装；不要使用原 Linux face_env |
+| 缺包 / Python 用错 | 用所选独立环境的解释器执行 `-m pip check` 和环境检查脚本，核对 executable 属于该环境；默认示例为 `.\.venv\Scripts\python.exe`，激活后可用 `python`；不要直接复用原 Linux face_env 到 Windows |
 | 能启动但没框 | 查看本次 `summary.json` 的真实 names、人物 ID、真实观测数；确认输入是广角原视频；G0 原规则还用 0.35 人物阈值，不能盲目降低阈值就当效果变好 |
 | 视频/标定尺寸不匹配 | `.\.venv\Scripts\python.exe -X utf8 .\run_windows.py --help`；已矫正视频用 already；原始帧用匹配 NPZ 的 calibration，不要重复矫正或静默 resize |
 | 保存失败/播放异常/中文乱码 | 查看 `run.log` 和 `outputs` 解码统计；尝试显式 `--codec MJPG`；命令加 `-X utf8`；FPS 无效须显式 `--fps`；只有文件存在不算成功 |

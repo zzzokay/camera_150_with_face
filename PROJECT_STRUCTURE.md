@@ -4,6 +4,8 @@
 
 当前 G2 收到跟踪质量反馈，状态为 IN_PROGRESS / 待改进；[docs/G2_QUALITY_REVIEW.md](docs/G2_QUALITY_REVIEW.md) 记录检测/关联问题、真实抽帧对照和整改顺序。本次未改变正式管线或配置。
 
+环境约定：使用独立 Python 环境，不向系统 Python 安装项目依赖；默认 `.venv`，也允许满足依赖要求的其他独立环境。文档/自动化优先显式指定解释器，日常开发可激活后使用 `python`，详见 AGENT_DEVELOPMENT_RULES.md 第 I 节。
+
 ## 来源与工作区
 
 用户指定上游：https://github.com/zzzokay/camera_150_with_face 。基线提交 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`，当前分支 `g2/bytetrack-person`；G0/G1 提交保留在历史中。

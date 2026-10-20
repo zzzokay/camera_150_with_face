@@ -274,6 +274,8 @@ Agent 每完成当前关卡，都必须在 `NEWCOMER_HANDOFF.md` 和交付回复
 
 ## I. 工程依赖、复现与文件管理
 
+> **本项目使用独立 Python 环境，不向系统 Python 安装项目依赖。默认采用 `.venv`，也允许其他满足依赖要求的独立环境。文档和自动化命令优先显式指定解释器；日常开发可以激活环境后使用 `python`。**
+
 1. 依赖版本应有可重复安装的 `requirements-windows.txt` / `pyproject.toml`，`torch` CPU/CUDA 的安装说明区分平台和显卡，不能保证一个 wheel 适合所有机器。
 2. 不提交 Python/Conda 虚拟环境、`__pycache__`、大型 `.pt/.onnx/.rknn`、原始篮球视频、训练数据集、日志、checkpoint；通过 `.gitignore` 和 `*.example.yaml`/说明文档管理。例外须用户明确要求。
 3. 不将人脸照片、检录身份数据、个人隐私、密钥、RTSP 凭据写入仓库或示例日志。已有仓库资产不能作为可公开散发的理由。

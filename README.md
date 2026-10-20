@@ -2,6 +2,8 @@
 
 > 文件作用：项目总览与入口导航。RK3588 原功能说明保留在下方；Windows 变更后同步本节与交接文档。
 
+> 本项目使用独立 Python 环境，不向系统 Python 安装项目依赖。默认采用 `.venv`，也允许其他满足依赖要求的独立环境。文档和自动化命令优先显式指定解释器；日常开发可以激活环境后使用 `python`。
+
 ## Windows G0/G1/G2 入口（2026-10-20）
 
 当前分支 `g2/bytetrack-person`，G0/G1 提交保留在历史；原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
@@ -19,8 +21,8 @@ G0/G1 调整范围已获用户授权继续；G2 接入独立人物 ByteTrack、�
 - G2 当前验收：[docs/G2_ACCEPTANCE_REPORT.md](docs/G2_ACCEPTANCE_REPORT.md) / [跟踪接口与 QC](docs/G2_TRACKING_QC.md)
 
 ```powershell
-python .\run_windows.py --help
-python .\check_windows_environment.py --model-dir .\best_sac
+.\.venv\Scripts\python.exe .\run_windows.py --help
+.\.venv\Scripts\python.exe .\check_windows_environment.py --model-dir .\best_sac
 ```
 
 `best_sac` 的现有文件是 SAC 检查点及优化器状态，未作为 YOLO 加载；实际测试权重路径见交接文档。
@@ -256,9 +258,9 @@ camera_150/
 
 ## 6. 软件依赖
 
-### 6.1 系统 Python
+### 6.1 原 RK3588 部署依赖（历史说明）
 
-导播和技术台使用系统 Python 3：
+原 RK3588 部署使用系统 Python 3，下面保留其依赖检查记录。当前项目依赖安装遵守本文开头的独立环境规范；新部署使用满足平台依赖要求的独立环境，RK3588 独立环境路径尚未实机验证。
 
 ```text
 Python 3.10+
@@ -540,7 +542,7 @@ face_checkin/trainer/labels.json
 face_env/bin/python
 ```
 
-导播和技术台仍由系统 Python 启动，不会污染 RKNN 环境。
+原部署中导播和技术台由系统 Python 启动；此处描述旧流程。新部署遵守本文开头的独立环境规范，当前未修改旧启动脚本。
 
 检录与导播共用 `/dev/video41`，进入导播前必须先停止识别线程并释放摄像头。
 

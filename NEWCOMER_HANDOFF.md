@@ -1,15 +1,15 @@
-# Windows G0 新人交接
+# Windows G0/G1 新人交接
 
 文件作用：让新 Agent 或新人无需原作者口头解释就能复现当前阶段。每次环境、命令、模型、接口或验收结论变化后更新；先读本文，再查 PROJECT_STRUCTURE.md、平台兼容矩阵和 G0 验收报告。
 
 ## 当前边界与真实性
 
-本轮只做 G0 Windows 迁移，停在用户验收之前。G1–G7 均未开始。
+G0 已完成并获用户“下一步吧”授权继续。本轮是用户调整后的 G1：人物筛选、检测记录、篮球接口暂留且关闭。G2–G7 均未开始；完整双类别检出能力未验收。
 原系统用 RK3588 NPU 检测人物，再根据人物分布和热点平滑移动裁切窗口；文件与函数位置见下文。
 本轮将 Windows 检测换成真实 Ultralytics YOLO，保留原距离关联、热点、镜头规则。
-最终实测能力、精确统计及尚未验收项见 [G0_ACCEPTANCE_REPORT.md](docs/G0_ACCEPTANCE_REPORT.md)，不得用组件测试或文件存在替代实际推理成功。
-首轮 `.venv` **22 项测试通过、0 失败/跳过**；指定录像前 300 帧（10 秒）完成 100 次真实 YOLO 推理，两路输出各完整解码 300 帧。用户补充室内录像后新增片段起点参数，最新 **27 项测试通过**，该录像 30 秒后完整处理 1818 帧、606 次真实推理；见 [补充验证报告](docs/G0_ADDITIONAL_VIDEO_VALIDATION.md)。
-实际权重类别只有 `{0: 'person'}`，没有篮球类别；本关不验收双类别检测。
+首轮实测见 [G0_ACCEPTANCE_REPORT.md](docs/G0_ACCEPTANCE_REPORT.md)，最新人物检测见 [G1_ACCEPTANCE_REPORT.md](docs/G1_ACCEPTANCE_REPORT.md)，不得用组件测试或文件存在替代实际推理成功。
+首轮 `.venv` **22 项测试通过、0 失败/跳过**；指定录像前 300 帧（10 秒）完成 100 次真实 YOLO 推理，两路输出各完整解码 300 帧。G0 补充室内录像后新增片段起点参数，当时 **27 项测试通过**，该录像 30 秒后完整处理 1818 帧、606 次真实推理；见 [补充验证报告](docs/G0_ADDITIONAL_VIDEO_VALIDATION.md)。
+实际权重类别只有 `{0: 'person'}`，没有篮球类别；按用户要求暂不做篮球实测。最新 G1 **39 项测试通过**，室内录像 30 秒后 **1818 帧/1818 次真实推理**、两路完整解码、1818 行检测记录均已核验，详见 [G1 验收报告](docs/G1_ACCEPTANCE_REPORT.md)。
 
 | 能力 | 证据类型与边界 |
 |---|---|
@@ -18,7 +18,30 @@
 | YOLO + 原规则 + 保存 | 使用用户确认的真实权重/篮球录像；以验收报告中实际运行数据为准 |
 | 摄像头 dshow、OpenCV 窗口 | 本机 0/1 号设备各读 3 帧、收帧时间递增、窗口 API 可见；未保存画面，外观由用户确认；msmf 未测 |
 | 音频/RTSP/完整技术台/人脸检录 | 旧源码保留，未移植到新入口，当前视频输出无音轨 |
-| 双类别检测质量、ByteTrack、轨迹数据、Homography、TCN | 未实施，需后续逐关批准 |
+| 人物 ROI/尺寸筛选、检测 JSONL | G1 已用室内录像实测；ROI 不等于球员身份分类 |
+| 篮球接口、双类别质量 | 类别/参数/无球字段已留接口，篮球关闭，真实球模型有效性未测 |
+| ByteTrack、轨迹数据、Homography、TCN | 未实施，需后续逐关批准 |
+
+## 当前 G1 最快上手
+
+原 G0 `YoloPersonDetector` 返回人物框，没有逐帧审计。G1 用 `YoloDetector` 读取真实类别表，只做一次推理，再按各类阈值、相对尺寸和 ROI 筛选；人物送入原导播，排除候选保留原因，球关闭时不产生位置。旧类保留为兼容构造器。
+**ROI（感兴趣区域）** 是画面上允许保留目标的位置。本次示例按人物框底部中心检查 y 比例 0.70–0.97，意图减少远处看台/近处场边影响；无法辨别场内裁判，也可能排除靠近边线的人，不能推广成所有视频通用配置。
+
+现有本机配置已经实际执行：
+
+```powershell
+Set-Location 'D:\0basketball\project'
+.\.venv\Scripts\python.exe -X utf8 .\run_windows.py --config .\configs\g1.indoor.local.yaml
+```
+
+本机配置复制自 `configs/g1.indoor.example.yaml`，仅填入用户指定室内视频和桌面 best.pt 的绝对路径；新机器先复制为 `.local.yaml` 并填写自己的真实文件，所有 YAML 相对路径仍以配置所在目录解析。`detection_policy: detection.indoor.example.yaml` 引用本次镜头专用策略；通用无 ROI 策略是 `detection.example.yaml`。
+实际结果：`D:\0basketball\project\runs\g1_20261020_171552_8d53d276`。先看 `overview.mp4`：绿框保留、紫框排除并注明原因、蓝框 ROI、青框原规则裁切，左上明确 `ball: DISABLED`。G1 绿框为当前真实检测，和 G0 的平滑临时 ID 框含义不同。`director.mp4` 仍是干净 720p；两路均无音轨。
+
+`detections.jsonl` 每帧一行，保存全幅框、类别、置信度、时间和排除原因；本轮每帧真实推理，不复制旧框当新检测。例：首个保留人物 confidence≈0.776394、xyxy≈[147.1211,806.7466,214.2195,971.2006]，源帧 723 / 30.0101 秒，`raw_full_frame_px`；同帧 `ball_enabled=false`、`ball_valid=false`、`ball_centers_full_frame_px=null`。实际原精度在文件中。
+统计为 20880 累计候选、17068 保留、3812 ROI 排除，不是人数或准确率；0 个完全无人物的推理帧也不证明每名球员都被检测。
+
+完整字段/单位/复用帧/球接口接入步骤见 [G1_DETECTION_SCHEMA.md](docs/G1_DETECTION_SCHEMA.md)。下次有真实篮球权重时，改本地策略 `ball.enabled: true` 并指向含球类别的权重；缺类别会报错，不能仅改开关就认为模型会找球。球参数 0.20 等仅是待验证初值。
+JSONL 目前是检测审计，没有轨迹 ID、速度或训练标签；后续 G2 可消费标准 Detection 做关联，G3 再定义可训练轨迹数据格式。本轮等待 G1 调整范围验收，不自动开始 G2。
 
 ## 从全新 Windows 建立环境
 
@@ -135,7 +158,7 @@ YAML 内相对路径以 YAML 文件所在目录解析，CLI 相对路径以调�
 1. `run_windows.main()` → `load_config()`：读配置，解析中文路径，默认 CPU。
 2. `VideoSource.read()`：文件逐帧读取，给源帧号与秒；避免旧摄像头“最新帧”方式在离线时丢/重复帧。
 3. `FramePreprocessor.apply()`：按 none/already/calibration 处理；标定尺寸不符直接报错，避免偷偷改变坐标空间。
-4. `YoloPersonDetector.detect()`：真实 YOLO 输出全幅人物框，读取模型类别名。
+4. `YoloDetector.detect()`：真实 YOLO 读取模型类别名，按策略输出全幅人物/可选球框；G0 兼容类名 `YoloPersonDetector` 保留。仅人物进入旧导播，G1 可另写检测审计。
 5. `LegacyDirector.process()`：转换成原整数框 → 原 `results_to_single_detections()` → 原 `SmoothTracks.update()` → 原 `analyze_single_view_frame()` → 原 `update_overlay_director_state()` → 原 720p 纯裁切函数。
 6. `SavedVideo.write()`：保存干净导播和全幅调试画面；关闭后 `verify_video()` 真正解码所有输出帧，检查尺寸和帧数。
 
@@ -184,7 +207,7 @@ $env:G0_TEST_VIDEO = 'C:\Users\zenghuiting\Desktop\rk_driceter\usb3_undistorted_
 
 ## 交接、回退与下一关
 
-准确的产物目录、测试输出、环境锁定与真实记录见 [G0 验收报告](docs/G0_ACCEPTANCE_REPORT.md)；当前状态见 [STAGE_PROGRESS.md](STAGE_PROGRESS.md)。
+准确的产物目录、测试输出与真实记录见 [G1 验收报告](docs/G1_ACCEPTANCE_REPORT.md)；环境与迁移证据保留在 [G0 验收报告](docs/G0_ACCEPTANCE_REPORT.md)，当前状态见 [STAGE_PROGRESS.md](STAGE_PROGRESS.md)。
 工作基线与修改都在本地 Git，未推送。需要回到原工程时可在另一个独立目录检出原基线，或在干净状态下切回原基线；不要用 hard reset 覆盖自己后续修改。
 新版 RK3588 入口仍使用原参数和 `.rknn`。共享算法回归已覆盖导入/规则逻辑，不等于 RK3588 NPU 真机已验证。
-G0 通过后，只有用户明确批准才能进入 G1，下一关会复核双类别权重和篮球检出质量；不会在当前关卡自动实施 ByteTrack 或 TCN。
+用户已授权进入本轮调整范围的 G1；篮球实测暂缓并预留接口。当前等待本轮验收，G2 ByteTrack 和 TCN 仍需后续明确批准。

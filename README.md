@@ -1,12 +1,12 @@
 # camera_150_with_face：RK3588 篮球赛事智能转播系统
 
-> 文件作用：项目总览与入口导航。RK3588 原功能说明保留在下方；Windows G0 变更后同步本节与交接文档。
+> 文件作用：项目总览与入口导航。RK3588 原功能说明保留在下方；Windows 变更后同步本节与交接文档。
 
-## Windows G0 入口（2026-10-20）
+## Windows G0/G1 入口（2026-10-20）
 
-本工作分支为 `g0/windows-migration`，原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
+当前分支 `g1/person-detection-ball-slot`，G0 提交保留在历史；原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
 Windows 使用本地 YOLO `.pt`，复用原 `SmoothTracks`、热点分析和规则运镜，并保存导播与广角调试视频。
-只执行 G0；后续双类别、ByteTrack、轨迹数据和 TCN 尚未实施。
+G0 已获用户授权继续；本次 G1 做人物筛选、检测 JSONL 与篮球关闭接口，篮球实测按用户要求暂缓。ByteTrack、轨迹数据和 TCN 尚未实施。
 可用 `--start-seconds 30 --max-frames 0` 跳过文件前 30 秒并处理到结尾，保留源帧号/时间；复现与验证结果见新人交接和验收报告。
 
 - 安装与完整 PowerShell 命令：[NEWCOMER_HANDOFF.md](NEWCOMER_HANDOFF.md)
@@ -14,6 +14,7 @@ Windows 使用本地 YOLO `.pt`，复用原 `SmoothTracks`、热点分析和规�
 - 平台依赖和迁移边界：[docs/WINDOWS_COMPATIBILITY.md](docs/WINDOWS_COMPATIBILITY.md)
 - 当前状态与证据：[STAGE_PROGRESS.md](STAGE_PROGRESS.md)
 - G0 验收：[docs/G0_ACCEPTANCE_REPORT.md](docs/G0_ACCEPTANCE_REPORT.md)
+- G1 当前验收与球接口：[docs/G1_ACCEPTANCE_REPORT.md](docs/G1_ACCEPTANCE_REPORT.md) / [检测记录规范](docs/G1_DETECTION_SCHEMA.md)
 
 ```powershell
 python .\run_windows.py --help

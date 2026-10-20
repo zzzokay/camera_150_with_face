@@ -4,7 +4,7 @@
 
 ## 来源与工作区
 
-用户指定上游：https://github.com/zzzokay/camera_150_with_face 。基线提交 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`，工作分支 `g0/windows-migration`。
+用户指定上游：https://github.com/zzzokay/camera_150_with_face 。基线提交 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`，当前分支 `g1/person-detection-ball-slot`；G0 提交保留在历史中。
 开始时本目录没有 `.git` 或工程源码，只有两份规范与 `best_sac/`；现已建立 Git 并从上游取得应用源码。
 使用 **稀疏检出（sparse checkout：只把所需文件放到工作目录）**，49 个上游应用文件被检出。
 上游的 Linux 虚拟环境、人脸档案、运行状态、模型等仍在上游版本树中，未删除、未主动检出；本轮未重新提交这些资产。
@@ -35,9 +35,10 @@ project/
 │   │   ├── single_rknn_director_view720_record_local.py    未修改
 │   │   ├── single_rknn_director_view1920_record_local.py   未修改
 │   │   ├── director_game_policy.py / audio_chain.py       未修改
-│   ├── windows_pipeline/                 本轮新增，只有 G0
+│   ├── windows_pipeline/                 G0/G1，未加入 ByteTrack/训练
 │   │   ├── config.py / contracts.py / sources.py / preprocessing.py
 │   │   ├── detector.py / director_adapter.py / rendering.py
+│   │   ├── detection_policy.py / detection_records.py   G1 策略/检测审计
 │   │   └── outputs.py / run.py / diagnostics.py
 │   ├── techtable_v2/                      原技术台应用源码，未修改
 │   ├── face_checkin_lbph*.py              原检录应用源码，未修改
@@ -46,8 +47,10 @@ project/
 │   ├── camera150_techtable_v3_patch/       原补丁工具源码，未执行
 │   └── start_all_techtable.py / stop_all_techtable.py 等原管理脚本
 ├── windows_camera_150_client/             原 Windows RTSP 客户端源码，未修改
-├── tests/                                本轮 G0 组件/回归/真实模型集成测试
-├── docs/                                 兼容矩阵、首轮验收报告、补充录像验证报告
+├── configs/detection*.example.yaml        G1 通用/本次室内策略，篮球默认关闭
+├── configs/g1.indoor.example.yaml         G1 运行模板，本地副本被忽略
+├── tests/                                G0/G1 组件/回归/真实模型测试
+├── docs/                                 G0/G1 报告、平台矩阵、G1 检测 schema
 ├── best_sac/                              用户原文件，Git 忽略，未加载
 ├── video/                                 用户补充的室内比赛录屏，MP4 被 Git 忽略
 ├── .venv/                                本机独立 Python 环境，Git 忽略
@@ -71,8 +74,10 @@ project/
 flowchart LR
     A[本地视频或摄像头] --> B[VideoSource: 源帧号/秒]
     B --> C[FramePreprocessor: 可选镜头矫正]
-    C --> D[真实 YOLO .pt: 人物全幅框]
-    D --> E[原 SmoothTracks: 距离关联和平滑]
+    C --> D[真实 YOLO .pt: 按真实 names 找类别]
+    D --> D1[G1 可选: 阈值/尺寸/ROI 筛选]
+    D1 --> D2[G1 可选: 检测 JSONL/排除原因/球关闭状态]
+    D1 --> E[仅人物: 原 SmoothTracks 距离关联和平滑]
     E --> F[原 analyze_single_view_frame]
     F --> G[可选比赛状态策略]
     G --> H[原 update_overlay_director_state]
@@ -82,7 +87,7 @@ flowchart LR
     H --> K
 ```
 
-本轮没有 ByteTrack、训练数据导出、特征和神经导播策略。
+本轮没有 ByteTrack、训练数据导出、特征和神经导播策略。G1 只增加检测审计，球按用户要求关闭。
 每 `detect_interval` 帧进行一次真实检测，中间帧沿用上一轮观测，并像旧入口一样更新平滑与规则状态。
 `overview` 明示 `NEW INFERENCE` / `REUSED age=N source frames`；不能用这些复用框直接计算运动真值。
 
@@ -95,7 +100,9 @@ flowchart LR
 | `camera_150/windows_pipeline/contracts.py` | `VideoFrame`, `Detection` | 内存类型，字段见下；source/detector 调用 |
 | `camera_150/windows_pipeline/sources.py` | `VideoSource.read` | 文件/设备 → 顺序帧、源索引、秒；run 调用 |
 | `camera_150/windows_pipeline/preprocessing.py` | `FramePreprocessor.apply` | 原 BGR → 全幅 BGR；尺寸不符报错 |
-| `camera_150/windows_pipeline/detector.py` | `YoloPersonDetector.detect` | 本地 `.pt` + 全幅 BGR → 人物框；不调用 model.track |
+| `camera_150/windows_pipeline/detector.py` | `YoloDetector.detect` / G0 兼容 `YoloPersonDetector` | 本地 `.pt` + 全幅 BGR → 真实标准类别框及排除原因；不调用 model.track |
+| `camera_150/windows_pipeline/detection_policy.py` | `load_detection_policy`, `resolve_class_ids`, `rejection_reason` | YAML/真实 names/像素框 → 标准类及筛选依据；ball 默认关闭 |
+| `camera_150/windows_pipeline/detection_records.py` | `DetectionRecords.write` | 每帧真实观测/无观测状态 → g1_detections_v1 JSONL；不是轨迹表 |
 | `camera_150/windows_pipeline/director_adapter.py` | `LegacyDirector.process` | 人物框 → 原平滑/规则 → 裁切图与状态 |
 | `camera_150/windows_pipeline/rendering.py` | `render_sample_director_view720` | 原录制脚本四个纯函数的独立副本；测试约束一致性 |
 | `camera_150/windows_pipeline/outputs.py` | `SavedVideo`, `verify_video` | BGR → 视频；关闭后逐帧解码核验 |
@@ -111,9 +118,10 @@ flowchart LR
 ## 数据约定与存放
 
 - `VideoFrame`：`image_bgr` 为 `[H,W,3]` uint8，`source_frame_idx` 从 0 起，`timestamp_sec` 为秒；容器 PTS 无效时用 `idx/fps` 并计数。摄像头使用 `perf_counter` 高精度单调时钟，表示收帧时刻，不等于相机曝光 PTS。
-- `Detection`：`class_name=person`，保留真实 `model_class_id`、`confidence`、`bbox_xyxy` 全幅像素、`coord_system`、`observed=true`。只有真实 detect 调用产生它；复用状态单独在调试视频/统计中记录。
+- `Detection`：标准 `class_name=person/ball`，保留真实 `model_class_id`、`confidence`、`bbox_xyxy` 全幅像素、`coord_system`、`observed=true`。本轮模型只实际产出 person；复用框在内存 observed=false，JSONL 不复制成新观测。
 - 坐标空间：`none` 是 `raw_full_frame_px`；`already/calibration` 是 `undistorted_full_frame_px`。`already` 是用户声明，本轮不重新标定验证镜头模型。
 - `summary.json`：版本 `g0_run_v1`，含真实模型类别/哈希、参数、源属性、推理耗时、真实观测次数、复用帧数、首条真实框、最终裁切框及产物解码统计。它是运行审计报告，**不是 G3 轨迹数据集**。
+- G1 开启策略或检测导出后，目录前缀为 g1，报告为 `g1_run_v1`，增加完整策略与按类计数；`detections.jsonl` 为 `g1_detections_v1`，每处理帧一行，含真实/复用标记、框/排除原因、球 valid/status。球关闭为 false/null。精确定义见 [G1_DETECTION_SCHEMA.md](docs/G1_DETECTION_SCHEMA.md)。
 - 片段选择：`start_seconds` 默认 0；顺序解码至首个 `timestamp_sec >= start_seconds` 的帧才开始推理/规则处理/保存，不重新压缩输入。保留原帧号/时间，片段第一帧立即推理；`max_frames` 只计选中后的处理帧。`g0_run_v1` 本次增加可选审计字段 `source.skipped_frames / first_source_frame_idx / first_timestamp_sec`，旧报告可能没有它们。
 - 本地输入推荐 `data/input/`，新权重推荐 `models/`，原 NPZ 继续位于 `camera_150/camera_usb3_calib.npz`；产物在配置的输出目录下按时间+随机后缀分目录。
 - 轨迹 CSV/JSONL、球场标定、特征、TCN checkpoint 本轮没有产出，也没有伪造占位数据。
@@ -121,7 +129,7 @@ flowchart LR
 ## 测试与后续模块位置
 
 `pytest.ini` 只收集 `tests/`，不收集上游 Linux 环境或设备脚本。`test_legacy_regression.py` 检查共享算法与上游一致、旧入口未改、180 帧合成序列逐帧对齐；`test_windows_components.py` 检查路径/编码/时间/标定边界；真实模型测试必须显式提供文件，否则 skip。
-未来经用户逐关批准后，检测质量工作放 G1，ByteTrack 放独立 tracker 模块（G2），轨迹导出放 research/tracking（G3），球场标定/特征/TCN 分别按 G4/G5/G6 开展。G0 不提前创建其功能。
+G1 人物筛选与检测审计已实现，球能力按用户要求暂缓。未来经逐关批准后，ByteTrack 放独立 tracker 模块（G2），轨迹导出放 research/tracking（G3），球场标定/特征/TCN 分别按 G4/G5/G6 开展，本轮不提前创建它们。
 
 ## 资产边界
 

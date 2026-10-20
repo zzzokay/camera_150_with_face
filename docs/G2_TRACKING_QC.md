@@ -1,11 +1,13 @@
 # G2 跟踪接口与验收记录
 
-文件作用：供调参、验收与下一关开发者理解 ByteTrack 输入、时间处理及 QC 文件。接口变化时同步本文、测试和 NEWCOMER_HANDOFF.md；这不是 G3 可训练数据集规范。
+文件作用：供当前 Windows G2 开发者理解 ByteTrack 输入、时间处理及 QC 文件。接口变化时同步本文、测试和 NEWCOMER_HANDOFF.md；这不是 G3 可训练数据集规范。
+
+当前入口为根 `run.py`，配置为 `configs/local.yaml`（模板 `local.example.yaml`），实现位于 `basketball/`。字段保持原 G2 语义；本轮重构证据见 [Windows 验收](G2_WINDOWS_ACCEPTANCE_REPORT.md)。
 
 ## 算法与调用边界
 
-旧 `single_rknn_base.SmoothTracks.update` 按脚底点距离贪心关联，并平滑框；已有临时 ID，并非原来无跟踪。
-新 `tracker.PersonByteTracker` 封装安装包中的 `ultralytics.trackers.byte_tracker.BYTETracker`（8.3.225，AGPL-3.0），使用 Kalman 运动预测、框重叠匹配和高/低置信两阶段关联。它不使用球衣外观或人脸，所以多人重叠、快速移动时仍可能换号。
+`basketball.baseline.SmoothTracks` 提取原脚底点距离贪心关联和平滑，已有临时 ID，只在开启 baseline 时运行。
+`basketball.tracker.PersonByteTracker` 封装安装包中的 `ultralytics.trackers.byte_tracker.BYTETracker`（8.3.225，AGPL-3.0），使用 Kalman 运动预测、框重叠匹配和高/低置信两阶段关联。它不使用球衣外观或人脸，所以多人重叠、快速移动时仍可能换号。
 
 ```text
 完整 BGR 帧 → 一次 YOLO（最低置信度 .10）
@@ -33,22 +35,22 @@
 
 ## 参数与调试
 
-`configs/tracking.example.yaml` 记录全部实测参数：high=.35、low=.10、new=.35、match=.8、buffer=30、fuse_score=true、gap=.5 秒、scene=.65。
+`configs/local.example.yaml` 的 tracking 段记录全部原参数：high=.35、low=.10、new=.35、match=.8、buffer=30、fuse_score=true、gap=.5 秒、scene=.65。默认关闭规则导播和旧对照，开启后才生成对应视频/CSV。
 高阈值必须等于当前 person.confidence；配置会检查两者一致。`match_thresh` 为关联代价上限，不能误读成 IoU 最小值。修改任一阈值后需用同片段复验，不能只用“ID 总数下降”判定效果更好。
-G2 的旧算法 ID 对照要求 `smooth > 1e-6`；原算法在 0 时关闭编号，因此 G2 会明确拒绝，G0/G1 仍保留原有关闭行为。
-`lap==0.5.12` 已作为明确依赖加入；仅在构建跟踪器时导入 ByteTrack，G0/G1 不需要启动跟踪器。运行前检查 lap 是否存在，避免 Ultralytics 的隐式自动安装。当前锁定 Ultralytics API 版本，升级会明确要求复核。
+开启旧算法 ID 对照时要求 `smooth > 1e-6`；当前统一配置拒绝零平滑值。detect 模式不暗中启动旧跟踪器。
+`lap==0.5.12` 是明确依赖；仅在构建跟踪器时导入 ByteTrack，detect 不启动跟踪器。运行前检查 lap 是否存在，避免 Ultralytics 的隐式自动安装。当前锁定 Ultralytics API 版本，升级会明确要求复核。match_thresh 只影响第一阶段；库内低置信/待确认阶段代价上限分别固定 .5/.7。
 
 ## QC 文件（g2_tracking_qc_v1）
 
 | 文件 | 一行的含义 |
 |---|---|
 | `bytetrack_qc.csv` | 一次 ByteTrack 已确认轨迹与真实当前观测的匹配；不是每人每帧必有一行 |
-| `smoothtracks_qc.csv` | 同一 YOLO 高阈值人物观测的旧关联结果 |
-| `tracking_audit.jsonl` | 每处理帧一行，含两个独立结果、lost_ids、未确认轨迹数、segment/重置原因、球关闭状态 |
+| `smoothtracks_qc.csv` | 开启 baseline 才创建；同一 YOLO 高阈值人物观测的旧关联结果 |
+| `tracking_audit.jsonl` | 每处理帧一行，含匹配、lost_ids、未确认轨迹数、segment/重置原因、球关闭状态；baseline 关闭时对照数组为空 |
 
 CSV 字段：schema_version、segment_id、source_frame_idx、timestamp_sec（源秒数，不从选段归零）、track_id、class_name、model_class_id、confidence（检测置信度）、observed、track_state、association_stage、det_x1/y1/x2/y2、track_x1/y1/x2/y2、coord_system。
 `det_*` 是原始检测；`track_*` 是滤波估计。当前所有导出行 observed=true、track_state=tracked；丢失只在逐帧 QC 中列出 ID，不写空中预测框。`association_stage=high/low/legacy_distance`。
-视频右侧/overview 为 ByteTrack，H/L 是高/低阶段；左侧旧算法标签 L 是 legacy_distance，不是低置信阶段。青色裁切框统一显示当前 ByteTrack 导播窗口，只对比关联，不在左图运行第二套导播。
+overview 为 ByteTrack，H/L 是高/低阶段。可选对照视频右侧为 ByteTrack，左侧旧算法标签 L 是 legacy_distance，不是低置信阶段。开启导播时才绘制青色裁切框；对照只比较关联，不在左图运行第二套导播。
 暂定同步写盘，写入失败使运行失败；离线不丢帧。本关没有异步数据队列、G3 数据集冻结、独立重放工具、速度或训练标签；CSV 仅用于 G2 的强制 ID 验收。
 
 ## 真实首条结果（四舍五入展示）

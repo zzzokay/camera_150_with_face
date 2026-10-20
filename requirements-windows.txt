@@ -1,4 +1,4 @@
-# 文件作用：G0/G1/G2 的 Windows Python 3.11 依赖；先按交接文档安装 CPU 或 CUDA torch。
+# 文件作用：Windows Python 3.11 项目依赖；只安装到独立环境，CPU 实测版本见锁文件。
 # CPU 已实测；CUDA 仅提供安装说明，未测试。
 torch==2.9.1
 torchvision==0.24.1

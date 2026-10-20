@@ -1,0 +1,53 @@
+# 文件作用：Windows 日常运行唯一配置模板。复制为 local.yaml 后填写本地路径；不提交本地文件。
+# 启动：.\.venv\Scripts\python.exe -X utf8 .\run.py --config .\configs\local.yaml
+# 快测：在启动命令末尾加 --max-frames 48；输入与输出路径相对于本 YAML 所在目录。
+schema_version: windows_run_config_v1
+mode: track  # track 有临时 ID/QC；detect 只检测。ID 不代表球员身份。
+input:
+  source: ../data/game.mp4  # 改成自己的录像；相机输入时设 source: null，并填 camera: 0。
+  camera: null
+  backend: auto  # 文件 auto/ffmpeg；Windows 相机 auto/dshow/msmf。
+  start_seconds: 30  # 当前篮球测试录像跳过前30秒；相机必须为0。
+  max_frames: 0     # 0表示到结尾；48用于快速验证。
+  undistort: none   # none 原图；already 声明已矫正；calibration 需同尺寸NPZ。
+  calib_file: null
+model:
+  weights: ../models/best.pt  # 本地 YOLO .pt；不使用 SAC .pth，不自动下载。
+  device: cpu
+  imgsz: 640  # 重构保持原参数；960/1280实验须等独立工程验收。
+  iou: 0.7   # YOLO NMS 重叠阈值；不是跟踪关联阈值。
+  detect_interval: 1  # track 必须每帧新推理。
+detection:
+  person:
+    enabled: true
+    aliases: [person, player]
+    confidence: 0.35  # 与 tracking.track_high_thresh 一致。
+    min_size_wh: [0, 0.02]  # 完整帧宽高比例，不是米。
+    max_size_wh: [1, 0.5]
+    roi_polygon: [[0, 0.66], [1, 0.66], [1, 0.97], [0, 0.97]] # 当前室内录像示例；用人物脚点，不识别球员身份。
+  ball:
+    enabled: false  # 尚无篮球模型；保持关闭/位置null，不用人框伪造球。
+tracking:
+  track_high_thresh: 0.35
+  track_low_thresh: 0.10  # 仅供续接；当前库第二阶段实际使用 score > low。
+  new_track_thresh: 0.35 # 新轨迹可先待确认，不一定立即输出ID。
+  track_buffer: 30       # 30FPS等效帧数，按源FPS换算约1秒；不是处理速度。
+  match_thresh: 0.8      # 第一阶段代价上限，越大越宽松，不是IoU下限。
+  fuse_score: true
+  gap_reset_seconds: 0.5
+  scene_cut_threshold: 0.65 # 直方图启发式，可能误判/漏判。
+director:
+  enabled: false
+  width: 1280
+  height: 720
+baseline:
+  enabled: false  # 开启才运行旧距离关联、额外写对照视频/CSV。
+  smooth: 0.65
+  max_match_dist: 180 # 完整帧脚点欧氏距离，像素。
+  max_missing: 15    # 源更新帧数；与ByteTrack buffer语义不同。
+output:
+  directory: ../runs
+  codec: mp4v  # .mp4；MJPG 显式保存 .avi。视频不含音轨。
+  preview: false
+  overview: true
+  export_detections: true

@@ -1,5 +1,0 @@
-Guessed Channel Layout for Input Stream #1.0 : stereo
-Guessed Channel Layout for Input Stream #1.0 : stereo
-av_interleaved_write_frame(): Broken pipe
-[out#0/rtsp @ 0x55b32a8200] Error muxing a packet
-[out#0/rtsp @ 0x55b32a8200] Error writing trailer: Broken pipe

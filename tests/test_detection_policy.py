@@ -1,7 +1,8 @@
-"""
-文件作用：验证 G1 类别、ROI、独立阈值、无球/复用记录的语义，不宣称篮球模型有效。
-输入：明确合成的类别表/像素框/空图；输出：pytest 断言及临时 JSONL。
-依赖：pytest、OpenCV；运行：python -m pytest tests/test_detection_policy.py -q。
+r"""
+文件作用：Windows test_detection_policy 的行为测试；合成输入不作为真实比赛精度证据。
+调用/快速测试（PowerShell）：.\.venv\Scripts\python.exe -X utf8 -m pytest tests/test_detection_policy.py -q
+输入：测试内说明的合成数据/临时路径；真实模型测试另需设置 BASKETBALL_TEST_WEIGHTS 与 BASKETBALL_TEST_VIDEO。
+预期输出：pytest 结果及临时目录产物；失败查看断言、依赖版本与 NEWCOMER_HANDOFF.md。
 """
 import json
 from dataclasses import replace
@@ -9,11 +10,11 @@ from dataclasses import replace
 import numpy as np
 import pytest
 
-from camera_150.windows_pipeline.contracts import Detection, VideoFrame
-from camera_150.windows_pipeline.detection_policy import (
-    ClassPolicy, DetectionPolicy, load_detection_policy, rejection_reason, resolve_class_ids, validate_policy,
+from basketball.contracts import Detection, VideoFrame
+from basketball.detection_policy import (
+    ClassPolicy, DetectionPolicy, policy_from_mapping, rejection_reason, resolve_class_ids, validate_policy,
 )
-from camera_150.windows_pipeline.detection_records import DetectionRecords
+from basketball.records import DetectionRecords
 
 
 def test_names_disabled_ball_and_missing_requested_class():
@@ -51,11 +52,9 @@ def test_invalid_policy_rejected(change):
 
 
 def test_yaml_unknown_field_and_defaults(tmp_path):
-    policy_path = tmp_path / "策略.yaml"
-    policy_path.write_text("schema_version: g1_detection_policy_v1\nperson:\n  confdence: 0.2\n", encoding="utf-8")
     with pytest.raises(ValueError, match="未知"):
-        load_detection_policy(policy_path)
-    policy = load_detection_policy(None, .44, ("human",))
+        policy_from_mapping({'person': {'confdence': .2}})
+    policy = policy_from_mapping({'person': {'confidence': .44, 'aliases': ['human']}})
     assert policy.person.confidence == .44 and policy.person.aliases == ("human",)
     assert policy.ball.enabled is False
 

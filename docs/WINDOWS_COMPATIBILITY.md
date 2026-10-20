@@ -2,6 +2,8 @@
 
 文件作用：为开发者和验收者逐项说明真实 RK3588 依赖、Windows 对应方案和验证边界。更换后端、编码器、相机或完成设备实测后更新；配合 PROJECT_STRUCTURE.md 与 G0_ACCEPTANCE_REPORT.md 阅读。
 
+**历史设计记录**：下表记录 G0/G1 迁移时的双平台方案和旧路径。当前 Windows 分支已删除 RK3588/客户端模块且不支持其部署，不再跨目录调用原规则；保留逻辑已独立提取到 `basketball/`。当前命令以 README 的根 `run.py` 和 `configs/local.yaml` 为准，独立化验证见 [G2_WINDOWS_ACCEPTANCE_REPORT.md](G2_WINDOWS_ACCEPTANCE_REPORT.md)。历史设备结果不代表重构后的新设备验收。
+
 G1 更新：用户授权人物筛选/检测记录与球接口预留，39 项测试通过；G0 默认无额外 ROI，G1 使用可选外部策略与 JSONL，球关闭。当前结果见 [G1_ACCEPTANCE_REPORT.md](G1_ACCEPTANCE_REPORT.md)，真实球模型和 CUDA/NPU 未验，不改变下表的硬件迁移边界。
 
 补充实测：室内比赛录屏按 `--start-seconds 30` 处理至结尾，保留源帧号/时间，两路 1818 帧完整解码；片段起点只用于文件，不更改摄像头接口。27 项测试通过，具体证据与裁切失败例见 [G0_ADDITIONAL_VIDEO_VALIDATION.md](G0_ADDITIONAL_VIDEO_VALIDATION.md)。

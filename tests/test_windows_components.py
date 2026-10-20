@@ -1,7 +1,8 @@
-"""
-文件作用：测试 G0 路径、时间戳、编码、去畸变边界及类别映射，均非检测准确率测试。
-输入：临时中文路径、合成彩条帧、合成标定；输出：pytest 断言和临时视频。
-依赖：pytest/OpenCV/NumPy；运行：python -m pytest tests/test_windows_components.py -q。
+r"""
+文件作用：Windows test_windows_components 的行为测试；合成输入不作为真实比赛精度证据。
+调用/快速测试（PowerShell）：.\.venv\Scripts\python.exe -X utf8 -m pytest tests/test_windows_components.py -q
+输入：测试内说明的合成数据/临时路径；真实模型测试另需设置 BASKETBALL_TEST_WEIGHTS 与 BASKETBALL_TEST_VIDEO。
+预期输出：pytest 结果及临时目录产物；失败查看断言、依赖版本与 NEWCOMER_HANDOFF.md。
 """
 from pathlib import Path
 
@@ -9,11 +10,11 @@ import cv2
 import numpy as np
 import pytest
 
-from camera_150.windows_pipeline.config import load_config
-from camera_150.windows_pipeline.detector import resolve_person_ids, validate_weights
-from camera_150.windows_pipeline.outputs import SavedVideo, verify_video
-from camera_150.windows_pipeline.preprocessing import FramePreprocessor
-from camera_150.windows_pipeline.sources import VideoSource
+from basketball.config import load_config
+from basketball.detector import resolve_person_ids, validate_weights
+from basketball.outputs import SavedVideo, verify_video
+from basketball.preprocessing import FramePreprocessor
+from basketball.sources import VideoSource
 
 
 @pytest.mark.parametrize("codec,suffix", [("mp4v", ".mp4"), ("MJPG", ".avi")])
@@ -49,7 +50,7 @@ def test_output_rejects_overwrite_and_shape(tmp_path):
 def test_config_paths_relative_to_yaml_not_cwd(tmp_path, monkeypatch):
     path = tmp_path / "中文 配置" / "local.yaml"
     path.parent.mkdir()
-    path.write_text("source: game.mp4\nweights: model.pt\noutput_dir: outputs\nundistort: already\n", encoding="utf-8")
+    path.write_text("schema_version: windows_run_config_v1\ninput:\n  source: game.mp4\n  undistort: already\nmodel:\n  weights: model.pt\noutput:\n  directory: outputs\n", encoding="utf-8")
     monkeypatch.chdir(Path.home())
     config = load_config(["--config", str(path), "--detect-interval", "1"])
     assert config.source == path.parent / "game.mp4"

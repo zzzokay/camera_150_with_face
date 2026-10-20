@@ -1,7 +1,8 @@
-"""
-文件作用：G2 两阶段关联、缺失/重置/时序、检测单次调用及原导播旁路的组件测试。
-输入：明确合成的像素框/场景/YOLO 返回值；输出：pytest 断言，不作为真实球员 ID 精度。
-依赖：固定版本 ByteTrack/lap 和 Windows 模块；运行 python -m pytest tests/test_tracker.py -q。
+r"""
+文件作用：Windows test_tracker 的行为测试；合成输入不作为真实比赛精度证据。
+调用/快速测试（PowerShell）：.\.venv\Scripts\python.exe -X utf8 -m pytest tests/test_tracker.py -q
+输入：测试内说明的合成数据/临时路径；真实模型测试另需设置 BASKETBALL_TEST_WEIGHTS 与 BASKETBALL_TEST_VIDEO。
+预期输出：pytest 结果及临时目录产物；失败查看断言、依赖版本与 NEWCOMER_HANDOFF.md。
 """
 import json
 from dataclasses import replace
@@ -10,9 +11,9 @@ from types import SimpleNamespace
 import numpy as np
 import pytest
 
-from camera_150.windows_pipeline.contracts import Detection, VideoFrame
-from camera_150.windows_pipeline.tracker import PersonByteTracker, TrackerConfig, load_tracker_config
-from camera_150.windows_pipeline.tracking_records import TrackingRecords
+from basketball.contracts import Detection, VideoFrame
+from basketball.tracker import PersonByteTracker, TrackerConfig, validate_tracker_config
+from basketball.records import TrackingRecords
 
 
 def person(x=10., confidence=.9):
@@ -95,8 +96,8 @@ def test_obvious_scene_cut_resets_without_cross_scene_id():
 
 
 def test_detector_once_per_frame_low_candidates_are_not_reused():
-    from camera_150.windows_pipeline.detector import YoloDetector
-    from camera_150.windows_pipeline.detection_policy import DetectionPolicy
+    from basketball.detector import YoloDetector
+    from basketball.detection_policy import DetectionPolicy
     detector = object.__new__(YoloDetector)
     detector.device, detector.imgsz, detector.confidence, detector.iou = 'cpu', 640, .1, .7
     detector.id_to_class, detector.policy = {7: 'person'}, DetectionPolicy()
@@ -117,13 +118,14 @@ def test_detector_once_per_frame_low_candidates_are_not_reused():
 
 
 def test_g2_director_skips_old_association_and_qc_preserves_both_boxes(tmp_path, monkeypatch):
-    from camera_150.windows_pipeline.director_adapter import LegacyDirector
+    from basketball.director import RuleDirector
     tracker = PersonByteTracker(TrackerConfig(), 30.)
     tracks = tracker.update([person()], 0, 0., (200, 100))
-    director = LegacyDirector(160, 90)
+    director = RuleDirector(160, 90)
     def fail_if_called(*args):
         raise AssertionError('G2 不得再次使用 SmoothTracks 关联')
-    monkeypatch.setattr(director.smoother, 'update', fail_if_called)
+    from basketball.baseline import SmoothTracks
+    monkeypatch.setattr(SmoothTracks, 'update', fail_if_called)
     image = np.zeros((100, 200, 3), dtype=np.uint8)
     _, _, wide, _ = director.process(image, [person()], tracked_persons=tracks)
     assert wide[0].track_id == tracks[0].track_id
@@ -135,13 +137,11 @@ def test_g2_director_skips_old_association_and_qc_preserves_both_boxes(tmp_path,
 
 
 def test_tracking_cli_rejects_inference_reuse_and_bad_thresholds(tmp_path):
-    from camera_150.windows_pipeline.config import load_config
-    from camera_150.windows_pipeline.tracker import SmoothTracksBaseline
+    from basketball.config import load_config
+    from basketball.baseline import SmoothTracksBaseline
     with pytest.raises(ValueError, match='禁用旧 ID'):
         SmoothTracksBaseline(smooth=0)
     with pytest.raises(ValueError, match='detect_interval'):
-        load_config(['--source', 'a.mp4', '--weights', 'a.pt', '--tracking-config', 'tracking.yaml'])
-    path = tmp_path / 'bad.yaml'
-    path.write_text('schema_version: g2_tracker_config_v1\ntrack_low_thresh: 0.5\n', encoding='utf-8')
+        load_config(['--source', 'a.mp4', '--weights', 'a.pt', '--detect-interval', '3'])
     with pytest.raises(ValueError, match='low < high'):
-        load_tracker_config(path)
+        validate_tracker_config(replace(TrackerConfig(), track_low_thresh=.5))

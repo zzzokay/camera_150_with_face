@@ -26,7 +26,7 @@ from .sources import VideoSource
 
 
 def run_pipeline(config: RunConfig) -> Path:
-    """执行真实管线；返回运行目录。失败保留失败报告并重新抛出异常。"""
+    """从指定源时间执行真实管线并返回运行目录；起点越界或失败时保留失败报告并抛异常。"""
     # 先检查本地权重，不向 Ultralytics 传入不存在的文件名，防止自动下载。
     validate_weights(config.weights)
     run_dir = config.output_dir / (datetime.now().strftime("g0_%Y%m%d_%H%M%S_") + uuid.uuid4().hex[:8])
@@ -47,15 +47,24 @@ def run_pipeline(config: RunConfig) -> Path:
             source = stack.enter_context(VideoSource(config.source, config.camera, config.backend,
                                                      config.fps, config.camera_width, config.camera_height))
             packet = source.read()
+            # 顺序解码跳过片头：以实际时间戳而非平均 FPS 估算边界，兼容录屏的变帧率。
+            # 跳过的帧不做 YOLO/规则处理、不写输出，源帧号与源时间保持不变。
+            while packet is not None and packet.timestamp_sec < config.start_seconds:
+                packet = source.read()
             if packet is None:
-                raise ValueError("输入没有可解码的视频帧")
+                raise ValueError(f"输入在起始时间 {config.start_seconds:g} 秒后没有可解码的视频帧")
             first_frame = preprocessor.apply(packet.image_bgr)
             h, w = first_frame.shape[:2]
             if config.debug_video and (w % 2 or h % 2):
                 raise ValueError("广角调试视频要求源宽高为偶数；请用 --no-debug-video 保持原图推理")
             report["source"] = {"fps": source.fps, "frame_size": [w, h],
                                  "metadata_frame_count": source.frame_count, "backend": source.backend_name,
-                                 "undistort_declaration": config.undistort}
+                                 "undistort_declaration": config.undistort,
+                                 "skipped_frames": packet.source_frame_idx,
+                                 "first_source_frame_idx": packet.source_frame_idx,
+                                 "first_timestamp_sec": packet.timestamp_sec}
+            logging.info("片段起点：源帧 %d，源时间 %.6f 秒；跳过 %d 帧",
+                         packet.source_frame_idx, packet.timestamp_sec, packet.source_frame_idx)
             detector = YoloPersonDetector(config.weights, config.device, config.imgsz,
                                            config.confidence, config.iou, config.person_aliases)
             report["model"] = {"path": str(detector.weights), "sha256": detector.sha256,
@@ -70,12 +79,13 @@ def run_pipeline(config: RunConfig) -> Path:
             overview = stack.enter_context(SavedVideo(run_dir / ("overview" + suffix), source.fps,
                                                         (w, h), config.codec)) if config.debug_video else None
             last_detections = []
-            last_detect_idx = 0
+            last_detect_idx = packet.source_frame_idx
             first_crop = None
             changed_crop_frames = 0
             while packet is not None:
-                frame = first_frame if packet.source_frame_idx == 0 else preprocessor.apply(packet.image_bgr)
-                observed = packet.source_frame_idx % config.detect_interval == 0
+                frame = first_frame if report["processed_frames"] == 0 else preprocessor.apply(packet.image_bgr)
+                # 每个片段首帧立即推理，防止从非 3 整数倍的源帧开始时先复用空结果。
+                observed = report["processed_frames"] % config.detect_interval == 0
                 if observed:
                     infer_start = time.perf_counter()
                     last_detections = detector.detect(frame, preprocessor.coord_system)

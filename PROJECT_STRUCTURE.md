@@ -47,8 +47,9 @@ project/
 │   └── start_all_techtable.py / stop_all_techtable.py 等原管理脚本
 ├── windows_camera_150_client/             原 Windows RTSP 客户端源码，未修改
 ├── tests/                                本轮 G0 组件/回归/真实模型集成测试
-├── docs/                                 兼容矩阵、验收报告
+├── docs/                                 兼容矩阵、首轮验收报告、补充录像验证报告
 ├── best_sac/                              用户原文件，Git 忽略，未加载
+├── video/                                 用户补充的室内比赛录屏，MP4 被 Git 忽略
 ├── .venv/                                本机独立 Python 环境，Git 忽略
 └── runs/                                 本机输出与证据，Git 忽略
 ```
@@ -113,6 +114,7 @@ flowchart LR
 - `Detection`：`class_name=person`，保留真实 `model_class_id`、`confidence`、`bbox_xyxy` 全幅像素、`coord_system`、`observed=true`。只有真实 detect 调用产生它；复用状态单独在调试视频/统计中记录。
 - 坐标空间：`none` 是 `raw_full_frame_px`；`already/calibration` 是 `undistorted_full_frame_px`。`already` 是用户声明，本轮不重新标定验证镜头模型。
 - `summary.json`：版本 `g0_run_v1`，含真实模型类别/哈希、参数、源属性、推理耗时、真实观测次数、复用帧数、首条真实框、最终裁切框及产物解码统计。它是运行审计报告，**不是 G3 轨迹数据集**。
+- 片段选择：`start_seconds` 默认 0；顺序解码至首个 `timestamp_sec >= start_seconds` 的帧才开始推理/规则处理/保存，不重新压缩输入。保留原帧号/时间，片段第一帧立即推理；`max_frames` 只计选中后的处理帧。`g0_run_v1` 本次增加可选审计字段 `source.skipped_frames / first_source_frame_idx / first_timestamp_sec`，旧报告可能没有它们。
 - 本地输入推荐 `data/input/`，新权重推荐 `models/`，原 NPZ 继续位于 `camera_150/camera_usb3_calib.npz`；产物在配置的输出目录下按时间+随机后缀分目录。
 - 轨迹 CSV/JSONL、球场标定、特征、TCN checkpoint 本轮没有产出，也没有伪造占位数据。
 

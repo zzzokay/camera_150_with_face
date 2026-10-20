@@ -62,6 +62,10 @@ def test_config_paths_relative_to_yaml_not_cwd(tmp_path, monkeypatch):
 @pytest.mark.parametrize("args", [[], ["--source", "a.mp4", "--camera", "0"],
     ["--source", "a.mp4", "--weights", "a.pt", "--detect-interval", "0"],
     ["--source", "a.mp4", "--weights", "a.pt", "--fps", "nan"],
+    ["--source", "a.mp4", "--weights", "a.pt", "--start-seconds", "-1"],
+    ["--source", "a.mp4", "--weights", "a.pt", "--start-seconds", "nan"],
+    ["--source", "a.mp4", "--weights", "a.pt", "--start-seconds", "inf"],
+    ["--camera", "0", "--weights", "a.pt", "--start-seconds", "30"],
     ["--source", "a.mp4", "--weights", "a.pt", "--undistort", "calibration"]])
 def test_invalid_config_rejected(args):
     with pytest.raises(ValueError):

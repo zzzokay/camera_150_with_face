@@ -15,7 +15,7 @@ import yaml
 
 @dataclass(frozen=True)
 class RunConfig:
-    """G0 参数；宽高单位为像素，fps 为帧/秒，max_frames=0 表示读到结尾。"""
+    """G0 参数；宽高为像素，start_seconds 为源时间秒数，max_frames=0 表示读到结尾。"""
 
     source: Path | None = None
     camera: int | None = None
@@ -41,6 +41,7 @@ class RunConfig:
     codec: str = "mp4v"
     preview: bool = False
     debug_video: bool = True
+    start_seconds: float = 0.0
     max_frames: int = 0
     game_state: Path | None = None
 
@@ -61,7 +62,7 @@ def load_config(argv: Sequence[str] | None = None) -> RunConfig:
     for name in ("camera", "imgsz", "detect_interval", "max_missing", "view_width", "view_height",
                  "max_frames", "camera_width", "camera_height"):
         parser.add_argument("--" + name.replace("_", "-"), type=int)
-    for name in ("fps", "confidence", "iou", "smooth", "max_match_dist"):
+    for name in ("fps", "confidence", "iou", "smooth", "max_match_dist", "start_seconds"):
         parser.add_argument("--" + name.replace("_", "-"), type=float)
     parser.add_argument("--undistort", choices=("none", "already", "calibration"))
     parser.add_argument("--backend", choices=("auto", "dshow", "msmf", "ffmpeg"))
@@ -106,6 +107,10 @@ def validate_config(config: RunConfig) -> None:
         raise ValueError("必须且只能指定 --source 视频路径或 --camera 摄像头编号")
     if config.camera is not None and config.camera < 0:
         raise ValueError("camera 必须是非负编号")
+    if not math.isfinite(config.start_seconds) or config.start_seconds < 0:
+        raise ValueError("start_seconds 必须是有限非负秒数")
+    if config.camera is not None and config.start_seconds:
+        raise ValueError("start_seconds 仅用于视频文件，不用于摄像头")
     if config.weights is None:
         raise ValueError("缺少 --weights：请指定真实 YOLO .pt 权重，不能使用 SAC policy.pth")
     if config.undistort not in ("none", "already", "calibration"):

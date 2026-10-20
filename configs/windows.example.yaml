@@ -20,4 +20,6 @@ view_height: 720
 codec: mp4v
 preview: false
 debug_video: true
+# 从源时间的此秒数开始；跳过帧不推理，0 表示从头；仅用于文件。
+start_seconds: 0
 max_frames: 90

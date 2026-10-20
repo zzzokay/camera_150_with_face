@@ -2,6 +2,8 @@
 
 文件作用：向用户提交 Windows G0 的真实验收证据、变更边界与未验证项。由本关测试执行者在代码或验证结果变化后更新；复现步骤见 NEWCOMER_HANDOFF.md，逐项状态见 STAGE_PROGRESS.md。
 
+补充验证：用户随后指定另一室内比赛录屏并要求跳过前 30 秒；已完成源时间 30.0101–105.7088 秒共 1818 帧、606 次真实 YOLO，两路完整解码；新增片段起点参数后 **27 项测试通过**。详见 [G0_ADDITIONAL_VIDEO_VALIDATION.md](G0_ADDITIONAL_VIDEO_VALIDATION.md)。下文保留首轮 300 帧及 22 项测试的原始记录。
+
 - 当前状态：**待用户验收 / READY_FOR_REVIEW**。用户尚未验收；G1 及后续未开始。
 - 本关目标：真实 Windows 本地篮球视频 → 真实 YOLO 人物推理 → 原 SmoothTracks 和规则导播 → 本地保存；去除新入口对 RKNN、Linux 设备、音频与硬件编码的启动依赖。
 - 原有问题与为何修改：`single_rknn_base.PersonDetector` 使用 RKNNLite，原 `open_camera` 使用 V4L2；旧录制/推流入口还绑定 RK3588 编码器、ALSA 和显示环境。Windows 需要独立入口和推理后端。旧 `SmoothTracks` 已有临时 ID，本轮复用，不宣称原来没有跟踪。

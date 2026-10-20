@@ -7,6 +7,7 @@
 本工作分支为 `g0/windows-migration`，原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
 Windows 使用本地 YOLO `.pt`，复用原 `SmoothTracks`、热点分析和规则运镜，并保存导播与广角调试视频。
 只执行 G0；后续双类别、ByteTrack、轨迹数据和 TCN 尚未实施。
+可用 `--start-seconds 30 --max-frames 0` 跳过文件前 30 秒并处理到结尾，保留源帧号/时间；复现与验证结果见新人交接和验收报告。
 
 - 安装与完整 PowerShell 命令：[NEWCOMER_HANDOFF.md](NEWCOMER_HANDOFF.md)
 - 真实结构与调用链：[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)

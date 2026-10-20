@@ -8,7 +8,7 @@
 原系统用 RK3588 NPU 检测人物，再根据人物分布和热点平滑移动裁切窗口；文件与函数位置见下文。
 本轮将 Windows 检测换成真实 Ultralytics YOLO，保留原距离关联、热点、镜头规则。
 最终实测能力、精确统计及尚未验收项见 [G0_ACCEPTANCE_REPORT.md](docs/G0_ACCEPTANCE_REPORT.md)，不得用组件测试或文件存在替代实际推理成功。
-本机最终 `.venv` **22 项测试通过、0 失败/跳过**；指定录像前 300 帧（10 秒）完成 100 次真实 YOLO 推理，两路输出各完整解码 300 帧。
+首轮 `.venv` **22 项测试通过、0 失败/跳过**；指定录像前 300 帧（10 秒）完成 100 次真实 YOLO 推理，两路输出各完整解码 300 帧。用户补充室内录像后新增片段起点参数，最新 **27 项测试通过**，该录像 30 秒后完整处理 1818 帧、606 次真实推理；见 [补充验证报告](docs/G0_ADDITIONAL_VIDEO_VALIDATION.md)。
 实际权重类别只有 `{0: 'person'}`，没有篮球类别；本关不验收双类别检测。
 
 | 能力 | 证据类型与边界 |
@@ -95,6 +95,25 @@ Set-Location 'D:\0basketball\project'
 
 本机实际检测到 `EV Camera Device`、`USB2.0 HD UVC WebCam`。0 号请求 640×360 后实际返回 640×480，1 号返回 640×360，说明相机可能不接受请求尺寸。两者均能打开并读帧，报告 FPS 约 30；1 号的实际读帧间隔约 1 秒，不能据设备报告的 FPS 宣称实时 30 FPS。完整摄像头 YOLO/保存与长时间实时性未在本轮验收。
 
+## 补充室内录像：跳过前 30 秒
+
+新增 `--start-seconds 30` 只用于文件，按源时间顺序解码跳过前段；不另存压缩输入，源帧号/时间保持不变，首个选中帧马上推理。`max_frames` 只计选中后的帧，0 表示处理剩余全部。默认 `start_seconds=0` 保持从头运行。
+输入与首轮相机不同，使用 `--undistort none`，不能把另一相机的 NPZ 套过来。输出坐标是 `raw_full_frame_px`，并非去畸变或球场米制坐标。
+本机已核对下面文件选择唯一匹配用户给定的长中文名；同一模型/CLI 参数的实际运行见补充报告，复现可执行：
+
+```powershell
+Set-Location 'D:\0basketball\project'
+$g0ReplayVideos = @(Get-ChildItem -LiteralPath .\video -Filter '2026-04-15*16-53-01.mp4' -File)
+if ($g0ReplayVideos.Count -ne 1) { throw '必须唯一匹配用户指定的比赛录像' }
+.\.venv\Scripts\python.exe -X utf8 .\run_windows.py `
+  --source $g0ReplayVideos[0].FullName `
+  --weights 'C:\Users\zenghuiting\Desktop\rk_driceter\best.pt' `
+  --undistort none --device cpu --detect-interval 3 --start-seconds 30 --max-frames 0
+```
+
+实际从源帧 723（30.0101 秒）处理到 2540（105.7088 秒），共 1818 帧。结果：`D:\0basketball\project\runs\g0_20261020_165817_c5a8d96f`；两份 MP4 都能完整解码，约 75.646 秒，无音轨。
+先查看 `review_contact_sheet_1.jpg` / `_2.jpg` 再播放两路视频。调试图里裁判/场边人员同样有 person 框；约 60 秒窗口偏右，左侧数人被裁出，不能把工程运行成功当作运镜质量已合格。源报告 FPS 与实际 PTS 有小差异，输出为恒定帧率，不保证音画精确同步。
+
 ## 配置文件和任意当前目录
 
 复制 `configs/windows.example.yaml` 为 Git 忽略的 `configs/windows.local.yaml`，只在本地填写模型/视频路径。
@@ -151,7 +170,7 @@ $env:G0_TEST_VIDEO = 'C:\Users\zenghuiting\Desktop\rk_driceter\usb3_undistorted_
 .\.venv\Scripts\python.exe -X utf8 -m pytest -q
 ```
 
-真实模型测试处理 12 帧，要求确实检出人物且两路视频都能解码；没有设置这两个变量时会 skip，必须报告未运行，不能算带模型测试通过。
+真实模型测试对每个起点各处理 12 帧，要求首个选中帧立即真实推理、确实检出人物且两路视频都能解码；没有设置这两个变量时会 skip，必须报告未运行，不能算带模型测试通过。
 
 | 问题 | 排查顺序与命令 |
 |---|---|

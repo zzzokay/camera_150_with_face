@@ -8,6 +8,7 @@
 Windows 使用本地 YOLO `.pt`，复用原 `SmoothTracks`、热点分析和规则运镜，并保存导播与广角调试视频。
 G0 已获用户授权继续；本次 G1 做人物筛选、检测 JSONL 与篮球关闭接口，篮球实测按用户要求暂缓。ByteTrack、轨迹数据和 TCN 尚未实施。
 可用 `--start-seconds 30 --max-frames 0` 跳过文件前 30 秒并处理到结尾，保留源帧号/时间；复现与验证结果见新人交接和验收报告。
+室内人物 ROI 上边界已按用户要求从 0.70 提高到 0.66（1080p 约上移 43 像素），同片段真实模型对照已完成；最新产物与筛选限制见 G1 验收报告的“最新补充验收”。
 
 - 安装与完整 PowerShell 命令：[NEWCOMER_HANDOFF.md](NEWCOMER_HANDOFF.md)
 - 真实结构与调用链：[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)

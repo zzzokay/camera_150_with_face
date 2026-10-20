@@ -14,6 +14,13 @@
 
 ## 当前 G1 验证
 
+- 最新用户调整：“roi范围的上边界可以再高一点”；室内策略上边界 **0.70 → 0.66**，1080p 中约上移 43 像素，下边界 0.97。仅配置/文档变更，未改原规则或 RK3588 源码。
+- 本次相关策略测试 **11 passed in 1.67s，0 失败/跳过**；其余 28 项未重跑（仅此场景参数变化，另做完整真实模型视频对照）。本次日志和核验脚本在 `runs/g1_roi_top_066_20261020_173333/`。
+- 最新目录 `runs/g1_20261020_173342_033fabce`：1818 帧/1818 次真实推理，两路 MP4 各完整解码 1818 帧、1818 行 JSONL 全部核验；原始候选与旧轮逐帧一致，**20880 候选、17287 保留、3593 ROI 排除**。179 帧多保留累计 219 框，包含远端场边和重叠候选，不是球员人数或准确率。
+- `roi_comparison_frame_1051.jpg` 展示源帧 1774（73.7962 秒）保留 6 → 11 框，另有四个抽查点；`roi_comparison_validation.json` 保存独立核验。新旧 `director.mp4` 哈希相同，本次未改变导播视频；球仍关闭。详细命令/边界见 [G1 报告最新补充](docs/G1_ACCEPTANCE_REPORT.md)。G1 仍待用户验收，G2 未开始。
+
+以下为上边界 0.70 的初版历史证据，当前配置与最新产物以上述补充为准：
+
 - 分支 `g1/person-detection-ball-slot`；本轮只改 Windows 检测/记录/配置/绘图，RK3588 原文件和规则未再改动。
 - **39 passed in 5.91s，0 失败/跳过**。实际命令：设置下文真实权重/视频环境变量后运行 `.\.venv\Scripts\python.exe -X utf8 -m pytest -q`；输出摘要在 `runs/g1_audit_20261020_171533/automated_test_stdout.txt`。三个真实模型集成用首轮固定录像回归，室内录像另做完整运行。
 - 室内完整验证：`.\.venv\Scripts\python.exe -X utf8 .\run_windows.py --config .\configs\g1.indoor.local.yaml`，`start_seconds=30`、`detect_interval=1`、策略 `detection.indoor.example.yaml`、导出检测记录；完整环境与复现见 [G1 报告](docs/G1_ACCEPTANCE_REPORT.md)。

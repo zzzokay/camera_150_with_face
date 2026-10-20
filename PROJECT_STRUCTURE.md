@@ -122,6 +122,7 @@ flowchart LR
 - 坐标空间：`none` 是 `raw_full_frame_px`；`already/calibration` 是 `undistorted_full_frame_px`。`already` 是用户声明，本轮不重新标定验证镜头模型。
 - `summary.json`：版本 `g0_run_v1`，含真实模型类别/哈希、参数、源属性、推理耗时、真实观测次数、复用帧数、首条真实框、最终裁切框及产物解码统计。它是运行审计报告，**不是 G3 轨迹数据集**。
 - G1 开启策略或检测导出后，目录前缀为 g1，报告为 `g1_run_v1`，增加完整策略与按类计数；`detections.jsonl` 为 `g1_detections_v1`，每处理帧一行，含真实/复用标记、框/排除原因、球 valid/status。球关闭为 false/null。精确定义见 [G1_DETECTION_SCHEMA.md](docs/G1_DETECTION_SCHEMA.md)。
+- `configs/detection.indoor.example.yaml` 当前人物 ROI 为全宽、y 比例 0.66–0.97，按框底部中心筛选；本次仅将上边界由 0.70 提高到 0.66，不改数据格式或算法。新旧同片段结果见 [G1 最新补充验收](docs/G1_ACCEPTANCE_REPORT.md)，证据在各自 runs 目录，旧产物不覆盖。
 - 片段选择：`start_seconds` 默认 0；顺序解码至首个 `timestamp_sec >= start_seconds` 的帧才开始推理/规则处理/保存，不重新压缩输入。保留原帧号/时间，片段第一帧立即推理；`max_frames` 只计选中后的处理帧。`g0_run_v1` 本次增加可选审计字段 `source.skipped_frames / first_source_frame_idx / first_timestamp_sec`，旧报告可能没有它们。
 - 本地输入推荐 `data/input/`，新权重推荐 `models/`，原 NPZ 继续位于 `camera_150/camera_usb3_calib.npz`；产物在配置的输出目录下按时间+随机后缀分目录。
 - 轨迹 CSV/JSONL、球场标定、特征、TCN checkpoint 本轮没有产出，也没有伪造占位数据。

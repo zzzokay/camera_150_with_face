@@ -1,5 +1,5 @@
 """
-文件作用：合并 YAML/CLI 配置，校验 G0 范围和 Windows 路径。
+文件作用：合并 G0/G1 YAML/CLI 配置，校验范围和 Windows 路径。
 输入：命令行列表和可选 YAML；输出：RunConfig；错误配置抛出 ValueError。
 依赖：pathlib、argparse、PyYAML；调用关系：run.main -> load_config。
 注意：YAML 内相对路径以 YAML 所在目录为基准，CLI 路径以调用者目录为基准。
@@ -44,18 +44,20 @@ class RunConfig:
     start_seconds: float = 0.0
     max_frames: int = 0
     game_state: Path | None = None
+    detection_policy: Path | None = None
+    export_detections: bool = False
 
     def serializable(self) -> dict:
         """返回可写入运行报告的配置；路径保持可追溯绝对值。"""
         return {k: str(v) if isinstance(v, Path) else v for k, v in asdict(self).items()}
 
 
-PATH_FIELDS = ("source", "weights", "output_dir", "calib_file", "game_state")
+PATH_FIELDS = ("source", "weights", "output_dir", "calib_file", "game_state", "detection_policy")
 
 
 def load_config(argv: Sequence[str] | None = None) -> RunConfig:
     """读取配置并校验；不打开摄像头、不下载或加载模型。"""
-    parser = argparse.ArgumentParser(description="G0 Windows YOLO -> 原规则导播 -> 视频保存")
+    parser = argparse.ArgumentParser(description="Windows YOLO -> 原规则导播 -> 视频/可选 G1 检测记录")
     parser.add_argument("--config", type=Path)
     for name in PATH_FIELDS:
         parser.add_argument("--" + name.replace("_", "-"), type=Path)
@@ -69,7 +71,7 @@ def load_config(argv: Sequence[str] | None = None) -> RunConfig:
     parser.add_argument("--device")
     parser.add_argument("--codec", choices=("mp4v", "MJPG"))
     parser.add_argument("--person-aliases", nargs="+")
-    for name in ("preview", "debug_video"):
+    for name in ("preview", "debug_video", "export_detections"):
         parser.add_argument("--" + name.replace("_", "-"), action=argparse.BooleanOptionalAction, default=None)
     cli = vars(parser.parse_args(argv))
     config_path = cli.pop("config")
@@ -137,5 +139,5 @@ def validate_config(config: RunConfig) -> None:
         raise ValueError("输出宽高必须为偶数，max_frames 必须非负")
     if config.fps is not None and (not math.isfinite(config.fps) or config.fps <= 0):
         raise ValueError("fps 必须是有限正数；视频文件仅在 FPS 元数据无效时使用它")
-    if not isinstance(config.preview, bool) or not isinstance(config.debug_video, bool):
-        raise ValueError("preview/debug_video 必须为 true 或 false")
+    if any(not isinstance(getattr(config, name), bool) for name in ("preview", "debug_video", "export_detections")):
+        raise ValueError("preview/debug_video/export_detections 必须为 true 或 false")

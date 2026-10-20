@@ -1,0 +1,18 @@
+# 文件作用：G1 检测策略；默认人物兼容 G0，篮球接口保留但关闭。
+# confidence 是各类独立阈值；尺寸/ROI 使用完整输入帧的 [0,1] 比例。
+schema_version: g1_detection_policy_v1
+person:
+  enabled: true
+  aliases: [person, player]
+  confidence: 0.35
+  min_size_wh: [0, 0]
+  max_size_wh: [1, 1]
+  roi_polygon: null
+ball:
+  enabled: false
+  aliases: [sports ball, ball, basketball]
+  confidence: 0.20
+  min_size_wh: [0, 0]
+  max_size_wh: [1, 1]
+  roi_polygon: null
+# 球的阈值为待后续真实权重验证的初值；本轮不证明其检出能力。

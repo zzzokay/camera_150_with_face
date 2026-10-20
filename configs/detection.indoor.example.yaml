@@ -1,0 +1,17 @@
+# 文件作用：仅针对用户本次室内录屏的 G1 人物 ROI 演示，不是通用球场标定。
+# 按框底部中心过滤远处看台/近处场边；边线球员也可能被排除，见失败案例。
+schema_version: g1_detection_policy_v1
+person:
+  enabled: true
+  aliases: [person, player]
+  confidence: 0.35
+  min_size_wh: [0, 0.02]
+  max_size_wh: [1, 0.5]
+  roi_polygon: [[0, 0.70], [1, 0.70], [1, 0.97], [0, 0.97]]
+ball:
+  enabled: false
+  aliases: [sports ball, ball, basketball]
+  confidence: 0.20
+  min_size_wh: [0, 0]
+  max_size_wh: [1, 1]
+  roi_polygon: null

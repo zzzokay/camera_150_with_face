@@ -1,22 +1,24 @@
 """
-文件作用：用真实本地 YOLO .pt 权重进行 Windows 人物检测，输出原广角帧像素框。
-输入：BGR 完整帧与推理参数；输出：真实 Detection 列表及权重内 names 类别表。
-依赖：Ultralytics/PyTorch；调用关系：run -> YoloPersonDetector -> 原规则适配器。
-注意：G0 复用人物导播；双类别质量验收留待 G1。禁止把 SAC .pth 当 YOLO。
+文件作用：Windows 真实 YOLO 推理及 G1 类别筛选，保留 G0 人物检测接口。
+输入：全幅 BGR、DetectionPolicy；输出：真实 Detection 与可解释排除记录。
+依赖：Ultralytics/PyTorch；调用：run -> YoloDetector -> 原人物导播适配器。
+注意：篮球默认关闭，一帧只推理一次；不补球、不调用 model.track。
 运行示例：见 NEWCOMER_HANDOFF.md；本组件不会自动下载权重。
 """
 import hashlib
 import math
+from dataclasses import asdict
 from pathlib import Path
 
 from .contracts import Detection
+from .detection_policy import ClassPolicy, DetectionPolicy, normalize_names, rejection_reason, resolve_class_ids
 
 
 def validate_weights(path: Path) -> Path:
     """只接受存在的本地 .pt 文件；返回绝对路径，否则在导入 YOLO 前报错。"""
     path = path.expanduser().resolve()
     if path.suffix.lower() != ".pt":
-        raise ValueError("G0 后端需要本地 YOLO .pt；不接受 SAC .pth 或 RKNN .rknn。ONNX 尚未适配")
+        raise ValueError("Windows 后端需要本地 YOLO .pt；不接受 SAC .pth 或 RKNN .rknn。ONNX 尚未适配")
     if not path.is_file():
         raise FileNotFoundError(f"找不到 YOLO 权重：{path}；请提供真实 .pt，不会自动下载")
     return path
@@ -24,10 +26,7 @@ def validate_weights(path: Path) -> Path:
 
 def resolve_person_ids(names: dict | list, aliases: tuple[str, ...]) -> tuple[dict[int, str], list[int]]:
     """从权重真实类别名找人物 ID；匹配不到就报错，绝不默认类别 0。"""
-    names = dict(enumerate(names)) if isinstance(names, list) else names
-    if not isinstance(names, dict) or not names:
-        raise ValueError("权重没有有效 names 类别表")
-    mapping = {int(k): str(v) for k, v in names.items()}
+    mapping = normalize_names(names)
     normalized = {name.casefold().strip() for name in aliases}
     ids = [key for key, name in mapping.items() if name.casefold().strip() in normalized]
     if not ids:
@@ -35,30 +34,37 @@ def resolve_person_ids(names: dict | list, aliases: tuple[str, ...]) -> tuple[di
     return mapping, ids
 
 
-class YoloPersonDetector:
-    """一帧一次真实 YOLO 推理；不调用 model.track，不引入 G2 跟踪器。"""
+class YoloDetector:
+    """一次推理筛选 person/可选 ball；last_rejections 保存本次真实候选排除原因。"""
 
     def __init__(self, weights: Path, device: str = "cpu", imgsz: int = 640,
-                 confidence: float = 0.35, iou: float = 0.7,
-                 person_aliases: tuple[str, ...] = ("person", "player")):
+                 iou: float = 0.7, policy: DetectionPolicy | None = None):
         self.weights = validate_weights(weights)
+        self.policy = policy or DetectionPolicy()
         from ultralytics import YOLO
 
         self.model = YOLO(str(self.weights), task="detect")
         if self.model.task != "detect":
             raise ValueError(f"需要 detect 检测权重，实际为 {self.model.task}")
-        self.names, self.person_ids = resolve_person_ids(self.model.names, person_aliases)
+        self.names, self.class_ids = resolve_class_ids(self.model.names, self.policy)
+        self.person_ids = self.class_ids["person"]
+        self.id_to_class = {i: name for name, ids in self.class_ids.items() for i in ids}
         self.device, self.imgsz = device, imgsz
-        self.confidence, self.iou = confidence, iou
+        self.iou = iou
+        self.confidence = min(getattr(self.policy, name).confidence for name in self.class_ids if self.class_ids[name])
+        self.last_rejections = []
+        self.last_candidate_counts = {"person": 0, "ball": 0}
         with self.weights.open("rb") as stream:
             self.sha256 = hashlib.file_digest(stream, "sha256").hexdigest()
 
     def detect(self, image_bgr, coord_system: str) -> list[Detection]:
-        """返回本帧真实人物框（像素）；推理失败向上传播，不能伪装成无人。"""
+        """返回筛选后真实观测；低于各类阈值/ROI/尺寸的候选记录原因，异常向上传播。"""
         results = self.model.predict(source=image_bgr, device=self.device, imgsz=self.imgsz,
-                                     conf=self.confidence, iou=self.iou, classes=self.person_ids,
+                                     conf=self.confidence, iou=self.iou, classes=list(self.id_to_class),
                                      verbose=False, save=False, show=False)
         boxes = results[0].boxes
+        self.last_rejections = []
+        self.last_candidate_counts = {"person": 0, "ball": 0}
         detections = []
         if boxes is None:
             return detections
@@ -67,10 +73,26 @@ class YoloPersonDetector:
             x1, y1, x2, y2, confidence, class_id = map(float, row[:6])
             if not all(math.isfinite(v) for v in (x1, y1, x2, y2, confidence, class_id)):
                 raise ValueError("YOLO 返回非有限检测数值")
-            if int(class_id) not in self.person_ids:
+            name = self.id_to_class.get(int(class_id))
+            if name is None:
                 continue
+            self.last_candidate_counts[name] += 1
             bbox = (max(0., min(w - 1., x1)), max(0., min(h - 1., y1)),
                     max(0., min(w - 1., x2)), max(0., min(h - 1., y2)))
-            if bbox[2] > bbox[0] and bbox[3] > bbox[1]:
-                detections.append(Detection("person", int(class_id), confidence, bbox, coord_system))
+            detection = Detection(name, int(class_id), confidence, bbox, coord_system)
+            reason = rejection_reason(detection, getattr(self.policy, name), (w, h))
+            if reason:
+                self.last_rejections.append({**asdict(detection), "reason": reason})
+            else:
+                detections.append(detection)
         return sorted(detections, key=lambda d: d.confidence, reverse=True)
+
+
+class YoloPersonDetector(YoloDetector):
+    """G0 兼容构造器：参数与返回值保持，篮球关闭，不增加区域/尺寸限制。"""
+
+    def __init__(self, weights: Path, device: str = "cpu", imgsz: int = 640,
+                 confidence: float = .35, iou: float = .7,
+                 person_aliases: tuple[str, ...] = ("person", "player")):
+        super().__init__(weights, device, imgsz, iou,
+                         DetectionPolicy(person=ClassPolicy(person_aliases, confidence=confidence)))

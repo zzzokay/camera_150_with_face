@@ -1,6 +1,6 @@
 """
-文件作用：G0 Windows 本地视频/摄像头 -> 真实 YOLO -> 原规则 -> 视频保存的总入口。
-输入：RunConfig；输出：唯一运行目录内的导播视频、调试视频、summary.json、run.log。
+文件作用：G0/G1 视频 -> 真实 YOLO -> 原规则 -> 视频及可选 G1 检测审计总入口。
+输入：RunConfig；输出：唯一目录内的视频、summary.json、run.log 和可选 detections.jsonl。
 依赖：各 Windows 组件；RKNN、音频、Qt、RTSP 不进入默认离线流程。
 调用关系：run_windows.py -> main -> run_pipeline -> sources/preprocess/detect/director/outputs。
 运行示例：见根目录 NEWCOMER_HANDOFF.md；未提供真实模型/视频时以非零状态退出。
@@ -18,9 +18,11 @@ from pathlib import Path
 import cv2
 
 from .config import RunConfig, load_config
-from .detector import YoloPersonDetector, validate_weights
+from .detector import YoloDetector, validate_weights
+from .detection_policy import load_detection_policy
+from .detection_records import DetectionRecords
 from .director_adapter import LegacyDirector
-from .outputs import SavedVideo, draw_overview, verify_video
+from .outputs import SavedVideo, draw_overview, draw_detection_overview, verify_video
 from .preprocessing import FramePreprocessor
 from .sources import VideoSource
 
@@ -29,18 +31,22 @@ def run_pipeline(config: RunConfig) -> Path:
     """从指定源时间执行真实管线并返回运行目录；起点越界或失败时保留失败报告并抛异常。"""
     # 先检查本地权重，不向 Ultralytics 传入不存在的文件名，防止自动下载。
     validate_weights(config.weights)
-    run_dir = config.output_dir / (datetime.now().strftime("g0_%Y%m%d_%H%M%S_") + uuid.uuid4().hex[:8])
+    g1 = config.detection_policy is not None or config.export_detections
+    prefix = "g1" if g1 else "g0"
+    run_dir = config.output_dir / (prefix + datetime.now().strftime("_%Y%m%d_%H%M%S_") + uuid.uuid4().hex[:8])
     run_dir.mkdir(parents=True, exist_ok=False)
     handler = logging.FileHandler(run_dir / "run.log", encoding="utf-8")
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
     logging.getLogger().addHandler(handler)
-    report = {"schema_version": "g0_run_v1", "status": "RUNNING", "config": config.serializable(),
+    report = {"schema_version": "g1_run_v1" if g1 else "g0_run_v1", "status": "RUNNING", "config": config.serializable(),
               "command_argv": sys.argv, "processed_frames": 0, "inference_calls": 0,
               "true_person_observations": 0, "frames_reusing_detections": 0,
               "first_detection": None, "outputs": [], "stop_reason": None}
     start = time.perf_counter()
     inference_ms = []
     try:
+        policy = load_detection_policy(config.detection_policy, config.confidence, config.person_aliases)
+        report["detection_policy"] = policy.serializable()
         preprocessor = FramePreprocessor(config.undistort, config.calib_file)
         logging.info("输出目录：%s", run_dir)
         with ExitStack() as stack:
@@ -65,12 +71,18 @@ def run_pipeline(config: RunConfig) -> Path:
                                  "first_timestamp_sec": packet.timestamp_sec}
             logging.info("片段起点：源帧 %d，源时间 %.6f 秒；跳过 %d 帧",
                          packet.source_frame_idx, packet.timestamp_sec, packet.source_frame_idx)
-            detector = YoloPersonDetector(config.weights, config.device, config.imgsz,
-                                           config.confidence, config.iou, config.person_aliases)
+            detector = YoloDetector(config.weights, config.device, config.imgsz, config.iou, policy)
             report["model"] = {"path": str(detector.weights), "sha256": detector.sha256,
                                 "names": detector.names, "person_class_ids": detector.person_ids,
-                                "device": config.device}
+                                "device": config.device, "canonical_class_ids": detector.class_ids}
             logging.info("真实模型类别：%s；人物类别 ID：%s", detector.names, detector.person_ids)
+            logging.info("篮球检测：%s", "启用" if policy.ball.enabled else "未启用（不生成位置）")
+            report["detection_summary"] = {
+                name: {"enabled": getattr(policy, name).enabled, "candidates": 0, "accepted": 0,
+                       "rejected_by_reason": {}, "frames_with_detections": 0,
+                       "frames_without_detections": 0 if getattr(policy, name).enabled else None}
+                for name in ("person", "ball")
+            }
             director = LegacyDirector(config.view_width, config.view_height, config.smooth,
                                        config.max_match_dist, config.max_missing, config.game_state)
             suffix = ".mp4" if config.codec == "mp4v" else ".avi"
@@ -78,6 +90,7 @@ def run_pipeline(config: RunConfig) -> Path:
                                                        (config.view_width, config.view_height), config.codec))
             overview = stack.enter_context(SavedVideo(run_dir / ("overview" + suffix), source.fps,
                                                         (w, h), config.codec)) if config.debug_video else None
+            records = stack.enter_context(DetectionRecords(run_dir / "detections.jsonl")) if config.export_detections else None
             last_detections = []
             last_detect_idx = packet.source_frame_idx
             first_crop = None
@@ -92,7 +105,19 @@ def run_pipeline(config: RunConfig) -> Path:
                     inference_ms.append((time.perf_counter() - infer_start) * 1000)
                     last_detect_idx = packet.source_frame_idx
                     report["inference_calls"] += 1
-                    report["true_person_observations"] += len(last_detections)
+                    report["true_person_observations"] += sum(d.class_name == "person" for d in last_detections)
+                    for name in ("person", "ball"):
+                        stats = report["detection_summary"][name]
+                        count = sum(d.class_name == name for d in last_detections)
+                        stats["candidates"] += detector.last_candidate_counts[name]
+                        stats["accepted"] += count
+                        if stats["enabled"]:
+                            stats["frames_with_detections"] += int(count > 0)
+                            stats["frames_without_detections"] += int(count == 0)
+                        for rejection in detector.last_rejections:
+                            if rejection["class_name"] == name:
+                                reason = rejection["reason"]
+                                stats["rejected_by_reason"][reason] = stats["rejected_by_reason"].get(reason, 0) + 1
                     if last_detections and report["first_detection"] is None:
                         report["first_detection"] = {**asdict(last_detections[0]),
                             "source_frame_idx": packet.source_frame_idx, "timestamp_sec": packet.timestamp_sec}
@@ -102,14 +127,22 @@ def run_pipeline(config: RunConfig) -> Path:
                 current_detections = last_detections if observed else [
                     replace(detection, observed=False) for detection in last_detections
                 ]
+                if records:
+                    records.write(packet, preprocessor.coord_system, observed, current_detections,
+                                  detector.last_rejections, policy.ball.enabled, last_detect_idx)
                 view, crop, smoothed, info = director.process(frame, current_detections)
                 first_crop = crop if first_crop is None else first_crop
                 changed_crop_frames += int(crop != first_crop)
                 program.write(view)
                 debug = None
                 if overview or config.preview:
-                    debug = draw_overview(frame, smoothed, crop, packet.source_frame_idx, observed,
-                                          packet.source_frame_idx - last_detect_idx)
+                    if g1:
+                        debug = draw_detection_overview(frame, current_detections, detector.last_rejections, crop,
+                                                       packet.source_frame_idx, observed,
+                                                       packet.source_frame_idx - last_detect_idx, policy)
+                    else:
+                        debug = draw_overview(frame, smoothed, crop, packet.source_frame_idx, observed,
+                                              packet.source_frame_idx - last_detect_idx)
                 if overview:
                     overview.write(debug)
                 report["processed_frames"] += 1
@@ -135,6 +168,9 @@ def run_pipeline(config: RunConfig) -> Path:
             report["timestamp_fallback_frames"] = source.fallback_count
             report["crop_changed_from_first_frames"] = changed_crop_frames
             report["processing_wall_sec"] = time.perf_counter() - start
+            if records:
+                report["detection_records"] = {"path": str(records.path), "rows": records.count,
+                                                 "schema_version": "g1_detections_v1"}
         # 资源已关闭：用真正解码检查保存成功，而不是只判断文件存在。
         for writer in (program, overview):
             if writer:
@@ -165,7 +201,7 @@ def main(argv=None) -> int:
     try:
         config = load_config(argv)
         path = run_pipeline(config)
-        logging.info("G0 本次运行完成：%s", path)
+        logging.info("Windows 本次运行完成：%s", path)
         return 0
     except KeyboardInterrupt:
         logging.error("用户中断；部分产物不能视为完整验收")

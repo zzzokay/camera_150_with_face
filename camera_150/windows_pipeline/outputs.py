@@ -9,6 +9,7 @@ import math
 from pathlib import Path
 
 import cv2
+import numpy as np
 
 
 class SavedVideo:
@@ -85,4 +86,32 @@ def draw_overview(frame, detections, crop, frame_idx: int, observed: bool, age: 
     status = "NEW INFERENCE" if observed else f"REUSED age={age} source frames"
     cv2.putText(out, f"frame={frame_idx} {status} | old SmoothTracks", (12, 28),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.65, color, 2)
+    return out
+
+
+def draw_detection_overview(frame, detections, rejections, crop, frame_idx, observed, age, policy):
+    """G1 对照：原始保留框绿/复用橙，排除框紫并写原因；ROI 蓝、规则裁切青。"""
+    out = frame.copy()
+    h, w = frame.shape[:2]
+    for name in ("person", "ball"):
+        rule = getattr(policy, name)
+        if rule.enabled and rule.roi_polygon:
+            points = np.asarray([(round(x * (w - 1)), round(y * (h - 1))) for x, y in rule.roi_polygon], dtype=np.int32)
+            cv2.polylines(out, [points], True, (255, 130, 0), 2)
+    for d in detections:
+        color = (0, 255, 0) if observed else (0, 165, 255)
+        if d.class_name == "ball" and observed:
+            color = (0, 255, 255)
+        x1, y1, x2, y2 = (int(round(v)) for v in d.bbox_xyxy)
+        cv2.rectangle(out, (x1, y1), (x2, y2), color, 2)
+        cv2.putText(out, f"{d.class_name} {d.confidence:.2f}", (x1, max(18, y1 - 5)), cv2.FONT_HERSHEY_SIMPLEX, .45, color, 1)
+    for d in rejections if observed else []:
+        x1, y1, x2, y2 = (int(round(v)) for v in d["bbox_xyxy"])
+        cv2.rectangle(out, (x1, y1), (x2, y2), (255, 0, 255), 1)
+        cv2.putText(out, f"excluded {d['reason']}", (x1, max(18, y1 - 5)), cv2.FONT_HERSHEY_SIMPLEX, .42, (255, 0, 255), 1)
+    x1, y1, x2, y2 = crop
+    cv2.rectangle(out, (x1, y1), (x2 - 1, y2 - 1), (255, 255, 0), 3)
+    status = "NEW INFERENCE" if observed else f"REUSED age={age}"
+    cv2.putText(out, f"frame={frame_idx} {status} | person candidates, not identities", (12, 28), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 255, 255), 2)
+    cv2.putText(out, "ball: DISABLED" if not policy.ball.enabled else "ball: real observations only", (12, 55), cv2.FONT_HERSHEY_SIMPLEX, .6, (0, 255, 255), 2)
     return out

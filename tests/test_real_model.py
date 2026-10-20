@@ -38,3 +38,24 @@ def test_actual_yolo_video_to_original_director(tmp_path, start_seconds):
     # 本测试录像的首个选中帧确实有人，必须立即实际推理，不能先复用空框。
     assert report["first_detection"]["source_frame_idx"] == report["source"]["first_source_frame_idx"]
     assert all(output["decoded_frames"] == 12 for output in report["outputs"])
+
+
+def test_actual_g1_person_policy_and_disabled_ball_records(tmp_path):
+    """真实人物模型验证 G1 导出；球仍关闭，不把合成契约测试算作真实球推理。"""
+    weights, video = os.environ.get("G0_TEST_WEIGHTS"), os.environ.get("G0_TEST_VIDEO")
+    if not weights or not video:
+        pytest.skip("未设置真实模型和视频")
+    policy = Path(__file__).resolve().parents[1] / "configs/detection.example.yaml"
+    config = RunConfig(source=Path(video), weights=Path(weights), output_dir=tmp_path,
+                       undistort="already", max_frames=6, detect_interval=3,
+                       view_width=640, view_height=360, detection_policy=policy, export_detections=True)
+    run_dir = run_pipeline(config)
+    report = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
+    rows = [json.loads(line) for line in (run_dir / "detections.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert report["schema_version"] == "g1_run_v1"
+    assert len(rows) == report["processed_frames"] == 6
+    assert sum(r["inference_performed"] for r in rows) == 2
+    assert all(r["ball_valid"] is False and r["ball_centers_full_frame_px"] is None for r in rows)
+    assert all(not r["detections"] for r in rows if not r["inference_performed"])
+    assert report["detection_summary"]["person"]["accepted"] == sum(len(r["detections"]) for r in rows)
+    assert report["detection_summary"]["ball"]["frames_without_detections"] is None

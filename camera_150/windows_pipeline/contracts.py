@@ -1,8 +1,8 @@
 """
-文件作用：定义 G0 内存中的视频帧与真实 YOLO 观测，不是 G3 轨迹导出格式。
+文件作用：定义 G0/G1 的视频帧与真实 YOLO 观测，不是 G3 轨迹导出格式。
 输入/输出：BGR uint8 图像、全幅像素框、秒为单位的时间戳。
 依赖：dataclasses、NumPy；被 sources / detector / director_adapter 调用。
-运行示例：见 NEWCOMER_HANDOFF.md；G0 仅向原人物规则传递 person。
+运行示例：见 NEWCOMER_HANDOFF.md；原人物规则只接收 person，球接口默认关闭。
 """
 from dataclasses import dataclass
 
@@ -11,7 +11,7 @@ import numpy as np
 
 @dataclass(frozen=True)
 class VideoFrame:
-    """源视频的一帧；索引从 0 开始，timestamp_sec 相对本段视频起点（秒）。"""
+    """源视频一帧；索引从 0 起，timestamp_sec 为源文件时间（秒），选段不归零。"""
 
     image_bgr: np.ndarray
     source_frame_idx: int

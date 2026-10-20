@@ -3,10 +3,10 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
-best_sac/
-data/
-runs/
-models/
+/best_sac/
+/data/
+/runs/
+/models/
 *.pt
 *.pth
 *.onnx

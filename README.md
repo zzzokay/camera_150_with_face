@@ -1,5 +1,28 @@
 # camera_150_with_face：RK3588 篮球赛事智能转播系统
 
+> 文件作用：项目总览与入口导航。RK3588 原功能说明保留在下方；Windows G0 变更后同步本节与交接文档。
+
+## Windows G0 入口（2026-10-20）
+
+本工作分支为 `g0/windows-migration`，原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
+Windows 使用本地 YOLO `.pt`，复用原 `SmoothTracks`、热点分析和规则运镜，并保存导播与广角调试视频。
+只执行 G0；后续双类别、ByteTrack、轨迹数据和 TCN 尚未实施。
+
+- 安装与完整 PowerShell 命令：[NEWCOMER_HANDOFF.md](NEWCOMER_HANDOFF.md)
+- 真实结构与调用链：[PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
+- 平台依赖和迁移边界：[docs/WINDOWS_COMPATIBILITY.md](docs/WINDOWS_COMPATIBILITY.md)
+- 当前状态与证据：[STAGE_PROGRESS.md](STAGE_PROGRESS.md)
+- G0 验收：[docs/G0_ACCEPTANCE_REPORT.md](docs/G0_ACCEPTANCE_REPORT.md)
+
+```powershell
+python .\run_windows.py --help
+python .\check_windows_environment.py --model-dir .\best_sac
+```
+
+`best_sac` 的现有文件是 SAC 检查点及优化器状态，未作为 YOLO 加载；实际测试权重路径见交接文档。
+
+---
+
 > 单路 150° USB3 广角摄像头 + RKNN 人物检测 + 自动运镜 + 人脸检录 + 篮球技术台 + H.264/AAC RTSP 网络转播
 
 本项目运行在飞凌 ELF2 / RK3588 平台上，面向班赛、校赛和小型篮球赛事的自动化转播。系统使用单路广角摄像头覆盖球场，通过 RKNN 在 NPU 上实时检测球员，再根据人物分布、主战区、热点和快攻状态生成 1280×720 导播画面。

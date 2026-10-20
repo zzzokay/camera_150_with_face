@@ -1,0 +1,23 @@
+# 文件作用：G0 示例；将 source / weights 替换为真实文件，再保存为 windows.local.yaml。
+# 所有相对路径以本 YAML 所在目录为基准。默认 CPU，无窗口也能运行。
+source: ../data/input/game.mp4
+weights: ../models/yolo.pt
+output_dir: ../runs
+# none=原始图，不矫正；already=用户声明输入已矫正；calibration=按 NPZ 矫正。
+undistort: already
+calib_file: null
+device: cpu
+imgsz: 640
+confidence: 0.35
+iou: 0.7
+person_aliases: [person, player]
+detect_interval: 3
+smooth: 0.65
+max_match_dist: 180.0
+max_missing: 15
+view_width: 1280
+view_height: 720
+codec: mp4v
+preview: false
+debug_video: true
+max_frames: 90

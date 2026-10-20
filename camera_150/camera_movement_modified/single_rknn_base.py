@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+文件作用：提供原 RK3588 采集、标定、检测与轻量跟踪；Windows 仅复用通用部分。
+输入：BGR 全幅帧或 RK3588 设备/模型路径；输出：像素坐标检测框、临时轨迹编号。
+依赖：OpenCV、NumPy；创建 PersonDetector 或选择 NPU 核时才需要 rknnlite。
+调用关系：旧 RKNN 入口及 windows_pipeline.director_adapter / preprocessing。
+运行示例：见根目录 NEWCOMER_HANDOFF.md；RK3588 原入口和参数保留。
+
 单路 USB3 摄像头 RKNN 运镜基础工具。
 
 本文件只保留单摄像头运行需要的通用能力：
@@ -28,7 +34,6 @@ os.environ["OPENCV_OPENCL_RUNTIME"] = "disabled"
 
 import cv2
 import numpy as np
-from rknnlite.api import RKNNLite
 
 try:
     cv2.ocl.setUseOpenCL(False)
@@ -235,6 +240,9 @@ def nms(boxes: np.ndarray, scores: np.ndarray, iou_threshold: float) -> List[int
 
 
 def get_core_mask(core_id: int):
+    # 延迟导入：读取标定/复用 SmoothTracks 不需要 RK3588 NPU 运行时。
+    from rknnlite.api import RKNNLite
+
     if core_id == 0:
         return RKNNLite.NPU_CORE_0
     if core_id == 1:
@@ -263,6 +271,9 @@ class PersonDetector:
         use_rgb: bool = True,
         name: str = "rknn",
     ):
+        # RK3588 推理的行为不变；仅把硬件依赖推迟至实际创建检测器。
+        from rknnlite.api import RKNNLite
+
         self.name = name
         self.model_path = model_path
         self.labels = load_labels(labels_path)

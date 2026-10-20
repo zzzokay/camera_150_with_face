@@ -1,8 +1,18 @@
+"""
+文件作用：原规则导播的横向平移、缩放及迟滞状态机，供 RK3588/Windows 共同调用。
+输入：predict1_weighted 的人物/热点分析字典、全幅宽高（像素）和上帧状态。
+输出：裁切框与更新后的状态；阈值、帧计数和平滑算法在 G0 保持原样。
+依赖：OpenCV、NumPy；旧全幅调试绘图才依赖 predict1_yolo。
+调用关系：旧 RKNN 入口 / windows_pipeline.director_adapter -> 本模块。
+运行示例：见根目录 NEWCOMER_HANDOFF.md。
+"""
 import cv2
 import numpy as np
 
-from predict1_weighted import *
-from predict1_yolo import draw_boxes_on_frame
+if __package__:
+    from .predict1_weighted import *
+else:
+    from predict1_weighted import *
 
 def choose_window_by_pan_bias(pan_bias, current_window):
     if current_window == WINDOW_RIGHT:
@@ -1099,6 +1109,9 @@ def render_overlay_outputs(
     out_frame = frame.copy()
 
     if draw_debug_boxes:
+        # 旧脚本会提供此绘图函数；纯状态机及 Windows 自身绘图无需导入它。
+        from predict1_yolo import draw_boxes_on_frame
+
         out_frame = draw_boxes_on_frame(out_frame, boxes_info)
         out_frame = draw_window_guide_box(
             out_frame,

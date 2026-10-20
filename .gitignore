@@ -1,0 +1,25 @@
+# 文件作用：忽略本地环境、模型、私人资料及运行产物；不移除上游已跟踪资产。
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+best_sac/
+data/
+runs/
+models/
+*.pt
+*.pth
+*.onnx
+*.rknn
+*.mp4
+*.avi
+*.mkv
+*.mov
+camera_150/face_env/
+camera_150/face_checkin/
+camera_150/runtime/
+camera_150/recorded_videos/
+camera_150/undistorted_videos/
+camera_150/techtable_v2/game_state.json
+camera_150/techtable_v2/events.jsonl
+configs/windows.local.yaml

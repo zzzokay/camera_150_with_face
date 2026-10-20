@@ -1,12 +1,23 @@
-# camera_150_with_face：RK3588 篮球赛事智能转播系统
+# Windows 篮球检测与跟踪（G2）
 
-> 文件作用：项目总览与入口导航。RK3588 原功能说明保留在下方；Windows 变更后同步本节与交接文档。
+> 文件作用：项目总览与入口导航；先看可用命令，再看当前整改范围。运行、结构或验收状态变化后同步新人交接和验收文档。
+
+当前已有环境及本机配置的最简运行方式（新 `run.py` 尚未实施）：
+
+```powershell
+Set-Location 'D:\0basketball\project'
+.\.venv\Scripts\python.exe -X utf8 .\run_windows.py --config .\configs\g2.indoor.local.yaml
+```
+
+准备已批准的 `best.pt` 和本地视频，配置仍从 30 秒开始；运行后按控制台目录查看 `overview.mp4` 和 `tracking_comparison.mp4`。新机器的环境、模型与配置准备见 [新人交接](NEWCOMER_HANDOFF.md)。
+
+**当前交付：Windows 独立化重构方案，待确认。** 新分支 `windows/g2-standalone` 目前只更新文档，源码来自 `g2/bytetrack-person@cc87e85`；历史分支保留。请先阅读 [重构方案、模块清单与目标结构](docs/G2_WINDOWS_STANDALONE_PLAN.md)。按用户最新要求，当前只面向 Windows；先确认方案，再重构并验收，之后才开始 ByteTrack 调参。G2 质量仍未验收，篮球关闭，不进入 G3/Homography/TCN。
 
 > 本项目使用独立 Python 环境，不向系统 Python 安装项目依赖。默认采用 `.venv`，也允许其他满足依赖要求的独立环境。文档和自动化命令优先显式指定解释器；日常开发可以激活环境后使用 `python`。
 
 ## Windows G0/G1/G2 入口（2026-10-20）
 
-当前分支 `g2/bytetrack-person`，G0/G1 提交保留在历史；原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
+当前代码基线为 `g2/bytetrack-person@cc87e85`，本方案分支为 `windows/g2-standalone`；G0/G1 提交保留在历史，原工程基线为 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`。
 Windows 使用本地 YOLO `.pt`；G0/G1 复用原 `SmoothTracks`，G2 使用 ByteTrack。两条路径均复用原热点分析和规则运镜，并保存导播与广角调试视频。
 G0/G1 调整范围已获用户授权继续；G2 接入独立人物 ByteTrack、带 ID 视频和验收 CSV，篮球按要求继续关闭。全套 53 项功能测试和同片段真实运行通过；用户反馈跟踪效果差，当前 G2 质量待改进、尚未验收，见 [质量复核](docs/G2_QUALITY_REVIEW.md)。G3 数据集/重放与 TCN 尚未实施。
 可用 `--start-seconds 30 --max-frames 0` 跳过文件前 30 秒并处理到结尾，保留源帧号/时间；复现与验证结果见新人交接和验收报告。
@@ -28,6 +39,8 @@ G0/G1 调整范围已获用户授权继续；G2 接入独立人物 ByteTrack、�
 `best_sac` 的现有文件是 SAC 检查点及优化器状态，未作为 YOLO 加载；实际测试权重路径见交接文档。
 
 ---
+
+> 以下为原 RK3588 项目的历史说明，当前尚未执行独立化删除。它不是 Windows 当前功能承诺；确认并实施方案后，简洁 README 将只保留 Windows 使用说明，旧工程继续从历史分支查阅。
 
 > 单路 150° USB3 广角摄像头 + RKNN 人物检测 + 自动运镜 + 人脸检录 + 篮球技术台 + H.264/AAC RTSP 网络转播
 

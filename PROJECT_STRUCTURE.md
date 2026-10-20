@@ -2,13 +2,19 @@
 
 文件作用：供新开发者了解真实仓库结构与模块数据流。修改入口、接口、数据位置或依赖后更新；先读本文件，再按 NEWCOMER_HANDOFF.md 运行。这里只列实际检出的内容，建议结构会明确标注未实现。
 
+## G2 Windows 独立化：当前结构与拟建结构
+
+本次仅在 `windows/g2-standalone` 增加方案文档，未移动或删除源码。当前真实树仍如下文；[目标目录、旧新路径对应与数据流](docs/G2_WINDOWS_STANDALONE_PLAN.md) 均待用户确认后实施，不能将 `basketball/`、根 `run.py` 或 `configs/local.example.yaml` 当作已存在。
+
+审查发现：`preprocessing` 顶层导入旧 base，`director_adapter` 导入旧规则/技术台策略，`rendering` 导入旧坐标工具，`SmoothTracksBaseline` 延迟导入旧 base；`run` 总是创建导播和 G2 旧对照。目标主链为独立 Windows 视频 → YOLO → ByteTrack → 记录/全幅可视化，规则导播和旧对照分别默认关闭。Git 树内仍有稀疏检出隐藏的环境/资产，迁移清单按 Git 树审计；历史分支和原工作目录个人资产保留。
+
 当前 G2 收到跟踪质量反馈，状态为 IN_PROGRESS / 待改进；[docs/G2_QUALITY_REVIEW.md](docs/G2_QUALITY_REVIEW.md) 记录检测/关联问题、真实抽帧对照和整改顺序。本次未改变正式管线或配置。
 
 环境约定：使用独立 Python 环境，不向系统 Python 安装项目依赖；默认 `.venv`，也允许满足依赖要求的其他独立环境。文档/自动化优先显式指定解释器，日常开发可激活后使用 `python`，详见 AGENT_DEVELOPMENT_RULES.md 第 I 节。
 
 ## 来源与工作区
 
-用户指定上游：https://github.com/zzzokay/camera_150_with_face 。基线提交 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`，当前分支 `g2/bytetrack-person`；G0/G1 提交保留在历史中。
+用户指定上游：https://github.com/zzzokay/camera_150_with_face 。基线提交 `5bd9c5a437536706f51106a5e86fbb2a7ec46906`，当前方案分支 `windows/g2-standalone`，代码基线 `g2/bytetrack-person@cc87e85`；G0/G1/G2 历史分支保留。
 开始时本目录没有 `.git` 或工程源码，只有两份规范与 `best_sac/`；现已建立 Git 并从上游取得应用源码。
 使用 **稀疏检出（sparse checkout：只把所需文件放到工作目录）**，49 个上游应用文件被检出。
 上游的 Linux 虚拟环境、人脸档案、运行状态、模型等仍在上游版本树中，未删除、未主动检出；本轮未重新提交这些资产。
